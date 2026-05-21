@@ -14,7 +14,7 @@ export const getDatabaseConfig = (configService: ConfigService): TypeOrmModuleOp
 			port: toPort(configService.get<string>('DB_MASTER_PORT'), 5432),
 			username: configService.get<string>('DB_MASTER_USER') ?? 'postgres',
 			password: configService.get<string>('DB_MASTER_PASS') ?? 'postgres',
-			database: configService.get<string>('DB_MASTER_NAME') ?? 'multipuntos',
+			database: configService.get<string>('DB_MASTER_NAME') ?? 'inmobiliaria',
 		},
 		slaves: [
 			{
@@ -22,7 +22,7 @@ export const getDatabaseConfig = (configService: ConfigService): TypeOrmModuleOp
 				port: toPort(configService.get<string>('DB_SLAVE_PORT'), 5432),
 				username: configService.get<string>('DB_SLAVE_USER') ?? 'postgres',
 				password: configService.get<string>('DB_SLAVE_PASS') ?? 'postgres',
-				database: configService.get<string>('DB_SLAVE_NAME') ?? 'multipuntos',
+				database: configService.get<string>('DB_SLAVE_NAME') ?? 'inmobiliaria',
 			},
 		],
 	},

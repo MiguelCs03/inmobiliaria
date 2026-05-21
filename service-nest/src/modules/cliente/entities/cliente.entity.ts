@@ -13,27 +13,27 @@ import { Contrato } from '../../contrato/entities/contrato.entity';
 @Entity('cliente')
 export class Cliente {
   @PrimaryGeneratedColumn('uuid')
-  id: string;
+  id!: string;
 
   @Column({ name: 'usuario_id', nullable: true })
-  usuarioId: string | null;
+  usuarioId!: string | null;
 
   @Column({ type: 'varchar', length: 100 })
-  nombres: string;
+  nombres!: string;
 
   @Column({ type: 'varchar', length: 20 })
-  telefono: string;
+  telefono!: string;
 
   @Column({ name: 'ci_nit', type: 'varchar', length: 30 })
-  ciNit: string;
+  ciNit!: string;
 
   @OneToOne(() => Usuario, (usuario) => usuario.cliente)
   @JoinColumn({ name: 'usuario_id' })
-  usuario: Usuario;
+  usuario?: Usuario | null;
 
   @OneToMany(() => Visita, (visita) => visita.cliente)
-  visitas: Visita[];
+  visitas!: Visita[];
 
   @OneToMany(() => Contrato, (contrato) => contrato.cliente)
-  contratos: Contrato[];
+  contratos!: Contrato[];
 }

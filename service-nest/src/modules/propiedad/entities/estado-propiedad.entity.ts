@@ -4,11 +4,11 @@ import { Propiedad } from './propiedad.entity';
 @Entity('estado_propiedad')
 export class EstadoPropiedad {
   @PrimaryGeneratedColumn()
-  id: number;
+  id!: number;
 
   @Column({ type: 'varchar', length: 50 })
-  nombre: string;
+  nombre!: string;
 
   @OneToMany(() => Propiedad, (propiedad) => propiedad.estadoPropiedad)
-  propiedades: Propiedad[];
+  propiedades!: Propiedad[];
 }

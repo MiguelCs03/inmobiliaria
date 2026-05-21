@@ -14,35 +14,35 @@ import { Factura } from './factura.entity';
 @Entity('contrato')
 export class Contrato {
   @PrimaryGeneratedColumn('uuid')
-  id: string;
+  id!: string;
 
   @Column({ name: 'propiedad_id' })
-  propiedadId: string;
+  propiedadId!: string;
 
   @Column({ name: 'cliente_id' })
-  clienteId: string;
+  clienteId!: string;
 
   @Column({ name: 'empleado_id' })
-  empleadoId: string;
+  empleadoId!: string;
 
   @Column({ name: 'monto_total', type: 'decimal', precision: 12, scale: 2 })
-  montoTotal: number;
+  montoTotal!: number;
 
   @Column({ name: 'documento_nosql_id', type: 'varchar', length: 50, nullable: true })
-  documentoNosqlId: string | null;
+  documentoNosqlId?: string | null;
 
   @ManyToOne(() => Propiedad, (propiedad) => propiedad.contratos)
   @JoinColumn({ name: 'propiedad_id' })
-  propiedad: Propiedad;
+  propiedad!: Propiedad;
 
   @ManyToOne(() => Cliente, (cliente) => cliente.contratos)
   @JoinColumn({ name: 'cliente_id' })
-  cliente: Cliente;
+  cliente!: Cliente;
 
   @ManyToOne(() => Empleado, (empleado) => empleado.contratos)
   @JoinColumn({ name: 'empleado_id' })
-  empleado: Empleado;
+  empleado!: Empleado;
 
   @OneToMany(() => Factura, (factura) => factura.contrato)
-  facturas: Factura[];
+  facturas!: Factura[];
 }

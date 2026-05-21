@@ -4,14 +4,14 @@ import { Empleado } from '../../empleado/entities/empleado.entity';
 @Entity('sucursal')
 export class Sucursal {
   @PrimaryGeneratedColumn()
-  id: number;
+  id!: number;
 
   @Column({ type: 'varchar', length: 100 })
-  nombre: string;
+  nombre!: string;
 
   @Column({ type: 'varchar', length: 50 })
-  ciudad: string;
+  ciudad!: string;
 
   @OneToMany(() => Empleado, (empleado) => empleado.sucursal)
-  empleados: Empleado[];
+  empleados!: Empleado[];
 }

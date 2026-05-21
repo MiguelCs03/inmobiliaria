@@ -4,17 +4,17 @@ import { Propiedad } from '../../propiedad/entities/propiedad.entity';
 @Entity('propietario')
 export class Propietario {
   @PrimaryGeneratedColumn('uuid')
-  id: string;
+  id!: string;
 
   @Column({ type: 'varchar', length: 100 })
-  nombres: string;
+  nombres!: string;
 
   @Column({ type: 'varchar', length: 20 })
-  telefono: string;
+  telefono!: string;
 
   @Column({ name: 'ci_nit', type: 'varchar', length: 30 })
-  ciNit: string;
+  ciNit!: string;
 
   @OneToMany(() => Propiedad, (propiedad) => propiedad.propietario)
-  propiedades: Propiedad[];
+  propiedades!: Propiedad[];
 }
