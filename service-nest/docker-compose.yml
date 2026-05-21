@@ -1,0 +1,53 @@
+services:
+  db:
+    image: postgres:17.6
+    container_name: db_service_nest
+    restart: always
+    environment:
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_DB: ${DB_NAME}
+      POSTGRES_PASSWORD: ${DB_PASS}
+    ports:
+      - "5434:5432"
+    volumes:
+      - core_dev_data:/var/lib/postgresql/data
+      - ./docker/postgres:/docker-entrypoint-initdb.d
+    networks:
+      - gateway-network
+
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: development
+    container_name: app_service_nest
+    restart: always
+    ports:
+      - "3003:3003"
+    environment:
+      - NODE_ENV=development
+      - DB_MASTER_HOST=db
+      - DB_MASTER_PORT=5432
+      - DB_MASTER_USER=${DB_USER}
+      - DB_MASTER_PASS=${DB_PASS}
+      - DB_MASTER_NAME=${DB_NAME}
+      - DB_SLAVE_HOST=db
+      - DB_SLAVE_PORT=5432
+      - DB_SLAVE_USER=${DB_USER}
+      - DB_SLAVE_PASS=${DB_PASS}
+      - DB_SLAVE_NAME=${DB_NAME}
+    depends_on:
+      - db
+    volumes:
+      - .:/app
+      - /app/node_modules
+    networks:
+      - gateway-network
+    command: npm run start:dev
+
+volumes:
+  core_dev_data:
+
+networks:
+  gateway-network:
+    driver: bridge
