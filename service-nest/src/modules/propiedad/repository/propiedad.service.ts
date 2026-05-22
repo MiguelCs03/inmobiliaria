@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
-import { CreatePropiedadInput } from './dto/create-propiedad.input';
-import { UpdatePropiedadInput } from './dto/update-propiedad.input';
+import { CreatePropiedadInput } from '../dto/create-propiedad.input';
+import { UpdatePropiedadInput } from '../dto/update-propiedad.input';
 
 @Injectable()
 export class PropiedadService {

@@ -1,5 +1,5 @@
 import { Module } from '@nestjs/common';
-import { EmpleadoService } from './empleado.service';
+import { EmpleadoService } from './repository/empleado.service';
 import { EmpleadoResolver } from './empleado.resolver';
 
 @Module({

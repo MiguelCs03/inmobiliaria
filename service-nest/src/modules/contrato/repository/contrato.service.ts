@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
-import { CreateContratoInput } from './dto/create-contrato.input';
-import { UpdateContratoInput } from './dto/update-contrato.input';
+import { CreateContratoInput } from '../dto/create-contrato.input';
+import { UpdateContratoInput } from '../dto/update-contrato.input';
 
 @Injectable()
 export class ContratoService {

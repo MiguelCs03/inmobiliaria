@@ -5,24 +5,31 @@ import {
   ManyToOne,
   PrimaryGeneratedColumn,
 } from 'typeorm';
+import { Field, Int, ObjectType } from '@nestjs/graphql';
 import { Propiedad } from '../../propiedad/entities/propiedad.entity';
 import { Cliente } from '../../cliente/entities/cliente.entity';
 import { Empleado } from '../../empleado/entities/empleado.entity';
 
+@ObjectType()
 @Entity('visita')
 export class Visita {
-  @PrimaryGeneratedColumn('uuid')
-  id!: string;
+  @Field(() => Int)
+  @PrimaryGeneratedColumn({ type: 'bigint' })
+  id!: number;
 
-  @Column({ name: 'propiedad_id' })
-  propiedadId!: string;
+  @Field(() => Int)
+  @Column({ name: 'propiedad_id', type: 'bigint' })
+  propiedadId!: number;
 
-  @Column({ name: 'cliente_id' })
-  clienteId!: string;
+  @Field(() => Int)
+  @Column({ name: 'cliente_id', type: 'bigint' })
+  clienteId!: number;
 
-  @Column({ name: 'empleado_id' })
-  empleadoId!: string;
+  @Field(() => Int)
+  @Column({ name: 'empleado_id', type: 'bigint' })
+  empleadoId!: number;
 
+  @Field(() => Date)
   @Column({ name: 'fecha_visita', type: 'timestamp' })
   fechaVisita!: Date;
 

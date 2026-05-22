@@ -1,10 +1,10 @@
 import { InputType, Field } from '@nestjs/graphql';
 
 @InputType()
-export class CreateSucursalInput {
+export class LoginInput {
   @Field(() => String)
-  nombre!: string;
+  correo!: string;
 
   @Field(() => String)
-  ciudad!: string;
+  contrasenia!: string;
 }

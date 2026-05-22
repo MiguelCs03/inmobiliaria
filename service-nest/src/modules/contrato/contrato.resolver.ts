@@ -1,5 +1,5 @@
 import { Resolver, Query, Mutation, Args, Int } from '@nestjs/graphql';
-import { ContratoService } from './contrato.service';
+import { ContratoService } from './repository/contrato.service';
 import { Contrato } from './entities/contrato.entity';
 import { CreateContratoInput } from './dto/create-contrato.input';
 import { UpdateContratoInput } from './dto/update-contrato.input';

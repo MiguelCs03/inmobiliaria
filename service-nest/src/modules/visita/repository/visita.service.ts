@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
-import { CreateVisitaInput } from './dto/create-visita.input';
-import { UpdateVisitaInput } from './dto/update-visita.input';
+import { CreateVisitaInput } from '../dto/create-visita.input';
+import { UpdateVisitaInput } from '../dto/update-visita.input';
 
 @Injectable()
 export class VisitaService {

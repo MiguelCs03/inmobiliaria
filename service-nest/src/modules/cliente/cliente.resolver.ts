@@ -1,5 +1,5 @@
 import { Resolver, Query, Mutation, Args, Int } from '@nestjs/graphql';
-import { ClienteService } from './cliente.service';
+import { ClienteService } from './repository/cliente.service';
 import { Cliente } from './entities/cliente.entity';
 import { CreateClienteInput } from './dto/create-cliente.input';
 import { UpdateClienteInput } from './dto/update-cliente.input';

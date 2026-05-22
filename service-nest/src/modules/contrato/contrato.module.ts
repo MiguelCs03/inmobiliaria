@@ -1,5 +1,5 @@
 import { Module } from '@nestjs/common';
-import { ContratoService } from './contrato.service';
+import { ContratoService } from './repository/contrato.service';
 import { ContratoResolver } from './contrato.resolver';
 
 @Module({

@@ -1,5 +1,5 @@
 import { Resolver, Query, Mutation, Args, Int } from '@nestjs/graphql';
-import { PropietarioService } from './propietario.service';
+import { PropietarioService } from './repository/propietario.service';
 import { Propietario } from './entities/propietario.entity';
 import { CreatePropietarioInput } from './dto/create-propietario.input';
 import { UpdatePropietarioInput } from './dto/update-propietario.input';

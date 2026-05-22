@@ -1,0 +1,214 @@
+# ------------------------------------------------------
+# THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
+# ------------------------------------------------------
+
+input CambiarContraseniaInput {
+  id: Int!
+  nueva: String!
+}
+
+type Cliente {
+  ciNit: String!
+  id: Int!
+  nombres: String!
+  telefono: String!
+  usuarioId: Int
+}
+
+type Contrato {
+  clienteId: Int!
+  documentoNosqlId: String
+  empleadoId: Int!
+  estadoContrato: String
+  id: Int!
+  montoTotal: Float!
+  propiedadId: Int!
+}
+
+input CreateClienteInput {
+  """Example field (placeholder)"""
+  exampleField: Int!
+}
+
+input CreateContratoInput {
+  """Example field (placeholder)"""
+  exampleField: Int!
+}
+
+input CreateEmpleadoInput {
+  """Example field (placeholder)"""
+  exampleField: Int!
+}
+
+input CreatePropiedadInput {
+  """Example field (placeholder)"""
+  exampleField: Int!
+}
+
+input CreatePropietarioInput {
+  """Example field (placeholder)"""
+  exampleField: Int!
+}
+
+input CreateSucursalInput {
+  ciudad: String!
+  nombre: String!
+}
+
+input CreateVisitaInput {
+  """Example field (placeholder)"""
+  exampleField: Int!
+}
+
+"""
+A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date-time format.
+"""
+scalar DateTime
+
+type Empleado {
+  apellidos: String!
+  id: Int!
+  nombres: String!
+  sucursalId: Int!
+  usuarioId: Int!
+}
+
+input LoginInput {
+  contrasenia: String!
+  correo: String!
+}
+
+type LoginResponse {
+  token: String!
+  usuario: UsuarioAuthOutput!
+}
+
+type Mutation {
+  cambiarContrasenia(cambiarContraseniaInput: CambiarContraseniaInput!): UsuarioAuthOutput!
+  createCliente(createClienteInput: CreateClienteInput!): Cliente!
+  createContrato(createContratoInput: CreateContratoInput!): Contrato!
+  createEmpleado(createEmpleadoInput: CreateEmpleadoInput!): Empleado!
+  createPropiedad(createPropiedadInput: CreatePropiedadInput!): Propiedad!
+  createPropietario(createPropietarioInput: CreatePropietarioInput!): Propietario!
+  createSucursal(createSucursalInput: CreateSucursalInput!): Sucursal!
+  createVisita(createVisitaInput: CreateVisitaInput!): Visita!
+  login(loginInput: LoginInput!): LoginResponse!
+  register(registerUsuarioInput: RegisterUsuarioInput!): UsuarioAuthOutput!
+  removeCliente(id: Int!): Cliente!
+  removeContrato(id: Int!): Contrato!
+  removeEmpleado(id: Int!): Empleado!
+  removePropiedad(id: Int!): Propiedad!
+  removePropietario(id: Int!): Propietario!
+  removeSucursal(id: Int!): Sucursal!
+  removeVisita(id: Int!): Visita!
+  toggleActivoUsuario(id: Int!): UsuarioAuthOutput!
+  updateCliente(updateClienteInput: UpdateClienteInput!): Cliente!
+  updateContrato(updateContratoInput: UpdateContratoInput!): Contrato!
+  updateEmpleado(updateEmpleadoInput: UpdateEmpleadoInput!): Empleado!
+  updatePropiedad(updatePropiedadInput: UpdatePropiedadInput!): Propiedad!
+  updatePropietario(updatePropietarioInput: UpdatePropietarioInput!): Propietario!
+  updateSucursal(updateSucursalInput: UpdateSucursalInput!): Sucursal!
+  updateVisita(updateVisitaInput: UpdateVisitaInput!): Visita!
+}
+
+type Propiedad {
+  areaM2: Float!
+  estadoPropiedadId: Int!
+  id: Int!
+  precioBase: Float!
+  propietarioId: Int!
+  tipoOperacionId: Int!
+  tipoPropiedadId: Int!
+  ubicacion: String
+}
+
+type Propietario {
+  ciNit: String!
+  id: Int!
+  nombres: String!
+  telefono: String!
+}
+
+type Query {
+  cliente(id: Int!): Cliente!
+  contrato(id: Int!): Contrato!
+  empleado(id: Int!): Empleado!
+  propiedad(id: Int!): Propiedad!
+  propietario(id: Int!): Propietario!
+  sucursal(id: Int!): Sucursal!
+  sucursales: [Sucursal!]!
+  usuario(id: Int!): UsuarioAuthOutput!
+  usuarios: [UsuarioAuthOutput!]!
+  visita(id: Int!): Visita!
+}
+
+input RegisterUsuarioInput {
+  activo: Boolean
+  adminId: Int!
+  contrasenia: String!
+  correo: String!
+  rolId: Int!
+}
+
+type Sucursal {
+  ciudad: String!
+  id: Int!
+  nombre: String!
+}
+
+input UpdateClienteInput {
+  """Example field (placeholder)"""
+  exampleField: Int
+  id: Int!
+}
+
+input UpdateContratoInput {
+  """Example field (placeholder)"""
+  exampleField: Int
+  id: Int!
+}
+
+input UpdateEmpleadoInput {
+  """Example field (placeholder)"""
+  exampleField: Int
+  id: Int!
+}
+
+input UpdatePropiedadInput {
+  """Example field (placeholder)"""
+  exampleField: Int
+  id: Int!
+}
+
+input UpdatePropietarioInput {
+  """Example field (placeholder)"""
+  exampleField: Int
+  id: Int!
+}
+
+input UpdateSucursalInput {
+  ciudad: String
+  id: Int!
+  nombre: String
+}
+
+input UpdateVisitaInput {
+  """Example field (placeholder)"""
+  exampleField: Int
+  id: Int!
+}
+
+type UsuarioAuthOutput {
+  activo: Boolean!
+  correo: String!
+  id: Int!
+  rolId: Int!
+}
+
+type Visita {
+  clienteId: Int!
+  empleadoId: Int!
+  fechaVisita: DateTime!
+  id: Int!
+  propiedadId: Int!
+}

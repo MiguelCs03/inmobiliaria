@@ -1,5 +1,5 @@
 import { Resolver, Query, Mutation, Args, Int } from '@nestjs/graphql';
-import { VisitaService } from './visita.service';
+import { VisitaService } from './repository/visita.service';
 import { Visita } from './entities/visita.entity';
 import { CreateVisitaInput } from './dto/create-visita.input';
 import { UpdateVisitaInput } from './dto/update-visita.input';

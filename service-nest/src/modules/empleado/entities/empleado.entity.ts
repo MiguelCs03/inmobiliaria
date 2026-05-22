@@ -7,25 +7,32 @@ import {
   OneToOne,
   PrimaryGeneratedColumn,
 } from 'typeorm';
+import { Field, Int, ObjectType } from '@nestjs/graphql';
 import { Usuario } from '../../auth/entities/usuario.entity';
 import { Sucursal } from '../../sucursal/entities/sucursal.entity';
 import { Visita } from '../../visita/entities/visita.entity';
 import { Contrato } from '../../contrato/entities/contrato.entity';
 
+@ObjectType()
 @Entity('empleado')
 export class Empleado {
-  @PrimaryGeneratedColumn('uuid')
-  id!: string;
+  @Field(() => Int)
+  @PrimaryGeneratedColumn({ type: 'bigint' })
+  id!: number;
 
-  @Column({ name: 'usuario_id' })
-  usuarioId!: string;
+  @Field(() => Int)
+  @Column({ name: 'usuario_id', type: 'bigint' })
+  usuarioId!: number;
 
+  @Field(() => Int)
   @Column({ name: 'sucursal_id' })
   sucursalId!: number;
 
+  @Field(() => String)
   @Column({ type: 'varchar', length: 100 })
   nombres!: string;
 
+  @Field(() => String)
   @Column({ type: 'varchar', length: 100 })
   apellidos!: string;
 

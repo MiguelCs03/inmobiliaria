@@ -1,5 +1,5 @@
 import { Resolver, Query, Mutation, Args, Int } from '@nestjs/graphql';
-import { EmpleadoService } from './empleado.service';
+import { EmpleadoService } from './repository/empleado.service';
 import { Empleado } from './entities/empleado.entity';
 import { CreateEmpleadoInput } from './dto/create-empleado.input';
 import { UpdateEmpleadoInput } from './dto/update-empleado.input';

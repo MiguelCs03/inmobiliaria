@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
-import { CreateEmpleadoInput } from './dto/create-empleado.input';
-import { UpdateEmpleadoInput } from './dto/update-empleado.input';
+import { CreateEmpleadoInput } from '../dto/create-empleado.input';
+import { UpdateEmpleadoInput } from '../dto/update-empleado.input';
 
 @Injectable()
 export class EmpleadoService {

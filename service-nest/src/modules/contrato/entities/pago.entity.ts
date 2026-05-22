@@ -9,11 +9,11 @@ import { Factura } from './factura.entity';
 
 @Entity('pago')
 export class Pago {
-  @PrimaryGeneratedColumn('uuid')
-  id!: string;
+  @PrimaryGeneratedColumn({ type: 'bigint' })
+  id!: number;
 
-  @Column({ name: 'factura_id' })
-  facturaId!: string;
+  @Column({ name: 'factura_id', type: 'bigint' })
+  facturaId!: number;
 
   @Column({ type: 'decimal', precision: 12, scale: 2 })
   monto!: number;

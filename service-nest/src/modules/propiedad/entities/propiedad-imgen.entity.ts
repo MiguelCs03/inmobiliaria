@@ -9,11 +9,11 @@ import { Propiedad } from './propiedad.entity';
 
 @Entity('propiedad_imagen')
 export class PropiedadImagen {
-  @PrimaryGeneratedColumn('uuid')
-  id!: string;
+  @PrimaryGeneratedColumn({ type: 'bigint' })
+  id!: number;
 
-  @Column({ name: 'propiedad_id' })
-  propiedadId!: string;
+  @Column({ name: 'propiedad_id', type: 'bigint' })
+  propiedadId!: number;
 
   @Column({ name: 'url_s3', type: 'varchar', length: 255 })
   urlS3!: string;

@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
-import { CreatePropietarioInput } from './dto/create-propietario.input';
-import { UpdatePropietarioInput } from './dto/update-propietario.input';
+import { CreatePropietarioInput } from '../dto/create-propietario.input';
+import { UpdatePropietarioInput } from '../dto/update-propietario.input';
 
 @Injectable()
 export class PropietarioService {

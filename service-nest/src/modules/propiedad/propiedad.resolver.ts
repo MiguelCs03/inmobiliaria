@@ -1,5 +1,5 @@
 import { Resolver, Query, Mutation, Args, Int } from '@nestjs/graphql';
-import { PropiedadService } from './propiedad.service';
+import { PropiedadService } from './repository/propiedad.service';
 import { Propiedad } from './entities/propiedad.entity';
 import { CreatePropiedadInput } from './dto/create-propiedad.input';
 import { UpdatePropiedadInput } from './dto/update-propiedad.input';

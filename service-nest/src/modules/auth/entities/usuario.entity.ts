@@ -12,8 +12,8 @@ import { Rol } from './rol.entity';
 
 @Entity('usuario')
 export class Usuario {
-  @PrimaryGeneratedColumn('uuid')
-  id!: string;
+  @PrimaryGeneratedColumn({ type: 'bigint' })
+  id!: number;
 
   @Column({ name: 'rol_id' })
   rolId!: number;

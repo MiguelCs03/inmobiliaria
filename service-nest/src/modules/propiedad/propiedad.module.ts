@@ -1,5 +1,5 @@
 import { Module } from '@nestjs/common';
-import { PropiedadService } from './propiedad.service';
+import { PropiedadService } from './repository/propiedad.service';
 import { PropiedadResolver } from './propiedad.resolver';
 
 @Module({

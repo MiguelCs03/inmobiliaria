@@ -16,11 +16,11 @@ export enum PlanPagoEstado {
 
 @Entity('plan_pagos')
 export class PlanPago {
-  @PrimaryGeneratedColumn('uuid')
-  id!: string;
+  @PrimaryGeneratedColumn({ type: 'bigint' })
+  id!: number;
 
-  @Column({ name: 'contrato_id' })
-  contratoId!: string;
+  @Column({ name: 'contrato_id', type: 'bigint' })
+  contratoId!: number;
 
   @Column({ name: 'nro_cuota', type: 'int' })
   nroCuota!: number;
