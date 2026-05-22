@@ -37,6 +37,9 @@ export class Propiedad {
   @Column({ name: 'area_m2', type: 'decimal', precision: 10, scale: 2 })
   areaM2!: number;
 
+  @Column({ type: 'varchar', length: 255, nullable: true })
+  ubicacion?: string | null;
+
   @Column({ name: 'detalles_json', type: 'jsonb', nullable: true })
   detallesJson?: Record<string, any> | null;
 

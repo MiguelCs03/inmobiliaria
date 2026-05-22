@@ -9,7 +9,7 @@ import {
 import { Propiedad } from '../../propiedad/entities/propiedad.entity';
 import { Cliente } from '../../cliente/entities/cliente.entity';
 import { Empleado } from '../../empleado/entities/empleado.entity';
-import { Factura } from './factura.entity';
+import { PlanPago } from './plan-pago.entity';
 
 @Entity('contrato')
 export class Contrato {
@@ -28,6 +28,9 @@ export class Contrato {
   @Column({ name: 'monto_total', type: 'decimal', precision: 12, scale: 2 })
   montoTotal!: number;
 
+  @Column({ name: 'estado_contrato', type: 'varchar', length: 30, nullable: true })
+  estadoContrato?: string | null;
+
   @Column({ name: 'documento_nosql_id', type: 'varchar', length: 50, nullable: true })
   documentoNosqlId?: string | null;
 
@@ -43,6 +46,6 @@ export class Contrato {
   @JoinColumn({ name: 'empleado_id' })
   empleado!: Empleado;
 
-  @OneToMany(() => Factura, (factura) => factura.contrato)
-  facturas!: Factura[];
+  @OneToMany(() => PlanPago, (planPago) => planPago.contrato)
+  planPagos!: PlanPago[];
 }
