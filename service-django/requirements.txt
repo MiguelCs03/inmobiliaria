@@ -1,0 +1,13 @@
+django>=4.2
+djangorestframework
+psycopg2-binary        # PostgreSQL
+celery[redis]          # tareas async
+redis
+scikit-learn
+torch torchvision      # deep learning
+tensorflow             # alternativa a PyTorch
+joblib                 # serialización de modelos sklearn
+mlflow                 # tracking de experimentos
+pandas numpy
+python-decouple        # variables de entorno
+gunicorn
