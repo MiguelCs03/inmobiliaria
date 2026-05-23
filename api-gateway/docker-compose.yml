@@ -1,0 +1,22 @@
+services:
+  api-gateway:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: development
+    container_name: api_gateway
+    restart: always
+    ports:
+      - "3001:3001"
+    environment:
+      - NODE_ENV=development
+      - PORT=3001
+      - ALLOWED_ORIGINS=${ALLOWED_ORIGINS:-http://localhost:3000}
+      - GATEWAY_GESTION_URL=${GATEWAY_GESTION_URL:-http://host.docker.internal:3001/api}
+      - GATEWAY_IA_URL=${GATEWAY_IA_URL:-http://host.docker.internal:8000/api}
+      - GATEWAY_DOCUMENTOS_URL=${GATEWAY_DOCUMENTOS_URL:-http://host.docker.internal:8080/api}
+      - GATEWAY_GRAPHQL_URL=${GATEWAY_GRAPHQL_URL:-http://host.docker.internal:3005/graphql}
+    volumes:
+      - .:/app
+      - /app/node_modules
+    command: npm run start:dev

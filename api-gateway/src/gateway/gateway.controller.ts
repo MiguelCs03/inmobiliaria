@@ -6,16 +6,39 @@ import { GatewayService } from './gateway.service';
 export class GatewayController {
   constructor(private readonly gatewayService: GatewayService) {}
 
+  @All('gestion')
+  async proxyGestionBase(@Req() req: Request, @Res() res: Response) {
+    // Encamina la raiz hacia el microservicio de gestion
+    return this.gatewayService.proxyToService(req, res, '/gestion', this.gatewayService.getGestionUrl());
+  }
+
   @All('gestion/*')
   async proxyGestion(@Req() req: Request, @Res() res: Response) {
     // Encamina hacia el microservicio de gestion
     return this.gatewayService.proxyToService(req, res, '/gestion', this.gatewayService.getGestionUrl());
   }
 
+  @All('ia')
+  async proxyIaBase(@Req() req: Request, @Res() res: Response) {
+    // Encamina la raiz hacia el microservicio de IA
+    return this.gatewayService.proxyToService(req, res, '/ia', this.gatewayService.getIaUrl());
+  }
+
   @All('ia/*')
   async proxyIa(@Req() req: Request, @Res() res: Response) {
     // Encamina hacia el microservicio de IA
     return this.gatewayService.proxyToService(req, res, '/ia', this.gatewayService.getIaUrl());
+  }
+
+  @All('documentos')
+  async proxyDocumentosBase(@Req() req: Request, @Res() res: Response) {
+    // Encamina la raiz hacia el microservicio de documentos
+    return this.gatewayService.proxyToService(
+      req,
+      res,
+      '/documentos',
+      this.gatewayService.getDocumentosUrl(),
+    );
   }
 
   @All('documentos/*')
@@ -35,3 +58,4 @@ export class GatewayController {
     return this.gatewayService.proxyGraphql(req, res);
   }
 }
+
