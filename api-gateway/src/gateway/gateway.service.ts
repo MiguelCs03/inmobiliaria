@@ -7,13 +7,17 @@ import type { Request, Response } from 'express';
 @Injectable()
 export class GatewayService {
   private readonly gestionUrl: string;
-  private readonly iaUrl: string;
+  private readonly djangoUrl: string;
   private readonly documentosUrl: string;
   private readonly graphqlUrl: string;
 
   constructor(private readonly configService: ConfigService) {
-    this.gestionUrl = this.configService.get<string>('GATEWAY_GESTION_URL') ?? 'http://localhost:3001/api';
-    this.iaUrl = this.configService.get<string>('GATEWAY_IA_URL') ?? 'http://127.0.0.1:8000/api';
+    this.gestionUrl =
+      this.configService.get<string>('GATEWAY_GESTION_URL') ?? 'http://localhost:3000/api/v1/gestion';
+    this.djangoUrl =
+      this.configService.get<string>('GATEWAY_DJANGO_URL') ??
+      this.configService.get<string>('GATEWAY_IA_URL') ??
+      'http://127.0.0.1:8000/api/v1';
     this.documentosUrl =
       this.configService.get<string>('GATEWAY_DOCUMENTOS_URL') ?? 'http://localhost:8080/api';
     this.graphqlUrl = this.configService.get<string>('GATEWAY_GRAPHQL_URL') ?? 'http://localhost:3005/graphql';
@@ -22,12 +26,12 @@ export class GatewayService {
   // Reenvia la solicitud al microservicio destino
   async proxyToService(req: Request, res: Response, basePath: string, targetBaseUrl: string) {
     const targetUrl = this.buildTargetUrl(req.originalUrl, basePath, targetBaseUrl);
+    const isMultipart = req.is('multipart/form-data');
     const config: AxiosRequestConfig = {
       url: targetUrl,
       method: req.method as AxiosRequestConfig['method'],
       headers: this.filterHeaders(req.headers),
-      params: req.query,
-      data: req.body,
+      data: isMultipart ? req : req.body,
       responseType: 'stream',
       validateStatus: () => true,
     };
@@ -59,8 +63,8 @@ export class GatewayService {
     return this.gestionUrl;
   }
 
-  getIaUrl(): string {
-    return this.iaUrl;
+  getDjangoUrl(): string {
+    return this.djangoUrl;
   }
 
   getDocumentosUrl(): string {
