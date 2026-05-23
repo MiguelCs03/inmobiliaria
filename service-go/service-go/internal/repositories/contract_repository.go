@@ -1,55 +1,61 @@
 package repositories
 
 import (
+	"context"
+
 	"service-go/internal/database"
 	"service-go/internal/models"
+
+	"github.com/aws/aws-sdk-go-v2/feature/dynamodb/attributevalue"
+	"github.com/aws/aws-sdk-go-v2/service/dynamodb"
 )
 
 func CreateContract(contract models.Contract) error {
 
-	query := `
-	INSERT INTO contracts (id, title, document_hash)
-	VALUES ($1, $2, $3)
-	`
+	item, err := attributevalue.MarshalMap(contract)
 
-	_, err := database.DB.Exec(
-		query,
-		contract.ID,
-		contract.Title,
-		contract.DocumentHash,
+	if err != nil {
+		return err
+	}
+
+	_, err = database.DynamoClient.PutItem(
+		context.TODO(),
+		&dynamodb.PutItemInput{
+			TableName: awsString("contracts"),
+			Item:      item,
+		},
 	)
 
 	return err
 }
 
-func GetContracts() ([]models.Contract, error){
-	query :=  `
-	SELECT id, title, document_hash
-	FROM contracts
-	`
-	rows, err := database.DB.Query(query)
+func GetContracts() ([]models.Contract, error) {
+
+	result, err := database.DynamoClient.Scan(
+		context.TODO(),
+		&dynamodb.ScanInput{
+			TableName: awsString("contracts"),
+		},
+	)
 
 	if err != nil {
 		return nil, err
 	}
 
-	defer rows.Close()
-
 	var contracts []models.Contract
 
-	for rows.Next(){
-		var contract models.Contract
+	err = attributevalue.UnmarshalListOfMaps(
+		result.Items,
+		&contracts,
+	)
 
-		err := rows.Scan(
-			&contract.ID,
-			&contract.Title,
-			&contract.DocumentHash,
-		)
-
-		if err != nil {
-			return nil,err
-		}
-		contracts = append(contracts, contract)
+	if err != nil {
+		return nil, err
 	}
+
 	return contracts, nil
+}
+
+func awsString(s string) *string {
+	return &s
 }

@@ -11,8 +11,9 @@ import (
 
 func main() {
 
-	database.ConnectDB()
-
+	database.ConnectDynamoDB()
+	database.CreateContractsTable()
+	
 	app := fiber.New()
 
 	routes.SetupRoutes(app)
