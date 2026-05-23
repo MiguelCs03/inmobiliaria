@@ -12,7 +12,6 @@
 
 # Binarios compilados de Linux / macOS (sin extensión habitual)
 # Si compilas a un nombre específico de binario, agrégalo aquí
-/service-go
 /bin/
 /dist/
 
