@@ -8,7 +8,7 @@ import (
 
 func SetupRoutes(app *fiber.App) {
 
-	app.Get("/service-go", handlers.RootHandler)
+	app.Get("/", handlers.RootHandler)
 	app.Post("/contracts", handlers.CreateContract)
 	app.Get("/contracts", handlers.GetContracts)
 }
