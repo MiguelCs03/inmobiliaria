@@ -31,7 +31,6 @@ coverage.txt
 .env
 .env.local
 *.env
-!.env.example
 
 # --- Dependencias (Opcional) ---
 # Descomenta la siguiente línea si no quieres subir la carpeta vendor/
