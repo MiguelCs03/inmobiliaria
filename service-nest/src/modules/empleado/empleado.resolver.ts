@@ -3,33 +3,47 @@ import { EmpleadoService } from './repository/empleado.service';
 import { Empleado } from './entities/empleado.entity';
 import { CreateEmpleadoInput } from './dto/create-empleado.input';
 import { UpdateEmpleadoInput } from './dto/update-empleado.input';
+import { EmpleadoListResponse, EmpleadoResponse } from './dto/empleado-response.dto';
+import { PaginationInput } from '../../common/dto/pagination.input';
 
 @Resolver(() => Empleado)
 export class EmpleadoResolver {
   constructor(private readonly empleadoService: EmpleadoService) {}
 
-  @Mutation(() => Empleado)
-  createEmpleado(@Args('createEmpleadoInput') createEmpleadoInput: CreateEmpleadoInput) {
-    return this.empleadoService.create(createEmpleadoInput);
+  @Mutation(() => EmpleadoResponse)
+  async createEmpleado(
+    @Args('createEmpleadoInput') createEmpleadoInput: CreateEmpleadoInput,
+  ): Promise<EmpleadoResponse> {
+    const data = await this.empleadoService.create(createEmpleadoInput);
+    return { success: true, data, message: 'Operacion exitosa' };
   }
 
-  @Query(() => [Empleado], { name: 'empleado' })
-  findAll() {
-    return this.empleadoService.findAll();
+  @Query(() => EmpleadoListResponse, { name: 'empleado' })
+  async findAll(
+    @Args('pagination', { type: () => PaginationInput, nullable: true })
+    pagination?: PaginationInput,
+  ): Promise<EmpleadoListResponse> {
+    const data = await this.empleadoService.findAll(pagination);
+    return { success: true, data, message: 'Operacion exitosa' };
   }
 
-  @Query(() => Empleado, { name: 'empleado' })
-  findOne(@Args('id', { type: () => Int }) id: number) {
-    return this.empleadoService.findOne(id);
+  @Query(() => EmpleadoResponse, { name: 'empleado' })
+  async findOne(@Args('id', { type: () => Int }) id: number): Promise<EmpleadoResponse> {
+    const data = await this.empleadoService.findOne(id);
+    return { success: true, data, message: 'Operacion exitosa' };
   }
 
-  @Mutation(() => Empleado)
-  updateEmpleado(@Args('updateEmpleadoInput') updateEmpleadoInput: UpdateEmpleadoInput) {
-    return this.empleadoService.update(updateEmpleadoInput.id, updateEmpleadoInput);
+  @Mutation(() => EmpleadoResponse)
+  async updateEmpleado(
+    @Args('updateEmpleadoInput') updateEmpleadoInput: UpdateEmpleadoInput,
+  ): Promise<EmpleadoResponse> {
+    const data = await this.empleadoService.update(updateEmpleadoInput.id, updateEmpleadoInput);
+    return { success: true, data, message: 'Operacion exitosa' };
   }
 
-  @Mutation(() => Empleado)
-  removeEmpleado(@Args('id', { type: () => Int }) id: number) {
-    return this.empleadoService.remove(id);
+  @Mutation(() => EmpleadoResponse)
+  async removeEmpleado(@Args('id', { type: () => Int }) id: number): Promise<EmpleadoResponse> {
+    const data = await this.empleadoService.remove(id);
+    return { success: true, data, message: 'Operacion exitosa' };
   }
 }

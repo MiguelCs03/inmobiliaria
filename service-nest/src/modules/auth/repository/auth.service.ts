@@ -1,6 +1,5 @@
 import {
   BadRequestException,
-  ForbiddenException,
   Injectable,
   NotFoundException,
   UnauthorizedException,
@@ -69,16 +68,6 @@ export class AuthService {
   }
 
   async register(input: RegisterUsuarioInput): Promise<UsuarioAuthOutput> {
-    // Validar que el solicitante sea Admin
-    const solicitante = await this.usuarioRepository.findOne({
-      where: { id: input.adminId },
-      relations: ['rol'],
-    });
-
-    if (!solicitante || !solicitante.activo || solicitante.rol?.nombre !== 'Admin') {
-      throw new ForbiddenException('Solo Admin puede crear usuarios');
-    }
-
     const existente = await this.usuarioRepository.findOne({
       where: { correo: input.correo },
     });

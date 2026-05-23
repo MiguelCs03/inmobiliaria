@@ -3,33 +3,49 @@ import { PropiedadService } from './repository/propiedad.service';
 import { Propiedad } from './entities/propiedad.entity';
 import { CreatePropiedadInput } from './dto/create-propiedad.input';
 import { UpdatePropiedadInput } from './dto/update-propiedad.input';
+import { PropiedadListResponse, PropiedadResponse } from './dto/propiedad-response.dto';
+import { PaginationInput } from '../../common/dto/pagination.input';
 
 @Resolver(() => Propiedad)
 export class PropiedadResolver {
   constructor(private readonly propiedadService: PropiedadService) {}
 
-  @Mutation(() => Propiedad)
-  createPropiedad(@Args('createPropiedadInput') createPropiedadInput: CreatePropiedadInput) {
-    return this.propiedadService.create(createPropiedadInput);
+  @Mutation(() => PropiedadResponse)
+  async createPropiedad(
+    @Args('createPropiedadInput') createPropiedadInput: CreatePropiedadInput,
+  ): Promise<PropiedadResponse> {
+    const data = await this.propiedadService.create(createPropiedadInput);
+    return { success: true, data, message: 'Operacion exitosa' };
   }
 
-  @Query(() => [Propiedad], { name: 'propiedad' })
-  findAll() {
-    return this.propiedadService.findAll();
+  @Query(() => PropiedadListResponse, { name: 'propiedad' })
+  async findAll(
+    @Args('pagination', { type: () => PaginationInput, nullable: true })
+    pagination?: PaginationInput,
+  ): Promise<PropiedadListResponse> {
+    const data = await this.propiedadService.findAll(pagination);
+    return { success: true, data, message: 'Operacion exitosa' };
   }
 
-  @Query(() => Propiedad, { name: 'propiedad' })
-  findOne(@Args('id', { type: () => Int }) id: number) {
-    return this.propiedadService.findOne(id);
+  @Query(() => PropiedadResponse, { name: 'propiedad' })
+  async findOne(@Args('id', { type: () => Int }) id: number): Promise<PropiedadResponse> {
+    const data = await this.propiedadService.findOne(id);
+    return { success: true, data, message: 'Operacion exitosa' };
   }
 
-  @Mutation(() => Propiedad)
-  updatePropiedad(@Args('updatePropiedadInput') updatePropiedadInput: UpdatePropiedadInput) {
-    return this.propiedadService.update(updatePropiedadInput.id, updatePropiedadInput);
+  @Mutation(() => PropiedadResponse)
+  async updatePropiedad(
+    @Args('updatePropiedadInput') updatePropiedadInput: UpdatePropiedadInput,
+  ): Promise<PropiedadResponse> {
+    const data = await this.propiedadService.update(updatePropiedadInput.id, updatePropiedadInput);
+    return { success: true, data, message: 'Operacion exitosa' };
   }
 
-  @Mutation(() => Propiedad)
-  removePropiedad(@Args('id', { type: () => Int }) id: number) {
-    return this.propiedadService.remove(id);
+  @Mutation(() => PropiedadResponse)
+  async removePropiedad(
+    @Args('id', { type: () => Int }) id: number,
+  ): Promise<PropiedadResponse> {
+    const data = await this.propiedadService.remove(id);
+    return { success: true, data, message: 'Operacion exitosa' };
   }
 }

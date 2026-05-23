@@ -3,50 +3,62 @@ import { AuthService } from './repository/auth.service';
 import { LoginInput } from './dto/login.input';
 import { RegisterUsuarioInput } from './dto/register-usuario.input';
 import { CambiarContraseniaInput } from './dto/cambiar-contrasenia.input';
-import { LoginResponse } from './dto/login-response.type';
-import { UsuarioAuthOutput } from './dto/usuario-auth.output';
+import {
+  LoginApiResponse,
+  UsuarioAuthListResponse,
+  UsuarioAuthResponse,
+} from './dto/auth-response.dto';
 
 @Resolver()
 export class AuthResolver {
   constructor(private readonly authService: AuthService) {}
 
-  @Mutation(() => LoginResponse)
-  login(@Args('loginInput') loginInput: LoginInput): Promise<LoginResponse> {
+  @Mutation(() => LoginApiResponse)
+  async login(@Args('loginInput') loginInput: LoginInput): Promise<LoginApiResponse> {
     // Iniciar sesion con correo y contrasenia
-    return this.authService.login(loginInput);
+    const data = await this.authService.login(loginInput);
+    return { success: true, data, message: 'Operacion exitosa' };
   }
 
-  @Mutation(() => UsuarioAuthOutput)
+  @Mutation(() => UsuarioAuthResponse)
   register(
     @Args('registerUsuarioInput') registerUsuarioInput: RegisterUsuarioInput,
-  ): Promise<UsuarioAuthOutput> {
+  ): Promise<UsuarioAuthResponse> {
     // Crear usuario desde un Admin
-    return this.authService.register(registerUsuarioInput);
+    return this.authService
+      .register(registerUsuarioInput)
+      .then((data) => ({ success: true, data, message: 'Operacion exitosa' }));
   }
 
-  @Mutation(() => UsuarioAuthOutput)
+  @Mutation(() => UsuarioAuthResponse)
   cambiarContrasenia(
     @Args('cambiarContraseniaInput') cambiarContraseniaInput: CambiarContraseniaInput,
-  ): Promise<UsuarioAuthOutput> {
+  ): Promise<UsuarioAuthResponse> {
     // Cambiar la contrasenia del usuario
-    return this.authService.cambiarContrasenia(cambiarContraseniaInput);
+    return this.authService
+      .cambiarContrasenia(cambiarContraseniaInput)
+      .then((data) => ({ success: true, data, message: 'Operacion exitosa' }));
   }
 
-  @Mutation(() => UsuarioAuthOutput)
-  toggleActivoUsuario(@Args('id', { type: () => Int }) id: number): Promise<UsuarioAuthOutput> {
+  @Mutation(() => UsuarioAuthResponse)
+  toggleActivoUsuario(@Args('id', { type: () => Int }) id: number): Promise<UsuarioAuthResponse> {
     // Activar o desactivar la cuenta
-    return this.authService.toggleActivoUsuario(id);
+    return this.authService
+      .toggleActivoUsuario(id)
+      .then((data) => ({ success: true, data, message: 'Operacion exitosa' }));
   }
 
-  @Query(() => [UsuarioAuthOutput], { name: 'usuarios' })
-  usuarios(): Promise<UsuarioAuthOutput[]> {
+  @Query(() => UsuarioAuthListResponse, { name: 'usuarios' })
+  async usuarios(): Promise<UsuarioAuthListResponse> {
     // Listar todos los usuarios
-    return this.authService.usuarios();
+    const data = await this.authService.usuarios();
+    return { success: true, data, message: 'Operacion exitosa' };
   }
 
-  @Query(() => UsuarioAuthOutput, { name: 'usuario' })
-  usuario(@Args('id', { type: () => Int }) id: number): Promise<UsuarioAuthOutput> {
+  @Query(() => UsuarioAuthResponse, { name: 'usuario' })
+  async usuario(@Args('id', { type: () => Int }) id: number): Promise<UsuarioAuthResponse> {
     // Obtener usuario por id
-    return this.authService.usuario(id);
+    const data = await this.authService.usuario(id);
+    return { success: true, data, message: 'Operacion exitosa' };
   }
 }

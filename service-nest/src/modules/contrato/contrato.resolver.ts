@@ -3,33 +3,47 @@ import { ContratoService } from './repository/contrato.service';
 import { Contrato } from './entities/contrato.entity';
 import { CreateContratoInput } from './dto/create-contrato.input';
 import { UpdateContratoInput } from './dto/update-contrato.input';
+import { ContratoListResponse, ContratoResponse } from './dto/contrato-response.dto';
+import { PaginationInput } from '../../common/dto/pagination.input';
 
 @Resolver(() => Contrato)
 export class ContratoResolver {
   constructor(private readonly contratoService: ContratoService) {}
 
-  @Mutation(() => Contrato)
-  createContrato(@Args('createContratoInput') createContratoInput: CreateContratoInput) {
-    return this.contratoService.create(createContratoInput);
+  @Mutation(() => ContratoResponse)
+  async createContrato(
+    @Args('createContratoInput') createContratoInput: CreateContratoInput,
+  ): Promise<ContratoResponse> {
+    const data = await this.contratoService.create(createContratoInput);
+    return { success: true, data, message: 'Operacion exitosa' };
   }
 
-  @Query(() => [Contrato], { name: 'contrato' })
-  findAll() {
-    return this.contratoService.findAll();
+  @Query(() => ContratoListResponse, { name: 'contrato' })
+  async findAll(
+    @Args('pagination', { type: () => PaginationInput, nullable: true })
+    pagination?: PaginationInput,
+  ): Promise<ContratoListResponse> {
+    const data = await this.contratoService.findAll(pagination);
+    return { success: true, data, message: 'Operacion exitosa' };
   }
 
-  @Query(() => Contrato, { name: 'contrato' })
-  findOne(@Args('id', { type: () => Int }) id: number) {
-    return this.contratoService.findOne(id);
+  @Query(() => ContratoResponse, { name: 'contrato' })
+  async findOne(@Args('id', { type: () => Int }) id: number): Promise<ContratoResponse> {
+    const data = await this.contratoService.findOne(id);
+    return { success: true, data, message: 'Operacion exitosa' };
   }
 
-  @Mutation(() => Contrato)
-  updateContrato(@Args('updateContratoInput') updateContratoInput: UpdateContratoInput) {
-    return this.contratoService.update(updateContratoInput.id, updateContratoInput);
+  @Mutation(() => ContratoResponse)
+  async updateContrato(
+    @Args('updateContratoInput') updateContratoInput: UpdateContratoInput,
+  ): Promise<ContratoResponse> {
+    const data = await this.contratoService.update(updateContratoInput.id, updateContratoInput);
+    return { success: true, data, message: 'Operacion exitosa' };
   }
 
-  @Mutation(() => Contrato)
-  removeContrato(@Args('id', { type: () => Int }) id: number) {
-    return this.contratoService.remove(id);
+  @Mutation(() => ContratoResponse)
+  async removeContrato(@Args('id', { type: () => Int }) id: number): Promise<ContratoResponse> {
+    const data = await this.contratoService.remove(id);
+    return { success: true, data, message: 'Operacion exitosa' };
   }
 }

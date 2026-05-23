@@ -15,6 +15,18 @@ type Cliente {
   usuarioId: Int
 }
 
+type ClienteListResponse {
+  data: [Cliente!]
+  message: String!
+  success: Boolean!
+}
+
+type ClienteResponse {
+  data: Cliente
+  message: String!
+  success: Boolean!
+}
+
 type Contrato {
   clienteId: Int!
   documentoNosqlId: String
@@ -25,29 +37,59 @@ type Contrato {
   propiedadId: Int!
 }
 
+type ContratoListResponse {
+  data: [Contrato!]
+  message: String!
+  success: Boolean!
+}
+
+type ContratoResponse {
+  data: Contrato
+  message: String!
+  success: Boolean!
+}
+
 input CreateClienteInput {
-  """Example field (placeholder)"""
-  exampleField: Int!
+  ciNit: String!
+  nombres: String!
+  telefono: String!
+  usuarioId: Int
 }
 
 input CreateContratoInput {
-  """Example field (placeholder)"""
-  exampleField: Int!
+  clienteId: Int!
+  documentoNosqlId: String
+  empleadoId: Int!
+  estadoContrato: String
+  montoTotal: Float!
+  propiedadId: Int!
 }
 
 input CreateEmpleadoInput {
-  """Example field (placeholder)"""
-  exampleField: Int!
+  apellidos: String!
+  nombres: String!
+  sucursalId: Int!
+  usuarioId: Int!
 }
 
 input CreatePropiedadInput {
-  """Example field (placeholder)"""
-  exampleField: Int!
+  areaM2: Float!
+  estadoPropiedadId: Int!
+  precioBase: Float!
+  propietarioId: Int!
+  tipoOperacionId: Int!
+  tipoPropiedadId: Int!
+  ubicacion: String
 }
 
 input CreatePropietarioInput {
-  """Example field (placeholder)"""
-  exampleField: Int!
+  ciNit: String!
+  nombres: String!
+  telefono: String!
+}
+
+input CreateRolInput {
+  nombre: String!
 }
 
 input CreateSucursalInput {
@@ -56,8 +98,10 @@ input CreateSucursalInput {
 }
 
 input CreateVisitaInput {
-  """Example field (placeholder)"""
-  exampleField: Int!
+  clienteId: Int!
+  empleadoId: Int!
+  fechaVisita: DateTime!
+  propiedadId: Int!
 }
 
 """
@@ -73,6 +117,24 @@ type Empleado {
   usuarioId: Int!
 }
 
+type EmpleadoListResponse {
+  data: [Empleado!]
+  message: String!
+  success: Boolean!
+}
+
+type EmpleadoResponse {
+  data: Empleado
+  message: String!
+  success: Boolean!
+}
+
+type LoginApiResponse {
+  data: LoginResponse
+  message: String!
+  success: Boolean!
+}
+
 input LoginInput {
   contrasenia: String!
   correo: String!
@@ -84,31 +146,40 @@ type LoginResponse {
 }
 
 type Mutation {
-  cambiarContrasenia(cambiarContraseniaInput: CambiarContraseniaInput!): UsuarioAuthOutput!
-  createCliente(createClienteInput: CreateClienteInput!): Cliente!
-  createContrato(createContratoInput: CreateContratoInput!): Contrato!
-  createEmpleado(createEmpleadoInput: CreateEmpleadoInput!): Empleado!
-  createPropiedad(createPropiedadInput: CreatePropiedadInput!): Propiedad!
-  createPropietario(createPropietarioInput: CreatePropietarioInput!): Propietario!
-  createSucursal(createSucursalInput: CreateSucursalInput!): Sucursal!
-  createVisita(createVisitaInput: CreateVisitaInput!): Visita!
-  login(loginInput: LoginInput!): LoginResponse!
-  register(registerUsuarioInput: RegisterUsuarioInput!): UsuarioAuthOutput!
-  removeCliente(id: Int!): Cliente!
-  removeContrato(id: Int!): Contrato!
-  removeEmpleado(id: Int!): Empleado!
-  removePropiedad(id: Int!): Propiedad!
-  removePropietario(id: Int!): Propietario!
-  removeSucursal(id: Int!): Sucursal!
-  removeVisita(id: Int!): Visita!
-  toggleActivoUsuario(id: Int!): UsuarioAuthOutput!
-  updateCliente(updateClienteInput: UpdateClienteInput!): Cliente!
-  updateContrato(updateContratoInput: UpdateContratoInput!): Contrato!
-  updateEmpleado(updateEmpleadoInput: UpdateEmpleadoInput!): Empleado!
-  updatePropiedad(updatePropiedadInput: UpdatePropiedadInput!): Propiedad!
-  updatePropietario(updatePropietarioInput: UpdatePropietarioInput!): Propietario!
-  updateSucursal(updateSucursalInput: UpdateSucursalInput!): Sucursal!
-  updateVisita(updateVisitaInput: UpdateVisitaInput!): Visita!
+  cambiarContrasenia(cambiarContraseniaInput: CambiarContraseniaInput!): UsuarioAuthResponse!
+  createCliente(createClienteInput: CreateClienteInput!): ClienteResponse!
+  createContrato(createContratoInput: CreateContratoInput!): ContratoResponse!
+  createEmpleado(createEmpleadoInput: CreateEmpleadoInput!): EmpleadoResponse!
+  createPropiedad(createPropiedadInput: CreatePropiedadInput!): PropiedadResponse!
+  createPropietario(createPropietarioInput: CreatePropietarioInput!): PropietarioResponse!
+  createRol(createRolInput: CreateRolInput!): RolResponse!
+  createSucursal(createSucursalInput: CreateSucursalInput!): SucursalResponse!
+  createVisita(createVisitaInput: CreateVisitaInput!): VisitaResponse!
+  login(loginInput: LoginInput!): LoginApiResponse!
+  register(registerUsuarioInput: RegisterUsuarioInput!): UsuarioAuthResponse!
+  removeCliente(id: Int!): ClienteResponse!
+  removeContrato(id: Int!): ContratoResponse!
+  removeEmpleado(id: Int!): EmpleadoResponse!
+  removePropiedad(id: Int!): PropiedadResponse!
+  removePropietario(id: Int!): PropietarioResponse!
+  removeSucursal(id: Int!): SucursalResponse!
+  removeVisita(id: Int!): VisitaResponse!
+  toggleActivoUsuario(id: Int!): UsuarioAuthResponse!
+  updateCliente(updateClienteInput: UpdateClienteInput!): ClienteResponse!
+  updateContrato(updateContratoInput: UpdateContratoInput!): ContratoResponse!
+  updateEmpleado(updateEmpleadoInput: UpdateEmpleadoInput!): EmpleadoResponse!
+  updatePropiedad(updatePropiedadInput: UpdatePropiedadInput!): PropiedadResponse!
+  updatePropietario(updatePropietarioInput: UpdatePropietarioInput!): PropietarioResponse!
+  updateSucursal(updateSucursalInput: UpdateSucursalInput!): SucursalResponse!
+  updateVisita(updateVisitaInput: UpdateVisitaInput!): VisitaResponse!
+}
+
+input PaginationInput {
+  endDate: String
+  limit: Int
+  page: Int
+  search: String
+  startDate: String
 }
 
 type Propiedad {
@@ -122,6 +193,18 @@ type Propiedad {
   ubicacion: String
 }
 
+type PropiedadListResponse {
+  data: [Propiedad!]
+  message: String!
+  success: Boolean!
+}
+
+type PropiedadResponse {
+  data: Propiedad
+  message: String!
+  success: Boolean!
+}
+
 type Propietario {
   ciNit: String!
   id: Int!
@@ -129,25 +212,55 @@ type Propietario {
   telefono: String!
 }
 
+type PropietarioListResponse {
+  data: [Propietario!]
+  message: String!
+  success: Boolean!
+}
+
+type PropietarioResponse {
+  data: Propietario
+  message: String!
+  success: Boolean!
+}
+
 type Query {
-  cliente(id: Int!): Cliente!
-  contrato(id: Int!): Contrato!
-  empleado(id: Int!): Empleado!
-  propiedad(id: Int!): Propiedad!
-  propietario(id: Int!): Propietario!
-  sucursal(id: Int!): Sucursal!
-  sucursales: [Sucursal!]!
-  usuario(id: Int!): UsuarioAuthOutput!
-  usuarios: [UsuarioAuthOutput!]!
-  visita(id: Int!): Visita!
+  cliente(id: Int!): ClienteResponse!
+  contrato(id: Int!): ContratoResponse!
+  empleado(id: Int!): EmpleadoResponse!
+  propiedad(id: Int!): PropiedadResponse!
+  propietario(id: Int!): PropietarioResponse!
+  rol(id: Int!): RolResponse!
+  roles: RolListResponse!
+  sucursal(id: Int!): SucursalResponse!
+  sucursales(pagination: PaginationInput): SucursalListResponse!
+  usuario(id: Int!): UsuarioAuthResponse!
+  usuarios: UsuarioAuthListResponse!
+  visita(id: Int!): VisitaResponse!
 }
 
 input RegisterUsuarioInput {
   activo: Boolean
-  adminId: Int!
   contrasenia: String!
   correo: String!
   rolId: Int!
+}
+
+type Rol {
+  id: Int!
+  nombre: String!
+}
+
+type RolListResponse {
+  data: [Rol!]
+  message: String!
+  success: Boolean!
+}
+
+type RolResponse {
+  data: Rol
+  message: String!
+  success: Boolean!
 }
 
 type Sucursal {
@@ -156,34 +269,60 @@ type Sucursal {
   nombre: String!
 }
 
+type SucursalListResponse {
+  data: [Sucursal!]
+  message: String!
+  success: Boolean!
+}
+
+type SucursalResponse {
+  data: Sucursal
+  message: String!
+  success: Boolean!
+}
+
 input UpdateClienteInput {
-  """Example field (placeholder)"""
-  exampleField: Int
+  ciNit: String
   id: Int!
+  nombres: String
+  telefono: String
+  usuarioId: Int
 }
 
 input UpdateContratoInput {
-  """Example field (placeholder)"""
-  exampleField: Int
+  clienteId: Int
+  documentoNosqlId: String
+  empleadoId: Int
+  estadoContrato: String
   id: Int!
+  montoTotal: Float
+  propiedadId: Int
 }
 
 input UpdateEmpleadoInput {
-  """Example field (placeholder)"""
-  exampleField: Int
+  apellidos: String
   id: Int!
+  nombres: String
+  sucursalId: Int
+  usuarioId: Int
 }
 
 input UpdatePropiedadInput {
-  """Example field (placeholder)"""
-  exampleField: Int
+  areaM2: Float
+  estadoPropiedadId: Int
   id: Int!
+  precioBase: Float
+  propietarioId: Int
+  tipoOperacionId: Int
+  tipoPropiedadId: Int
+  ubicacion: String
 }
 
 input UpdatePropietarioInput {
-  """Example field (placeholder)"""
-  exampleField: Int
+  ciNit: String
   id: Int!
+  nombres: String
+  telefono: String
 }
 
 input UpdateSucursalInput {
@@ -193,9 +332,17 @@ input UpdateSucursalInput {
 }
 
 input UpdateVisitaInput {
-  """Example field (placeholder)"""
-  exampleField: Int
+  clienteId: Int
+  empleadoId: Int
+  fechaVisita: DateTime
   id: Int!
+  propiedadId: Int
+}
+
+type UsuarioAuthListResponse {
+  data: [UsuarioAuthOutput!]
+  message: String!
+  success: Boolean!
 }
 
 type UsuarioAuthOutput {
@@ -205,10 +352,28 @@ type UsuarioAuthOutput {
   rolId: Int!
 }
 
+type UsuarioAuthResponse {
+  data: UsuarioAuthOutput
+  message: String!
+  success: Boolean!
+}
+
 type Visita {
   clienteId: Int!
   empleadoId: Int!
   fechaVisita: DateTime!
   id: Int!
   propiedadId: Int!
+}
+
+type VisitaListResponse {
+  data: [Visita!]
+  message: String!
+  success: Boolean!
+}
+
+type VisitaResponse {
+  data: Visita
+  message: String!
+  success: Boolean!
 }

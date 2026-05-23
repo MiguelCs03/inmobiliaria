@@ -1,7 +1,13 @@
-import { InputType, Int, Field } from '@nestjs/graphql';
+import { InputType, Field } from '@nestjs/graphql';
 
 @InputType()
 export class CreatePropietarioInput {
-  @Field(() => Int, { description: 'Example field (placeholder)' })
-  exampleField: number;
+  @Field(() => String)
+  nombres!: string;
+
+  @Field(() => String)
+  telefono!: string;
+
+  @Field(() => String)
+  ciNit!: string;
 }

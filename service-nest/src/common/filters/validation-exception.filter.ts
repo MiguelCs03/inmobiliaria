@@ -1,6 +1,8 @@
 import { ArgumentsHost, BadRequestException, Catch, ExceptionFilter, HttpStatus } from '@nestjs/common';
 import { Response } from 'express';
 import { ApiResponse } from '../interfaces/api-response.interface';
+import { GqlArgumentsHost } from '@nestjs/graphql';
+import { GraphQLError } from 'graphql';
 
 interface ValidationErrorResponse {
   message: string | string[];
@@ -11,8 +13,6 @@ interface ValidationErrorResponse {
 @Catch(BadRequestException)
 export class ValidationExceptionFilter implements ExceptionFilter {
   catch(exception: BadRequestException, host: ArgumentsHost) {
-    const ctx = host.switchToHttp();
-    const response = ctx.getResponse<Response>();
     const exceptionResponse = exception.getResponse() as ValidationErrorResponse;
 
     let errorMessage = 'Error de validación';
@@ -31,6 +31,17 @@ export class ValidationExceptionFilter implements ExceptionFilter {
       message: errorMessage,
     };
 
-    response.status(HttpStatus.OK).json(apiResponse);
+    if (host.getType() === 'http') {
+      const ctx = host.switchToHttp();
+      const response = ctx.getResponse<Response>();
+      response.status(HttpStatus.OK).json(apiResponse);
+      return;
+    }
+
+    // En GraphQL no usamos response.status, devolvemos un error GraphQL
+    GqlArgumentsHost.create(host);
+    return new GraphQLError(errorMessage, {
+      extensions: { code: 'BAD_USER_INPUT', response: apiResponse },
+    });
   }
 }

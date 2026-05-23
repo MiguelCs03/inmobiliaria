@@ -3,38 +3,52 @@ import { SucursalService } from './repository/sucursal.service';
 import { Sucursal } from './entities/sucursal.entity';
 import { CreateSucursalInput } from './dto/create-sucursal.input';
 import { UpdateSucursalInput } from './dto/update-sucursal.input';
+import { SucursalListResponse, SucursalResponse } from './dto/sucursal-response.dto';
+import { PaginationInput } from '../../common/dto/pagination.input';
 
 @Resolver(() => Sucursal)
 export class SucursalResolver {
   constructor(private readonly sucursalService: SucursalService) {}
 
-  @Mutation(() => Sucursal)
-  createSucursal(@Args('createSucursalInput') createSucursalInput: CreateSucursalInput) {
+  @Mutation(() => SucursalResponse)
+  async createSucursal(
+    @Args('createSucursalInput') createSucursalInput: CreateSucursalInput,
+  ): Promise<SucursalResponse> {
     // Crear una nueva sucursal
-    return this.sucursalService.create(createSucursalInput);
+    const data = await this.sucursalService.create(createSucursalInput);
+    return { success: true, data, message: 'Operacion exitosa' };
   }
 
-  @Query(() => [Sucursal], { name: 'sucursales' })
-  findAll() {
+  @Query(() => SucursalListResponse, { name: 'sucursales' })
+  async findAll(
+    @Args('pagination', { type: () => PaginationInput, nullable: true })
+    pagination?: PaginationInput,
+  ): Promise<SucursalListResponse> {
     // Listar sucursales
-    return this.sucursalService.findAll();
+    const data = await this.sucursalService.findAll(pagination);
+    return { success: true, data, message: 'Operacion exitosa' };
   }
 
-  @Query(() => Sucursal, { name: 'sucursal' })
-  findOne(@Args('id', { type: () => Int }) id: number) {
+  @Query(() => SucursalResponse, { name: 'sucursal' })
+  async findOne(@Args('id', { type: () => Int }) id: number): Promise<SucursalResponse> {
     // Buscar sucursal por id
-    return this.sucursalService.findOne(id);
+    const data = await this.sucursalService.findOne(id);
+    return { success: true, data, message: 'Operacion exitosa' };
   }
 
-  @Mutation(() => Sucursal)
-  updateSucursal(@Args('updateSucursalInput') updateSucursalInput: UpdateSucursalInput) {
+  @Mutation(() => SucursalResponse)
+  async updateSucursal(
+    @Args('updateSucursalInput') updateSucursalInput: UpdateSucursalInput,
+  ): Promise<SucursalResponse> {
     // Actualizar datos de una sucursal
-    return this.sucursalService.update(updateSucursalInput.id, updateSucursalInput);
+    const data = await this.sucursalService.update(updateSucursalInput.id, updateSucursalInput);
+    return { success: true, data, message: 'Operacion exitosa' };
   }
 
-  @Mutation(() => Sucursal)
-  removeSucursal(@Args('id', { type: () => Int }) id: number) {
+  @Mutation(() => SucursalResponse)
+  async removeSucursal(@Args('id', { type: () => Int }) id: number): Promise<SucursalResponse> {
     // Eliminar sucursal
-    return this.sucursalService.remove(id);
+    const data = await this.sucursalService.remove(id);
+    return { success: true, data, message: 'Operacion exitosa' };
   }
 }

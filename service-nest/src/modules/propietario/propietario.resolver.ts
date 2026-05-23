@@ -3,33 +3,49 @@ import { PropietarioService } from './repository/propietario.service';
 import { Propietario } from './entities/propietario.entity';
 import { CreatePropietarioInput } from './dto/create-propietario.input';
 import { UpdatePropietarioInput } from './dto/update-propietario.input';
+import { PropietarioListResponse, PropietarioResponse } from './dto/propietario-response.dto';
+import { PaginationInput } from '../../common/dto/pagination.input';
 
 @Resolver(() => Propietario)
 export class PropietarioResolver {
   constructor(private readonly propietarioService: PropietarioService) {}
 
-  @Mutation(() => Propietario)
-  createPropietario(@Args('createPropietarioInput') createPropietarioInput: CreatePropietarioInput) {
-    return this.propietarioService.create(createPropietarioInput);
+  @Mutation(() => PropietarioResponse)
+  async createPropietario(
+    @Args('createPropietarioInput') createPropietarioInput: CreatePropietarioInput,
+  ): Promise<PropietarioResponse> {
+    const data = await this.propietarioService.create(createPropietarioInput);
+    return { success: true, data, message: 'Operacion exitosa' };
   }
 
-  @Query(() => [Propietario], { name: 'propietario' })
-  findAll() {
-    return this.propietarioService.findAll();
+  @Query(() => PropietarioListResponse, { name: 'propietario' })
+  async findAll(
+    @Args('pagination', { type: () => PaginationInput, nullable: true })
+    pagination?: PaginationInput,
+  ): Promise<PropietarioListResponse> {
+    const data = await this.propietarioService.findAll(pagination);
+    return { success: true, data, message: 'Operacion exitosa' };
   }
 
-  @Query(() => Propietario, { name: 'propietario' })
-  findOne(@Args('id', { type: () => Int }) id: number) {
-    return this.propietarioService.findOne(id);
+  @Query(() => PropietarioResponse, { name: 'propietario' })
+  async findOne(@Args('id', { type: () => Int }) id: number): Promise<PropietarioResponse> {
+    const data = await this.propietarioService.findOne(id);
+    return { success: true, data, message: 'Operacion exitosa' };
   }
 
-  @Mutation(() => Propietario)
-  updatePropietario(@Args('updatePropietarioInput') updatePropietarioInput: UpdatePropietarioInput) {
-    return this.propietarioService.update(updatePropietarioInput.id, updatePropietarioInput);
+  @Mutation(() => PropietarioResponse)
+  async updatePropietario(
+    @Args('updatePropietarioInput') updatePropietarioInput: UpdatePropietarioInput,
+  ): Promise<PropietarioResponse> {
+    const data = await this.propietarioService.update(updatePropietarioInput.id, updatePropietarioInput);
+    return { success: true, data, message: 'Operacion exitosa' };
   }
 
-  @Mutation(() => Propietario)
-  removePropietario(@Args('id', { type: () => Int }) id: number) {
-    return this.propietarioService.remove(id);
+  @Mutation(() => PropietarioResponse)
+  async removePropietario(
+    @Args('id', { type: () => Int }) id: number,
+  ): Promise<PropietarioResponse> {
+    const data = await this.propietarioService.remove(id);
+    return { success: true, data, message: 'Operacion exitosa' };
   }
 }

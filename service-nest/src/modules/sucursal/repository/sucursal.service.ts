@@ -4,6 +4,7 @@ import { Repository } from 'typeorm';
 import { CreateSucursalInput } from '../dto/create-sucursal.input';
 import { UpdateSucursalInput } from '../dto/update-sucursal.input';
 import { Sucursal } from '../entities/sucursal.entity';
+import { PaginationInput } from '../../../common/dto/pagination.input';
 
 @Injectable()
 export class SucursalService {
@@ -18,9 +19,16 @@ export class SucursalService {
     return this.sucursalRepository.save(sucursal);
   }
 
-  async findAll(): Promise<Sucursal[]> {
-    // Traer todas las sucursales
-    return this.sucursalRepository.find();
+  async findAll(pagination?: PaginationInput): Promise<Sucursal[]> {
+    if (!pagination) {
+      return this.sucursalRepository.find();
+    }
+
+    // Aplicar paginacion simple cuando se envia
+    const page = pagination.page ?? 1;
+    const limit = pagination.limit ?? 10;
+    const skip = (page - 1) * limit;
+    return this.sucursalRepository.find({ skip, take: limit });
   }
 
   async findOne(id: number): Promise<Sucursal> {
