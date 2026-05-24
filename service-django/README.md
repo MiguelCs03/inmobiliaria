@@ -6,29 +6,6 @@
 - **Angular** (web) + **React Native** (móvil) — Frontends
 - **PostgreSQL** — BD compartida (tablas TypeORM + tablas Django)
 - **Redis + Celery** — Tareas asíncronas pesadas
-
-## Setup local rápido
-
-```bash
-# 1. Instalar dependencias
-pip install -r requirements.txt
-
-# 2. Configurar .env (ya viene con valores de desarrollo)
-cp .env.example .env
-
-# 3. Migraciones (solo crea tablas Django, no toca las de TypeORM)
-python manage.py migrate
-
-# 4. Crear superusuario
-python manage.py createsuperuser
-
-# 5. Correr servidor
-python manage.py runserver
-
-# 6. Worker Celery (en otra terminal)
-celery -A config worker -l info
-```
-
 ## Endpoints principales
 
 | Método | URL | Descripción |
@@ -80,7 +57,34 @@ python manage.py runserver
 # 5b. Celery worker (otra terminal, mismo venv)
 celery -A config worker -l info --pool=solo
 
-# 6. Levantar el redis con docker ( otra terminal , con nvenv)
-docker compose up redis -d
-# para revisar si el Redis esta tiene que mostrar el puerto 6379:6379->6379/tcp
+
+
+sobre docker
+
+# Construir imágenes y levantar todo
+docker compose up -d --build
+
+# Ver contenedores corriendo
 docker compose ps
+
+# Ver logs de un servicio
+docker compose logs web
+docker compose logs worker
+
+# Detener todo
+docker compose down
+
+# Solo un servicio (ej: redis)
+docker compose up redis -d
+
+
+
+
+
+# Docker Start (prender pc)
+docker compose up -d
+
+# Docker Stop (apagar pc)
+docker compose down
+
+

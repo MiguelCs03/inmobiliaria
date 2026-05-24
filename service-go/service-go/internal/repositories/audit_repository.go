@@ -10,9 +10,9 @@ import (
 	"github.com/aws/aws-sdk-go-v2/service/dynamodb"
 )
 
-func CreateContract(contract models.Contract) error {
+func CreateAudit(audit models.Audit) error {
 
-	item, err := attributevalue.MarshalMap(contract)
+	item, err := attributevalue.MarshalMap(audit)
 
 	if err != nil {
 		return err
@@ -21,7 +21,7 @@ func CreateContract(contract models.Contract) error {
 	_, err = database.DynamoClient.PutItem(
 		context.TODO(),
 		&dynamodb.PutItemInput{
-			TableName: awsString("contracts"),
+			TableName: awsString("audit_logs"),
 			Item:      item,
 		},
 	)
@@ -29,12 +29,12 @@ func CreateContract(contract models.Contract) error {
 	return err
 }
 
-func GetContracts() ([]models.Contract, error) {
+func GetAuditLogs() ([]models.Audit, error) {
 
 	result, err := database.DynamoClient.Scan(
 		context.TODO(),
 		&dynamodb.ScanInput{
-			TableName: awsString("contracts"),
+			TableName: awsString("audit_logs"),
 		},
 	)
 
@@ -42,20 +42,16 @@ func GetContracts() ([]models.Contract, error) {
 		return nil, err
 	}
 
-	var contracts []models.Contract
+	var audits []models.Audit
 
 	err = attributevalue.UnmarshalListOfMaps(
 		result.Items,
-		&contracts,
+		&audits,
 	)
 
 	if err != nil {
 		return nil, err
 	}
 
-	return contracts, nil
-}
-
-func awsString(s string) *string {
-	return &s
+	return audits, nil
 }

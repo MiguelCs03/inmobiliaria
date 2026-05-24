@@ -1,0 +1,12 @@
+{
+    "propiedad_id": 1,
+    "metros_cuad": 250,
+    "habitaciones": 4,
+    "banos": 3,
+    "anio_construc": 2020,
+    "barrio": "Urbari",
+    "ciudad": "Santa Cruz",
+    "anillo_vial": 2,
+    "tipo_propiedad": "Casa",
+    "tipo_operacion": "Venta"
+}
