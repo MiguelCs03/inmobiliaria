@@ -80,7 +80,36 @@ python manage.py runserver
 # 5b. Celery worker (otra terminal, mismo venv)
 celery -A config worker -l info --pool=solo
 
-# 6. Levantar el redis con docker ( otra terminal , con nvenv)
-docker compose up redis -d
-# para revisar si el Redis esta tiene que mostrar el puerto 6379:6379->6379/tcp
+
+
+
+
+sobre docker
+
+# Construir imágenes y levantar todo
+docker compose up -d --build
+
+# Ver contenedores corriendo
 docker compose ps
+
+# Ver logs de un servicio
+docker compose logs web
+docker compose logs worker
+
+# Detener todo
+docker compose down
+
+# Solo un servicio (ej: redis)
+docker compose up redis -d
+
+
+
+
+
+# Docker Start (prender pc)
+docker compose up -d
+
+# Docker Stop (apagar pc)
+docker compose down
+
+
