@@ -12,6 +12,8 @@ logger = logging.getLogger(__name__)
 class RandomForestPriceService:
     _instance = None
     _model = None
+    _le_zona = None
+    _features = None
     _ready = False
 
     def __new__(cls):
@@ -25,7 +27,10 @@ class RandomForestPriceService:
         if model_path.exists():
             try:
                 import joblib
-                self._model = joblib.load(model_path)
+                bundle = joblib.load(model_path)
+                self._model = bundle['model']
+                self._le_zona = bundle['le_zona']
+                self._features = bundle['features']
                 self._ready = True
                 logger.info("RandomForest cargado correctamente.")
             except Exception as e:
@@ -36,17 +41,19 @@ class RandomForestPriceService:
     def is_ready(self) -> bool:
         return self._ready
 
-    def _encode(self, value: str, n: int = 500) -> int:
-        return hash(value.lower().strip()) % n
-
     def _build_features(self, data: dict) -> np.ndarray:
+        barrio = data.get('barrio', '')
+        try:
+            zona_enc = self._le_zona.transform([barrio.lower().strip()])[0]
+        except (ValueError, AttributeError):
+            zona_enc = 0
         return np.array([[
             float(data.get('metros_cuad', 100)),
             int(data.get('habitaciones', 3)),
             int(data.get('banos', 2)),
             int(data.get('anio_construc', 2010)),
-            self._encode(data.get('barrio', ''), 500),
-            self._encode(data.get('ciudad', 'Santa Cruz'), 50),
+            zona_enc,
+            int(data.get('anillo_vial', 3)),
         ]])
 
     def predict_price(self, data: dict) -> dict:

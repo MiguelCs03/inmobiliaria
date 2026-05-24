@@ -6,29 +6,6 @@
 - **Angular** (web) + **React Native** (móvil) — Frontends
 - **PostgreSQL** — BD compartida (tablas TypeORM + tablas Django)
 - **Redis + Celery** — Tareas asíncronas pesadas
-
-## Setup local rápido
-
-```bash
-# 1. Instalar dependencias
-pip install -r requirements.txt
-
-# 2. Configurar .env (ya viene con valores de desarrollo)
-cp .env.example .env
-
-# 3. Migraciones (solo crea tablas Django, no toca las de TypeORM)
-python manage.py migrate
-
-# 4. Crear superusuario
-python manage.py createsuperuser
-
-# 5. Correr servidor
-python manage.py runserver
-
-# 6. Worker Celery (en otra terminal)
-celery -A config worker -l info
-```
-
 ## Endpoints principales
 
 | Método | URL | Descripción |
@@ -79,8 +56,6 @@ python manage.py runserver
 
 # 5b. Celery worker (otra terminal, mismo venv)
 celery -A config worker -l info --pool=solo
-
-
 
 
 

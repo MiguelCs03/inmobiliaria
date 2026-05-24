@@ -11,8 +11,8 @@ from django.conf import settings
 
 logger = logging.getLogger(__name__)
 
-CONSERVATION_LABELS = ['Excelente','Bueno','Regular','Deteriorado','Ruinoso']
-ROOM_LABELS         = ['Sala','Cocina','Dormitorio','Bano','Exterior','Garaje','Terraza','Otro']
+CONSERVATION_LABELS = ['Excelente','Bueno','Regular','Malo','En construcción']
+ROOM_LABELS         = ['Sala','Dormitorio','Cocina','Baño','Fachada exterior','Jardín/Patio','Garaje','Otro']
 
 class PropertyDualHeadCNN:
     """Arquitectura ResNet18 con dos cabezas."""

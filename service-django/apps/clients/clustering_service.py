@@ -32,6 +32,9 @@ ZONA_MAP = {
 class ClientClusteringService:
     _instance = None
     _model = None
+    _scaler = None
+    _le_tipo = None
+    _le_zona = None
     _ready = False
 
     def __new__(cls):
@@ -45,7 +48,11 @@ class ClientClusteringService:
         if model_path.exists():
             try:
                 import joblib
-                self._model = joblib.load(model_path)
+                bundle = joblib.load(model_path)
+                self._model = bundle['kmeans']
+                self._scaler = bundle['scaler']
+                self._le_tipo = bundle['le_tipo']
+                self._le_zona = bundle['le_zona']
                 self._ready = True
                 logger.info("KMeans cargado correctamente.")
             except Exception as e:
@@ -57,15 +64,22 @@ class ClientClusteringService:
         return self._ready
 
     def _preprocess(self, data: dict) -> np.ndarray:
-        presupuesto   = float(data.get('presupuesto_max', 50000))
-        tipo_enc      = TIPO_PROP_MAP.get(
-            str(data.get('tipo_prop_pref', '')).lower(), 1)
-        hab           = int(data.get('habitaciones_pref', 2))
-        zona_enc      = ZONA_MAP.get(
-            str(data.get('zona_pref', '')).lower(), 5)
-        n_busq        = int(data.get('n_busquedas', 0))
+        presupuesto = float(data.get('presupuesto_max', 50000))
+        tipo_prop = str(data.get('tipo_prop_pref', '')).lower().strip()
+        try:
+            tipo_enc = self._le_tipo.transform([tipo_prop])[0]
+        except (ValueError, AttributeError):
+            tipo_enc = 1
+        hab = int(data.get('habitaciones_pref', 2))
+        zona = str(data.get('zona_pref', '')).lower().strip()
+        try:
+            zona_enc = self._le_zona.transform([zona])[0]
+        except (ValueError, AttributeError):
+            zona_enc = 5
+        n_busq = int(data.get('n_busquedas', 0))
         interacciones = int(data.get('interacciones', 0))
-        return np.array([[presupuesto, tipo_enc, hab, zona_enc, n_busq, interacciones]])
+        raw = np.array([[presupuesto, tipo_enc, hab, zona_enc, n_busq, interacciones]])
+        return self._scaler.transform(raw)
 
     def segment_client(self, data: dict) -> dict:
         if self._ready:

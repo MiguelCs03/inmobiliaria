@@ -1,0 +1,12 @@
+{
+    "usuario_id": 100,
+    "nombres": "Juan Perez",
+    "email": "juan.perez@email.com",
+    "telefono": "70012345",
+    "presupuesto_max": "250000.00",
+    "tipo_prop_pref": "Casa",
+    "habitaciones_pref": 3,
+    "zona_pref": "Equipetrol",
+    "n_busquedas": 15,
+    "interacciones": 8
+}
