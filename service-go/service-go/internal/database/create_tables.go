@@ -45,3 +45,36 @@ func CreateContractsTable() {
 func awsString(s string) *string {
 	return &s
 }
+
+func CreateAuditTable() {
+
+	_, err := DynamoClient.CreateTable(
+		context.TODO(),
+		&dynamodb.CreateTableInput{
+			TableName: awsString("audit_logs"),
+
+			AttributeDefinitions: []dynamodbtypes.AttributeDefinition{
+				{
+					AttributeName: awsString("id"),
+					AttributeType: dynamodbtypes.ScalarAttributeTypeS,
+				},
+			},
+
+			KeySchema: []dynamodbtypes.KeySchemaElement{
+				{
+					AttributeName: awsString("id"),
+					KeyType:       dynamodbtypes.KeyTypeHash,
+				},
+			},
+
+			BillingMode: dynamodbtypes.BillingModePayPerRequest,
+		},
+	)
+
+	if err != nil {
+		log.Println(err)
+		return
+	}
+
+	log.Println("audit_logs table created")
+}
