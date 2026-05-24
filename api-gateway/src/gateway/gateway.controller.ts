@@ -21,13 +21,25 @@ export class GatewayController {
   @All('ia')
   async proxyIaBase(@Req() req: Request, @Res() res: Response) {
     // Encamina la raiz hacia el microservicio de IA
-    return this.gatewayService.proxyToService(req, res, '/ia', this.gatewayService.getIaUrl());
+    return this.gatewayService.proxyToService(req, res, '/ia', this.gatewayService.getDjangoUrl());
   }
 
   @All('ia/*')
   async proxyIa(@Req() req: Request, @Res() res: Response) {
     // Encamina hacia el microservicio de IA
-    return this.gatewayService.proxyToService(req, res, '/ia', this.gatewayService.getIaUrl());
+    return this.gatewayService.proxyToService(req, res, '/ia', this.gatewayService.getDjangoUrl());
+  }
+
+  @All('django')
+  async proxyDjangoBase(@Req() req: Request, @Res() res: Response) {
+    // Encamina la raiz hacia el microservicio Django
+    return this.gatewayService.proxyToService(req, res, '/django', this.gatewayService.getDjangoUrl());
+  }
+
+  @All('django/*')
+  async proxyDjango(@Req() req: Request, @Res() res: Response) {
+    // Encamina hacia el microservicio Django
+    return this.gatewayService.proxyToService(req, res, '/django', this.gatewayService.getDjangoUrl());
   }
 
   @All('documentos')
