@@ -2,7 +2,7 @@ services:
   db:
     image: postgres:15-alpine
     environment:
-      POSTGRES_DB: inmobilaria
+      POSTGRES_DB: inmobilaria_django
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: "9775137"
     ports:

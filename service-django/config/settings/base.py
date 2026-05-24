@@ -18,8 +18,6 @@ INSTALLED_APPS = [
     'rest_framework.authtoken',
     'corsheaders',
     'django_filters',
-    'apps.api',
-    'apps.properties',
     'apps.valuations',
     'apps.clients',
     'apps.image_analysis',
