@@ -19,7 +19,7 @@ export class GatewayService {
       this.configService.get<string>('GATEWAY_IA_URL') ??
       'http://127.0.0.1:8000/api/v1';
     this.documentosUrl =
-      this.configService.get<string>('GATEWAY_DOCUMENTOS_URL') ?? 'http://localhost:8080/api';
+      this.configService.get<string>('GATEWAY_DOCUMENTOS_URL') ?? 'http://localhost:8080';
     this.graphqlUrl = this.configService.get<string>('GATEWAY_GRAPHQL_URL') ?? 'http://localhost:3005/graphql';
   }
 
