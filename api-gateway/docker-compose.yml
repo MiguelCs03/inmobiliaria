@@ -11,12 +11,12 @@ services:
     environment:
       - NODE_ENV=development
       - PORT=3001
-      - ALLOWED_ORIGINS=${ALLOWED_ORIGINS:-http://localhost:3000}
-      - GATEWAY_GESTION_URL=${GATEWAY_GESTION_URL:-http://host.docker.internal:3001/api/v1/gestion}
+      - ALLOWED_ORIGINS=${ALLOWED_ORIGINS:-http://localhost:3000,http://localhost:4200}
+      - GATEWAY_GESTION_URL=${GATEWAY_GESTION_URL:-http://host.docker.internal:3003/api/v1/gestion}
       - GATEWAY_DJANGO_URL=${GATEWAY_DJANGO_URL:-http://host.docker.internal:8000/api/v1}
       - GATEWAY_IA_URL=${GATEWAY_IA_URL:-http://host.docker.internal:8000/api/v1}
       - GATEWAY_DOCUMENTOS_URL=${GATEWAY_DOCUMENTOS_URL:-http://host.docker.internal:8080}
-      - GATEWAY_GRAPHQL_URL=${GATEWAY_GRAPHQL_URL:-http://host.docker.internal:3005/graphql}
+      - GATEWAY_GRAPHQL_URL=${GATEWAY_GRAPHQL_URL:-http://host.docker.internal:3003/graphql}
     volumes:
       - .:/app
       - /app/node_modules

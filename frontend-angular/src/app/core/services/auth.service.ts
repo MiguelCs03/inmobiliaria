@@ -27,7 +27,7 @@ export interface LoginResponse {
 
 export interface LoginInput {
   correo: string;
-  contrasena: string;
+  contrasenia: string;
 }
 
 @Injectable({
@@ -57,7 +57,7 @@ export class AuthService {
 
   /**
    * Realiza el inicio de sesión del usuario utilizando la mutación GraphQL.
-   * @param input Credenciales de inicio de sesión (correo y contrasena).
+   * @param input Credenciales de inicio de sesión (correo y contrasenia).
    */
   login(input: LoginInput): Observable<LoginResponse['login']> {
     return this.apollo

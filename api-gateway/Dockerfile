@@ -33,6 +33,6 @@ RUN addgroup -g 1001 -S nodejs && \
     chown -R nestjs:nodejs /app
 
 USER nestjs
-EXPOSE 3000
+EXPOSE 3001
 ENTRYPOINT ["/sbin/tini", "--"]
 CMD ["node", "dist/main"]

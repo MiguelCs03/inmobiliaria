@@ -26,6 +26,7 @@ services:
       - "3003:3003"
     environment:
       - NODE_ENV=development
+      - PORT=3003
       - DB_MASTER_HOST=db
       - DB_MASTER_PORT=5432
       - DB_MASTER_USER=${DB_USER}

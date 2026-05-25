@@ -39,7 +39,7 @@ export class LoginComponent implements OnInit {
         Validators.email,
         Validators.pattern('^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$')
       ]],
-      contrasena: ['', [
+      contrasenia: ['', [
         Validators.required,
         Validators.minLength(6)
       ]]
@@ -65,9 +65,9 @@ export class LoginComponent implements OnInit {
     this.loading = true;
     this.errorMessage = '';
 
-    const { correo, contrasena } = this.loginForm.value;
+    const { correo, contrasenia } = this.loginForm.value;
 
-    this.authService.login({ correo, contrasena }).subscribe({
+    this.authService.login({ correo, contrasenia }).subscribe({
       next: (response) => {
         this.loading = false;
         if (response.success && response.data) {

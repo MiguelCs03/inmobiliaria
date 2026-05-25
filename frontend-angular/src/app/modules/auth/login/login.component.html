@@ -48,10 +48,10 @@
 
     <!-- Footer del Panel Izquierdo -->
     <div class="w-full relative z-20 flex justify-between items-center text-xs text-slate-400 self-end border-t border-white/10 pt-6">
-      <span>ESTABLECIDO 2024</span>
+      <span>Elaborado 1/2026</span>
       <span class="flex items-center gap-1.5">
         <span class="h-2 w-2 rounded-full bg-emerald-500 animate-ping"></span>
-        CENTRO INMOBILIARIO GLOBAL
+        GRUPO #3
       </span>
     </div>
   </div>
@@ -77,7 +77,7 @@
         
         <!-- Encabezado del Formulario -->
         <div class="mb-8">
-          <h2 class="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight">Portal Corporativo</h2>
+          <h2 class="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight">Iniciar Sesion</h2>
           <p class="text-slate-500 mt-1.5 text-sm">Acceso Interno a EstateCore ERP</p>
         </div>
 
@@ -117,7 +117,7 @@
           <!-- Campo: Contraseña -->
           <div>
             <div class="flex justify-between items-center mb-2">
-              <label for="contrasena" class="block text-xs font-bold uppercase tracking-wider text-slate-600">Contraseña</label>
+              <label for="contrasenia" class="block text-xs font-bold uppercase tracking-wider text-slate-600">Contraseña</label>
               <a href="javascript:void(0)" class="text-xs font-bold text-blue-600 hover:text-blue-800 hover:underline transition-colors uppercase tracking-wider">¿Olvidaste?</a>
             </div>
             <div class="relative">
@@ -127,14 +127,14 @@
                 </svg>
               </span>
               <input
-                id="contrasena"
+                id="contrasenia"
                 [type]="showPassword ? 'text' : 'password'"
-                formControlName="contrasena"
+                formControlName="contrasenia"
                 placeholder="••••••••"
                 class="w-full pl-11 pr-12 py-3.5 bg-slate-50 hover:bg-slate-100/50 focus:bg-white text-slate-800 placeholder-slate-400 rounded-xl border transition-all duration-200 outline-none"
                 [ngClass]="{
-                  'border-rose-300 focus:border-rose-500 focus:ring-4 focus:ring-rose-500/10': isFieldInvalid('contrasena'),
-                  'border-slate-200 focus:border-blue-600 focus:ring-4 focus:ring-blue-600/10': !isFieldInvalid('contrasena')
+                  'border-rose-300 focus:border-rose-500 focus:ring-4 focus:ring-rose-500/10': isFieldInvalid('contrasenia'),
+                  'border-slate-200 focus:border-blue-600 focus:ring-4 focus:ring-blue-600/10': !isFieldInvalid('contrasenia')
                 }"
               />
               <!-- Botón Toggle de Contraseña Ojo (Ocultar/Mostrar) -->
@@ -156,7 +156,7 @@
               </button>
             </div>
             <!-- Feedback de error para Contraseña -->
-            <div *ngIf="isFieldInvalid('contrasena')" class="mt-2 text-xs text-rose-500 flex items-center gap-1">
+            <div *ngIf="isFieldInvalid('contrasenia')" class="mt-2 text-xs text-rose-500 flex items-center gap-1">
               <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 shrink-0" viewBox="0 0 20 20" fill="currentColor">
                 <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd" />
               </svg>
@@ -219,11 +219,7 @@
 
       </div>
       
-      <!-- Indicador Técnico del Flujo de Comunicación -->
-      <div class="mt-8 flex justify-center items-center gap-2">
-        <span class="inline-block h-2 w-2 rounded-full bg-emerald-400"></span>
-        <span class="text-[10px] tracking-wider uppercase font-bold text-slate-400">Consumo de Mutación: login</span>
-      </div>
+     
     </div>
 
     <!-- Footer de Términos / Compliance -->
