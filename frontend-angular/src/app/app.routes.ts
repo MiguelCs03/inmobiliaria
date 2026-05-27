@@ -10,13 +10,30 @@ export const routes: Routes = [
     path: 'intranet',
     loadComponent: () => import('./modules/auth/login/login.component').then(m => m.LoginComponent)
   },
-  // Rutas protegidas de destino para Administrador y Agente (Ejemplos/Placeholders)
+  // Rutas de Intranet para Administrador
   {
-    path: 'admin/dashboard',
-    loadComponent: () => import('./modules/auth/login/login.component').then(m => m.LoginComponent) // Opcional o placeholder
+    path: 'admin',
+    loadComponent: () => import('./modules/dashboard/dashboard-layout/dashboard-layout.component').then(m => m.DashboardLayoutComponent),
+    children: [
+      { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
+      { path: 'dashboard', loadComponent: () => import('./modules/dashboard/home/home.component').then(m => m.HomeComponent) },
+      { path: 'propietarios', loadComponent: () => import('./modules/dashboard/propietarios/propietarios.component').then(m => m.PropietariosComponent) },
+      { path: 'propiedades', loadComponent: () => import('./modules/dashboard/propiedades/propiedades.component').then(m => m.PropiedadesComponent) }
+    ]
+  },
+  // Rutas de Intranet para Agente
+  {
+    path: 'agente',
+    loadComponent: () => import('./modules/dashboard/dashboard-layout/dashboard-layout.component').then(m => m.DashboardLayoutComponent),
+    children: [
+      { path: '', redirectTo: 'visitas', pathMatch: 'full' },
+      { path: 'visitas', loadComponent: () => import('./modules/dashboard/home/home.component').then(m => m.HomeComponent) },
+      { path: 'propietarios', loadComponent: () => import('./modules/dashboard/propietarios/propietarios.component').then(m => m.PropietariosComponent) },
+      { path: 'propiedades', loadComponent: () => import('./modules/dashboard/propiedades/propiedades.component').then(m => m.PropiedadesComponent) }
+    ]
   },
   {
-    path: 'agente/visitas',
-    loadComponent: () => import('./modules/auth/login/login.component').then(m => m.LoginComponent) // Opcional o placeholder
+    path: '**',
+    redirectTo: 'intranet'
   }
 ];

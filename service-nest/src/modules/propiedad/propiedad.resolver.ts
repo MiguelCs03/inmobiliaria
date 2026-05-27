@@ -18,7 +18,7 @@ export class PropiedadResolver {
     return { success: true, data, message: 'Operacion exitosa' };
   }
 
-  @Query(() => PropiedadListResponse, { name: 'propiedad' })
+  @Query(() => PropiedadListResponse, { name: 'propiedades' })
   async findAll(
     @Args('pagination', { type: () => PaginationInput, nullable: true })
     pagination?: PaginationInput,

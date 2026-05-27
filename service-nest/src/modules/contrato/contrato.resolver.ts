@@ -18,7 +18,7 @@ export class ContratoResolver {
     return { success: true, data, message: 'Operacion exitosa' };
   }
 
-  @Query(() => ContratoListResponse, { name: 'contrato' })
+  @Query(() => ContratoListResponse, { name: 'contratos' })
   async findAll(
     @Args('pagination', { type: () => PaginationInput, nullable: true })
     pagination?: PaginationInput,

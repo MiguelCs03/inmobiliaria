@@ -27,16 +27,18 @@ services:
     environment:
       - NODE_ENV=development
       - PORT=3003
-      - DB_MASTER_HOST=db
-      - DB_MASTER_PORT=5432
+      - DB_MASTER_HOST=host.docker.internal
+      - DB_MASTER_PORT=5434
       - DB_MASTER_USER=${DB_USER}
       - DB_MASTER_PASS=${DB_PASS}
       - DB_MASTER_NAME=${DB_NAME}
-      - DB_SLAVE_HOST=db
-      - DB_SLAVE_PORT=5432
+      - DB_SLAVE_HOST=host.docker.internal
+      - DB_SLAVE_PORT=5434
       - DB_SLAVE_USER=${DB_USER}
       - DB_SLAVE_PASS=${DB_PASS}
       - DB_SLAVE_NAME=${DB_NAME}
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
     depends_on:
       - db
     volumes:

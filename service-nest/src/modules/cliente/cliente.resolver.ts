@@ -18,7 +18,7 @@ export class ClienteResolver {
     return { success: true, data, message: 'Operacion exitosa' };
   }
 
-  @Query(() => ClienteListResponse, { name: 'cliente' })
+  @Query(() => ClienteListResponse, { name: 'clientes' })
   async findAll(
     @Args('pagination', { type: () => PaginationInput, nullable: true })
     pagination?: PaginationInput,

@@ -226,10 +226,15 @@ type PropietarioResponse {
 
 type Query {
   cliente(id: Int!): ClienteResponse!
+  clientes(pagination: PaginationInput): ClienteListResponse!
   contrato(id: Int!): ContratoResponse!
+  contratos(pagination: PaginationInput): ContratoListResponse!
   empleado(id: Int!): EmpleadoResponse!
+  empleados(pagination: PaginationInput): EmpleadoListResponse!
   propiedad(id: Int!): PropiedadResponse!
+  propiedades(pagination: PaginationInput): PropiedadListResponse!
   propietario(id: Int!): PropietarioResponse!
+  propietarios(pagination: PaginationInput): PropietarioListResponse!
   rol(id: Int!): RolResponse!
   roles: RolListResponse!
   sucursal(id: Int!): SucursalResponse!
@@ -237,6 +242,7 @@ type Query {
   usuario(id: Int!): UsuarioAuthResponse!
   usuarios: UsuarioAuthListResponse!
   visita(id: Int!): VisitaResponse!
+  visitas(pagination: PaginationInput): VisitaListResponse!
 }
 
 input RegisterUsuarioInput {

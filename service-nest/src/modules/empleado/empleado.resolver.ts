@@ -18,7 +18,7 @@ export class EmpleadoResolver {
     return { success: true, data, message: 'Operacion exitosa' };
   }
 
-  @Query(() => EmpleadoListResponse, { name: 'empleado' })
+  @Query(() => EmpleadoListResponse, { name: 'empleados' })
   async findAll(
     @Args('pagination', { type: () => PaginationInput, nullable: true })
     pagination?: PaginationInput,

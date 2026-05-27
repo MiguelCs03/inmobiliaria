@@ -18,7 +18,7 @@ export class VisitaResolver {
     return { success: true, data, message: 'Operacion exitosa' };
   }
 
-  @Query(() => VisitaListResponse, { name: 'visita' })
+  @Query(() => VisitaListResponse, { name: 'visitas' })
   async findAll(
     @Args('pagination', { type: () => PaginationInput, nullable: true })
     pagination?: PaginationInput,

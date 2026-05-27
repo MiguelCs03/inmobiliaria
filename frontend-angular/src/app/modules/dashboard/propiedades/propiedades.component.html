@@ -1,0 +1,219 @@
+<div class="propiedades-wrapper">
+  <!-- Title & Action Bar -->
+  <div class="section-header-bar">
+    <div class="title-text">
+      <h1>Gestión de Casas / Inmuebles</h1>
+      <p>Administra la cartera de propiedades, terrenos y departamentos afiliados en el sistema.</p>
+    </div>
+    <button class="primary-action-btn" (click)="openModal()">
+      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" class="btn-icon">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+      </svg>
+      <span>Registrar Inmueble</span>
+    </button>
+  </div>
+
+  <!-- Messages / Alerts -->
+  <div class="alert-banner success" *ngIf="successMessage">
+    <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" class="alert-icon">
+      <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+    </svg>
+    <span>{{ successMessage }}</span>
+  </div>
+
+  <div class="alert-banner error" *ngIf="errorMessage">
+    <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" class="alert-icon">
+      <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+    </svg>
+    <span>{{ errorMessage }}</span>
+  </div>
+
+  <!-- Registration Modal Popup (Double Column Form Layout) -->
+  <div class="modal-overlay" *ngIf="showModal" (click)="closeModal()">
+    <div class="modal-container" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <div class="modal-header-text">
+          <h3>Registrar Inmueble</h3>
+          <p>Introduce la información técnica y comercial de la propiedad de forma fidedigna.</p>
+        </div>
+        <button class="close-modal-btn" (click)="closeModal()">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="close-icon">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        </button>
+      </div>
+
+      <form [formGroup]="propiedadForm" (ngSubmit)="onSubmit()" class="form-body">
+        <!-- Propietario -->
+        <div class="form-group">
+          <label for="propietarioId">Propietario Asociado</label>
+          <div class="select-wrapper" [class.invalid]="isFieldInvalid('propietarioId')">
+            <select id="propietarioId" formControlName="propietarioId">
+              <option value="" disabled>Selecciona un propietario de la lista...</option>
+              <option *ngFor="let propietario of propietarios" [value]="propietario.id">
+                {{ propietario.nombres }} (ID: {{ propietario.id }})
+              </option>
+            </select>
+          </div>
+          <span class="loading-inline" *ngIf="loadingPropietarios">Cargando propietarios afiliados...</span>
+          <span class="error-text" *ngIf="isFieldInvalid('propietarioId')">
+            Debes seleccionar un propietario.
+          </span>
+        </div>
+
+        <!-- Tipo Propiedad & Tipo Operación -->
+        <div class="form-row">
+          <div class="form-group">
+            <label for="tipoPropiedadId">Tipo de Inmueble</label>
+            <div class="select-wrapper" [class.invalid]="isFieldInvalid('tipoPropiedadId')">
+              <select id="tipoPropiedadId" formControlName="tipoPropiedadId">
+                <option value="" disabled>Selecciona...</option>
+                <option *ngFor="let tipo of tiposPropiedad" [value]="tipo.id">{{ tipo.nombre }}</option>
+              </select>
+            </div>
+            <span class="error-text" *ngIf="isFieldInvalid('tipoPropiedadId')">Requerido.</span>
+          </div>
+
+          <div class="form-group">
+            <label for="tipoOperacionId">Modalidad Comercial</label>
+            <div class="select-wrapper" [class.invalid]="isFieldInvalid('tipoOperacionId')">
+              <select id="tipoOperacionId" formControlName="tipoOperacionId">
+                <option value="" disabled>Selecciona...</option>
+                <option *ngFor="let op of tiposOperacion" [value]="op.id">{{ op.nombre }}</option>
+              </select>
+            </div>
+            <span class="error-text" *ngIf="isFieldInvalid('tipoOperacionId')">Requerido.</span>
+          </div>
+        </div>
+
+        <!-- Estado & Precio -->
+        <div class="form-row">
+          <div class="form-group">
+            <label for="estadoPropiedadId">Estado del Inmueble</label>
+            <div class="select-wrapper" [class.invalid]="isFieldInvalid('estadoPropiedadId')">
+              <select id="estadoPropiedadId" formControlName="estadoPropiedadId">
+                <option value="" disabled>Selecciona...</option>
+                <option *ngFor="let est of estadosPropiedad" [value]="est.id">{{ est.nombre }}</option>
+              </select>
+            </div>
+            <span class="error-text" *ngIf="isFieldInvalid('estadoPropiedadId')">Requerido.</span>
+          </div>
+
+          <div class="form-group">
+            <label for="precioBase">Precio Base ($ USD)</label>
+            <div class="input-wrapper" [class.invalid]="isFieldInvalid('precioBase')">
+              <input type="number" id="precioBase" formControlName="precioBase" placeholder="Ej. 125000" autocomplete="off" />
+            </div>
+            <span class="error-text" *ngIf="isFieldInvalid('precioBase')">
+              Mínimo $100.
+            </span>
+          </div>
+        </div>
+
+        <!-- Área & Ubicación -->
+        <div class="form-group">
+          <label for="areaM2">Área Construida / Superficie (m²)</label>
+          <div class="input-wrapper" [class.invalid]="isFieldInvalid('areaM2')">
+            <input type="number" id="areaM2" formControlName="areaM2" placeholder="Ej. 150" autocomplete="off" />
+          </div>
+          <span class="error-text" *ngIf="isFieldInvalid('areaM2')">
+            Área requerida (mínimo 5 m²).
+          </span>
+        </div>
+
+        <div class="form-group">
+          <label for="ubicacion">Dirección / Ubicación Física</label>
+          <div class="input-wrapper" [class.invalid]="isFieldInvalid('ubicacion')">
+            <input type="text" id="ubicacion" formControlName="ubicacion" placeholder="Ej. Barrio Sirari, Calle 6 Este #12" autocomplete="off" />
+          </div>
+          <span class="error-text" *ngIf="isFieldInvalid('ubicacion')">
+            La dirección detallada es obligatoria.
+          </span>
+        </div>
+
+        <div class="modal-footer-actions">
+          <button type="button" class="cancel-btn" (click)="closeModal()">Cancelar</button>
+          <button type="submit" class="submit-btn" [disabled]="submitting || propiedadForm.invalid">
+            <span *ngIf="!submitting">Guardar Propiedad</span>
+            <span *ngIf="submitting" class="loader-spinner"></span>
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Properties Grid Catalog (Full Width corporate Layout) -->
+  <div class="card catalog-full-card">
+    <div class="card-header-list">
+      <div class="header-text">
+        <h3>Catálogo de Inmuebles Afiliados</h3>
+        <p>Cartera comercial activa en el sistema de gestión.</p>
+      </div>
+      <div class="filter-box">
+        <span class="filter-label">Filtrar por Modalidad:</span>
+        <div class="select-wrapper filter-select">
+          <select (change)="onFilterChange($event)">
+            <option value="0">Todos los Inmuebles</option>
+            <option value="1">En Venta</option>
+            <option value="2">En Alquiler</option>
+            <option value="3">En Anticrético</option>
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <div class="list-body">
+      <!-- Loading State -->
+      <div class="loading-overlay" *ngIf="loadingList">
+        <div class="spinner"></div>
+        <span>Cargando catálogo comercial...</span>
+      </div>
+
+      <!-- Empty State -->
+      <div class="empty-state" *ngIf="!loadingList && filteredPropiedades.length === 0">
+        <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" class="empty-icon">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+        </svg>
+        <p>No se encontraron propiedades en esta categoría comercial.</p>
+      </div>
+
+      <!-- Cards Grid View (Sober Technical Design) -->
+      <div class="properties-cards-grid" *ngIf="!loadingList && filteredPropiedades.length > 0">
+        <div class="property-card-item" *ngFor="let p of filteredPropiedades">
+          <!-- Sober Technical Header -->
+          <div class="property-thumbnail-header">
+            <span class="tag-operation" [class.tag-rent]="p.tipoOperacionId === 2" [class.tag-anti]="p.tipoOperacionId === 3">
+              {{ getTipoOperacionNombre(p.tipoOperacionId) }}
+            </span>
+            <span class="tag-status" [class.reserved]="p.estadoPropiedadId === 2" [class.sold]="p.estadoPropiedadId === 3">
+              {{ getEstadoPropiedadNombre(p.estadoPropiedadId) }}
+            </span>
+          </div>
+
+          <!-- Card Content Details -->
+          <div class="property-card-content">
+            <div class="property-type-row">
+              <span class="property-type">{{ getTipoPropiedadNombre(p.tipoPropiedadId) }}</span>
+              <span class="property-area">{{ p.areaM2 }} m²</span>
+            </div>
+            
+            <h4 class="property-price">${{ p.precioBase | number:'1.2-2' }} USD</h4>
+            
+            <p class="property-location" [title]="p.ubicacion || ''">
+              <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" class="location-icon">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                <path stroke-linecap="round" stroke-linejoin="round" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+              </svg>
+              <span>{{ p.ubicacion || 'Sin ubicación registrada' }}</span>
+            </p>
+            
+            <div class="property-owner-footer">
+              <span class="owner-lbl">Contacto / Propietario:</span>
+              <span class="owner-val">{{ getPropietarioNombre(p.propietarioId) }}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
