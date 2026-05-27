@@ -15,6 +15,9 @@ import { Rol } from '../entities/rol.entity';
 import { UsuarioAuthOutput } from '../dto/usuario-auth.output';
 import { LoginResponse } from '../dto/login-response.type';
 
+const TOKEN_DURATION_MS = 2 * 60 * 60 * 1000;
+const TOKEN_SECRET = process.env.TOKEN_SECRET || 'estatecore-default-secret';
+
 @Injectable()
 export class AuthService {
   constructor(
@@ -30,9 +33,33 @@ export class AuthService {
   }
 
   private generarToken(usuario: Usuario): string {
-    // Token aleatorio basado en tiempo e identidad
-    const raw = `${usuario.id}:${Date.now()}:${CryptoJS.lib.WordArray.random(16)}`;
-    return CryptoJS.SHA256(raw).toString();
+    const expiry = Date.now() + TOKEN_DURATION_MS;
+    const payload = `${usuario.id}:${expiry}`;
+    const payloadBase64 = Buffer.from(payload).toString('base64');
+    const signature = CryptoJS.HmacSHA256(payloadBase64, TOKEN_SECRET).toString();
+    return `${payloadBase64}.${signature}`;
+  }
+
+  verificarToken(token: string): { userId: number; valido: boolean } {
+    try {
+      const parts = token.split('.');
+      if (parts.length !== 2) return { userId: 0, valido: false };
+
+      const [payloadBase64, signature] = parts;
+      const expectedSig = CryptoJS.HmacSHA256(payloadBase64, TOKEN_SECRET).toString();
+      if (signature !== expectedSig) return { userId: 0, valido: false };
+
+      const payload = Buffer.from(payloadBase64, 'base64').toString('utf-8');
+      const [userIdStr, expiryStr] = payload.split(':');
+      const userId = parseInt(userIdStr, 10);
+      const expiry = parseInt(expiryStr, 10);
+
+      if (Date.now() > expiry) return { userId, valido: false };
+
+      return { userId, valido: true };
+    } catch {
+      return { userId: 0, valido: false };
+    }
   }
 
   private toUsuarioOutput(usuario: Usuario): UsuarioAuthOutput {

@@ -204,8 +204,8 @@ export class PropiedadesComponent implements OnInit {
     }).valueChanges.subscribe({
       next: (result) => {
         this.loadingList = false;
-        if (result.data?.propiedades?.success && result.data.propiedades.data) {
-          this.propiedades = result.data.propiedades.data as Propiedad[];
+        if (result.data?.propiedades?.success !== false) {
+          this.propiedades = (result.data?.propiedades?.data || []) as Propiedad[];
           this.applyFilter();
         } else {
           this.errorMessage = result.data?.propiedades?.message || 'Error al obtener propiedades.';

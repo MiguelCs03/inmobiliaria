@@ -4,7 +4,6 @@ import { gql } from '@apollo/client/core';
 import { Observable, throwError } from 'rxjs';
 import { map, catchError, tap } from 'rxjs/operators';
 
-// Interfaces altamente tipadas para la respuesta de GraphQL
 export interface Usuario {
   id: string;
   correo: string;
@@ -30,13 +29,14 @@ export interface LoginInput {
   contrasenia: string;
 }
 
+const TOKEN_DURATION_MS = 2 * 60 * 60 * 1000;
+
 @Injectable({
   providedIn: 'root',
 })
 export class AuthService {
   private apollo = inject(Apollo);
 
-  // Mutación GraphQL exacta requerida por el backend a través del Gateway
   private readonly LOGIN_MUTATION = gql`
     mutation Login($loginInput: LoginInput!) {
       login(loginInput: $loginInput) {
@@ -55,10 +55,6 @@ export class AuthService {
     }
   `;
 
-  /**
-   * Realiza el inicio de sesión del usuario utilizando la mutación GraphQL.
-   * @param input Credenciales de inicio de sesión (correo y contrasenia).
-   */
   login(input: LoginInput): Observable<LoginResponse['login']> {
     return this.apollo
       .mutate<LoginResponse>({
@@ -68,49 +64,59 @@ export class AuthService {
         },
       })
       .pipe(
-        map((result) => {
-          if (!result.data || !result.data.login) {
+        map((result: any) => {
+          if (result.error?.graphQLErrors?.length > 0) {
+            const msg = result.error.graphQLErrors[0]?.message || 'Credenciales inválidas';
+            throw new Error(msg);
+          }
+          if (!result.data?.login) {
             throw new Error('Respuesta inválida del servidor.');
           }
           return result.data.login;
         }),
         tap((loginResult) => {
-          // Persistir token y rolId de forma segura si la autenticación fue exitosa
           if (loginResult.success && loginResult.data) {
-            this.saveSession(loginResult.data.token, loginResult.data.usuario.rolId);
+            // Guardamos el token, rol, id de usuario y su correo en localStorage
+            this.saveSession(
+              loginResult.data.token, 
+              loginResult.data.usuario.rolId, 
+              loginResult.data.usuario.id, 
+              loginResult.data.usuario.correo
+            );
           }
         }),
         catchError((error) => {
-          // Manejo avanzado de errores de GraphQL/Red
           console.error('Error de autenticación:', error);
-          return throwError(() => error);
+          const message = error.message || 'Error en el servidor. Intente más tarde.';
+          return throwError(() => new Error(message));
         })
       );
     }
 
-  /**
-   * Guarda de forma segura los datos de sesión en el almacenamiento local.
-   */
-  private saveSession(token: string, rolId: number): void {
+  private saveSession(token: string, rolId: number, userId: string, correo: string): void {
     if (typeof window !== 'undefined' && window.localStorage) {
       localStorage.setItem('auth_token', token);
       localStorage.setItem('user_role', rolId.toString());
+      localStorage.setItem('user_id', userId);
+      localStorage.setItem('user_email', correo);
+      localStorage.setItem('token_expires_at', (Date.now() + TOKEN_DURATION_MS).toString());
     }
   }
 
-  /**
-   * Remueve los datos de sesión (Cerrar sesión).
-   */
   logout(): void {
     if (typeof window !== 'undefined' && window.localStorage) {
       localStorage.removeItem('auth_token');
       localStorage.removeItem('user_role');
+      localStorage.removeItem('user_id');
+      localStorage.removeItem('user_email');
+      localStorage.removeItem('user_name'); // Limpiar datos de perfil locales
+      localStorage.removeItem('user_lastname');
+      localStorage.removeItem('user_phone');
+      localStorage.removeItem('user_photo');
+      localStorage.removeItem('token_expires_at');
     }
   }
 
-  /**
-   * Obtiene el token guardado actualmente.
-   */
   getToken(): string | null {
     if (typeof window !== 'undefined' && window.localStorage) {
       return localStorage.getItem('auth_token');
@@ -118,9 +124,6 @@ export class AuthService {
     return null;
   }
 
-  /**
-   * Obtiene el rolId del usuario guardado.
-   */
   getUserRole(): number | null {
     if (typeof window !== 'undefined' && window.localStorage) {
       const role = localStorage.getItem('user_role');
@@ -129,10 +132,69 @@ export class AuthService {
     return null;
   }
 
-  /**
-   * Valida si el usuario está autenticado.
-   */
   isAuthenticated(): boolean {
-    return this.getToken() !== null;
+    if (typeof window === 'undefined' || !window.localStorage) return false;
+    const token = localStorage.getItem('auth_token');
+    if (!token) return false;
+    const expiresAt = localStorage.getItem('token_expires_at');
+    if (expiresAt && Date.now() > parseInt(expiresAt, 10)) {
+      this.logout();
+      return false;
+    }
+    return true;
+  }
+
+  // Mutación GraphQL para cambiar la contraseña del usuario a través del API Gateway
+  private readonly CAMBIAR_CONTRASENIA_MUTATION = gql`
+    mutation CambiarContrasenia($input: CambiarContraseniaInput!) {
+      cambiarContrasenia(cambiarContraseniaInput: $input) {
+        success
+        message
+        data {
+          id
+          correo
+          rolId
+          activo
+        }
+      }
+    }
+  `;
+
+  /**
+   * Cambia la contraseña del usuario actual de manera segura.
+   * @param id Identificador numérico del usuario.
+   * @param nueva Contraseña nueva a establecer.
+   */
+  cambiarContrasenia(id: number, nueva: string): Observable<any> {
+    return this.apollo.mutate({
+      mutation: this.CAMBIAR_CONTRASENIA_MUTATION,
+      variables: {
+        input: {
+          id: id,
+          nueva: nueva
+        }
+      }
+    }).pipe(
+      map((result: any) => {
+        if (!result.data || !result.data.cambiarContrasenia) {
+          throw new Error('Respuesta inválida del servidor al cambiar contraseña.');
+        }
+        return result.data.cambiarContrasenia;
+      })
+    );
+  }
+
+  getUserId(): string | null {
+    if (typeof window !== 'undefined' && window.localStorage) {
+      return localStorage.getItem('user_id');
+    }
+    return null;
+  }
+
+  getUserEmail(): string | null {
+    if (typeof window !== 'undefined' && window.localStorage) {
+      return localStorage.getItem('user_email');
+    }
+    return null;
   }
 }

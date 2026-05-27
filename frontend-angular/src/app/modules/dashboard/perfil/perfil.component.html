@@ -1,0 +1,161 @@
+<div class="perfil-wrapper">
+  <!-- Title Section -->
+  <div class="section-title-bar">
+    <h1>Configuración del Perfil</h1>
+    <p>Administra tu información personal, tu avatar y las credenciales de acceso de tu cuenta.</p>
+  </div>
+
+  <div class="perfil-layout-grid">
+    <!-- Left Column: User Card & Photo -->
+    <div class="card profile-card">
+      <div class="avatar-upload-container">
+        <div class="profile-avatar-wrapper">
+          <img *ngIf="userPhoto" [src]="userPhoto" class="profile-avatar-img" alt="Avatar Usuario" />
+          <span *ngIf="!userPhoto" class="profile-avatar-fallback">{{ userName.charAt(0) }}</span>
+          
+          <!-- Hover Overlay to upload photo -->
+          <div class="avatar-overlay" (click)="fileInput.click()">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="camera-icon">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M6.827 6.175A2.31 2.31 0 015.186 7.23c-.38.054-.757.112-1.134.175C2.999 7.58 2.25 8.507 2.25 9.574V18a2.25 2.25 0 002.25 2.25h15A2.25 2.25 0 0021.75 18V9.574c0-1.067-.75-1.994-1.802-2.169a47.865 47.865 0 00-1.134-.175 2.31 2.31 0 01-1.64-1.055l-.822-1.316a2.192 2.192 0 00-1.736-1.039 48.774 48.774 0 00-5.232 0 2.192 2.192 0 00-1.736 1.039l-.821 1.316z" />
+              <path stroke-linecap="round" stroke-linejoin="round" d="M16.5 12.75a4.5 4.5 0 11-9 0 4.5 4.5 0 019 0zM18.75 10.5h.008v.008h-.008V10.5z" />
+            </svg>
+            <span>Cambiar Foto</span>
+          </div>
+        </div>
+        <!-- Hidden input for file selection -->
+        <input type="file" #fileInput style="display: none;" (change)="onPhotoSelected($event)" accept="image/*" />
+      </div>
+
+      <div class="profile-card-details">
+        <h3>{{ userName }}</h3>
+        <span class="role-badge" [class.admin]="userId === '1'">{{ roleName }}</span>
+        <div class="details-divider"></div>
+        <div class="info-row">
+          <span class="label">Correo Oficial:</span>
+          <span class="value" [title]="userEmail">{{ userEmail }}</span>
+        </div>
+        <div class="info-row">
+          <span class="label">Conexión:</span>
+          <span class="value status"><span class="status-indicator"></span>Activa</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Right Column: Settings Forms -->
+    <div class="settings-forms-container">
+      
+      <!-- Personal Details Form -->
+      <div class="card form-card">
+        <div class="card-header">
+          <h3>Datos Personales</h3>
+          <p>Actualiza la información visible y tus datos de contacto.</p>
+        </div>
+
+        <div class="alert-banner success" *ngIf="successMessagePersonal">
+          <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" class="alert-icon">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+          </svg>
+          <span>{{ successMessagePersonal }}</span>
+        </div>
+
+        <div class="alert-banner error" *ngIf="errorMessagePersonal">
+          <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" class="alert-icon">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+          </svg>
+          <span>{{ errorMessagePersonal }}</span>
+        </div>
+
+        <form [formGroup]="personalForm" (ngSubmit)="onSubmitPersonal()" class="form-body">
+          <div class="form-row">
+            <div class="form-group">
+              <label for="nombres">Nombres</label>
+              <div class="input-wrapper" [class.invalid]="isFieldInvalid(personalForm, 'nombres')">
+                <input type="text" id="nombres" formControlName="nombres" placeholder="Ej. Juan Carlos" autocomplete="off" />
+              </div>
+              <span class="error-text" *ngIf="isFieldInvalid(personalForm, 'nombres')">
+                Los nombres son obligatorios.
+              </span>
+            </div>
+
+            <div class="form-group">
+              <label for="apellidos">Apellidos</label>
+              <div class="input-wrapper" [class.invalid]="isFieldInvalid(personalForm, 'apellidos')">
+                <input type="text" id="apellidos" formControlName="apellidos" placeholder="Ej. Pérez" autocomplete="off" />
+              </div>
+              <span class="error-text" *ngIf="isFieldInvalid(personalForm, 'apellidos')">
+                Los apellidos son obligatorios.
+              </span>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="telefono">Número de Teléfono</label>
+            <div class="input-wrapper" [class.invalid]="isFieldInvalid(personalForm, 'telefono')">
+              <input type="text" id="telefono" formControlName="telefono" placeholder="Ej. +591 70012345" autocomplete="off" />
+            </div>
+            <span class="error-text" *ngIf="isFieldInvalid(personalForm, 'telefono')">
+              Formato de teléfono inválido (mínimo 7 dígitos).
+            </span>
+          </div>
+
+          <button type="submit" class="submit-btn" [disabled]="loadingPersonal || personalForm.invalid">
+            <span *ngIf="!loadingPersonal">Guardar Cambios</span>
+            <span *ngIf="loadingPersonal" class="loader-spinner"></span>
+          </button>
+        </form>
+      </div>
+
+      <!-- Security / Change Password Form -->
+      <div class="card form-card">
+        <div class="card-header">
+          <h3>Seguridad de la Cuenta</h3>
+          <p>Cambia tu contraseña de acceso. Esto actualizará tus credenciales en la base de datos de NestJS.</p>
+        </div>
+
+        <div class="alert-banner success" *ngIf="successMessagePassword">
+          <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" class="alert-icon">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+          </svg>
+          <span>{{ successMessagePassword }}</span>
+        </div>
+
+        <div class="alert-banner error" *ngIf="errorMessagePassword">
+          <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" class="alert-icon">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+          </svg>
+          <span>{{ errorMessagePassword }}</span>
+        </div>
+
+        <form [formGroup]="passwordForm" (ngSubmit)="onSubmitPassword()" class="form-body">
+          <div class="form-row">
+            <div class="form-group">
+              <label for="nuevaContrasenia">Nueva Contraseña</label>
+              <div class="input-wrapper" [class.invalid]="isFieldInvalid(passwordForm, 'nuevaContrasenia')">
+                <input type="password" id="nuevaContrasenia" formControlName="nuevaContrasenia" placeholder="Mínimo 6 caracteres" />
+              </div>
+              <span class="error-text" *ngIf="isFieldInvalid(passwordForm, 'nuevaContrasenia')">
+                La contraseña debe tener al menos 6 caracteres.
+              </span>
+            </div>
+
+            <div class="form-group">
+              <label for="confirmarContrasenia">Confirmar Contraseña</label>
+              <div class="input-wrapper" [class.invalid]="isFieldInvalid(passwordForm, 'confirmarContrasenia') || passwordForm.hasError('mismatch') && passwordForm.get('confirmarContrasenia')?.touched">
+                <input type="password" id="confirmarContrasenia" formControlName="confirmarContrasenia" placeholder="Repite la contraseña" />
+              </div>
+              <span class="error-text" *ngIf="passwordForm.hasError('mismatch') && passwordForm.get('confirmarContrasenia')?.touched">
+                Las contraseñas no coinciden.
+              </span>
+            </div>
+          </div>
+
+          <button type="submit" class="submit-btn" [disabled]="loadingPassword || passwordForm.invalid">
+            <span *ngIf="!loadingPassword">Actualizar Contraseña</span>
+            <span *ngIf="loadingPassword" class="loader-spinner"></span>
+          </button>
+        </form>
+      </div>
+
+    </div>
+  </div>
+</div>

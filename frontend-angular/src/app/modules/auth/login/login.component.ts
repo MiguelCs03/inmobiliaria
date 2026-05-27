@@ -1,7 +1,9 @@
-import { Component, OnInit, inject } from '@angular/core';
+import { Component, OnInit, OnDestroy, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
+import { Subject } from 'rxjs';
+import { takeUntil, finalize } from 'rxjs/operators';
 import { AuthService } from '../../../core/services/auth.service';
 
 @Component({
@@ -11,10 +13,11 @@ import { AuthService } from '../../../core/services/auth.service';
   templateUrl: './login.component.html',
   styleUrls: ['./login.component.css']
 })
-export class LoginComponent implements OnInit {
+export class LoginComponent implements OnInit, OnDestroy {
   private fb = inject(FormBuilder);
   private authService = inject(AuthService);
   private router = inject(Router);
+  private destroy$ = new Subject<void>();
 
   loginForm!: FormGroup;
   loading = false;
@@ -67,21 +70,27 @@ export class LoginComponent implements OnInit {
 
     const { correo, contrasenia } = this.loginForm.value;
 
-    this.authService.login({ correo, contrasenia }).subscribe({
+    this.authService.login({ correo, contrasenia }).pipe(
+      takeUntil(this.destroy$)
+    ).subscribe({
       next: (response) => {
+        // Restablecemos el estado de carga inmediatamente al recibir respuesta del servidor
         this.loading = false;
         if (response.success && response.data) {
           const rolId = response.data.usuario.rolId;
           this.redirectByUserRole(rolId);
         } else {
+          // Asignamos el mensaje descriptivo devuelto por el backend
           this.errorMessage = response.message || 'Credenciales inválidas. Por favor intente de nuevo.';
         }
       },
       error: (err) => {
+        // En caso de error de red o error devuelto por Apollo/GraphQL, restablecemos el spinner
         this.loading = false;
-        // Tratamiento seguro de errores para evitar fugas de información
-        if (err.status === 0 || err.message?.includes('Failed to fetch')) {
-          this.errorMessage = 'No se pudo conectar con el servidor de la intranet. Verifique su conexión.';
+        if (err.message?.includes('Credenciales') || err.message?.includes('invalida')) {
+          this.errorMessage = err.message;
+        } else if (err.status === 0 || err.message?.includes('Failed to fetch')) {
+          this.errorMessage = 'No se pudo conectar con el servidor. Verifique su conexión.';
         } else {
           this.errorMessage = 'Error en el proceso de autenticación. Intente más tarde.';
         }
@@ -107,5 +116,10 @@ export class LoginComponent implements OnInit {
   isFieldInvalid(field: string): boolean {
     const control = this.loginForm.get(field);
     return !!(control && control.invalid && (control.dirty || control.touched));
+  }
+
+  ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
   }
 }

@@ -1,3 +1,74 @@
-/* You can add global styles to this file, and also import other style files */
-
 @import 'tailwindcss';
+
+/* ==========================================================================
+   SISTEMA DE MODO OSCURO GLOBAL (INTRANET)
+   ========================================================================== */
+
+/* Transición suave para todos los fondos y textos de la aplicación */
+body {
+  transition: background-color 0.25s ease, color 0.25s ease;
+}
+
+/* Sobreescritura de variables CSS cuando el cuerpo de la página tiene la clase `.dark` */
+body.dark,
+body.dark app-dashboard-layout,
+body.dark app-home,
+body.dark app-propietarios,
+body.dark app-propiedades,
+body.dark app-perfil {
+  --bg-body: #0b0f19;          /* Fondo oscuro profundo de la intranet */
+  --bg-white: #1e293b;         /* Fondo de tarjetas (Cards) en modo oscuro */
+  --text-primary: #f8fafc;     /* Texto principal en blanco hueso de alta legibilidad */
+  --text-secondary: #94a3b8;   /* Texto secundario en gris azulado medio */
+  --text-muted: #64748b;       /* Texto desvanecido / placeholder */
+  --border-color: #334155;     /* Bordes sutiles y elegantes */
+  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.3);
+  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.45);
+  --celeste-light: rgba(14, 165, 233, 0.15); /* Hover celeste semitransparente premium */
+}
+
+/* Correcciones de elementos con estilos claros estáticos en los componentes en Modo Oscuro */
+body.dark th {
+  background-color: #0f172a !important;
+  color: #94a3b8 !important;
+  border-bottom: 2px solid #334155 !important;
+}
+
+body.dark .input-wrapper {
+  background-color: #0b0f19 !important;
+}
+
+body.dark .input-wrapper input {
+  color: #f8fafc !important;
+}
+
+body.dark .input-wrapper input::placeholder {
+  color: #475569 !important;
+}
+
+body.dark .close-modal-btn:hover {
+  background-color: #334155 !important;
+  color: #f8fafc !important;
+}
+
+body.dark .cancel-btn:hover {
+  background-color: #1e293b !important;
+  color: #f8fafc !important;
+}
+
+/* Alertas y Toasts adaptativos en Modo Oscuro */
+body.dark .toast-overlay.toast-success {
+  background-color: #064e3b !important;
+  border: 1px solid #059669 !important;
+  color: #a7f3d0 !important;
+}
+
+body.dark .toast-overlay.toast-error {
+  background-color: #7f1d1d !important;
+  border: 1px solid #dc2626 !important;
+  color: #fca5a5 !important;
+}
+
+body.dark .loading-overlay {
+  background-color: rgba(30, 41, 59, 0.85) !important;
+}
