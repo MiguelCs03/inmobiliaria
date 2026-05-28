@@ -27,6 +27,9 @@ export class Usuario {
   @Column({ type: 'boolean', default: true })
   activo!: boolean;
 
+  @Column({ name: 'foto_url', type: 'varchar', length: 255, nullable: true })
+  fotoUrl?: string | null;
+
   @ManyToOne(() => Rol, (rol) => rol.usuarios)
   @JoinColumn({ name: 'rol_id' })
   rol!: Rol;

@@ -8,6 +8,7 @@ input CambiarContraseniaInput {
 }
 
 type Cliente {
+  activo: Boolean!
   ciNit: String!
   id: Int!
   nombres: String!
@@ -50,6 +51,7 @@ type ContratoResponse {
 }
 
 input CreateClienteInput {
+  activo: Boolean
   ciNit: String!
   nombres: String!
   telefono: String!
@@ -66,6 +68,7 @@ input CreateContratoInput {
 }
 
 input CreateEmpleadoInput {
+  activo: Boolean
   apellidos: String!
   nombres: String!
   sucursalId: Int!
@@ -75,6 +78,7 @@ input CreateEmpleadoInput {
 input CreatePropiedadInput {
   areaM2: Float!
   estadoPropiedadId: Int!
+  imagenesUrls: [String!]
   precioBase: Float!
   propietarioId: Int!
   tipoOperacionId: Int!
@@ -83,7 +87,9 @@ input CreatePropiedadInput {
 }
 
 input CreatePropietarioInput {
+  activo: Boolean
   ciNit: String!
+  fotoUrl: String
   nombres: String!
   telefono: String!
 }
@@ -93,6 +99,7 @@ input CreateRolInput {
 }
 
 input CreateSucursalInput {
+  activo: Boolean
   ciudad: String!
   nombre: String!
 }
@@ -100,6 +107,7 @@ input CreateSucursalInput {
 input CreateVisitaInput {
   clienteId: Int!
   empleadoId: Int!
+  estado: String
   fechaVisita: DateTime!
   propiedadId: Int!
 }
@@ -110,6 +118,7 @@ A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date
 scalar DateTime
 
 type Empleado {
+  activo: Boolean!
   apellidos: String!
   id: Int!
   nombres: String!
@@ -186,11 +195,19 @@ type Propiedad {
   areaM2: Float!
   estadoPropiedadId: Int!
   id: Int!
+  imagenes: [PropiedadImagen!]
   precioBase: Float!
   propietarioId: Int!
   tipoOperacionId: Int!
   tipoPropiedadId: Int!
   ubicacion: String
+}
+
+type PropiedadImagen {
+  id: Int!
+  procesadaIa: Boolean!
+  propiedadId: Int!
+  urlS3: String!
 }
 
 type PropiedadListResponse {
@@ -206,7 +223,9 @@ type PropiedadResponse {
 }
 
 type Propietario {
+  activo: Boolean!
   ciNit: String!
+  fotoUrl: String
   id: Int!
   nombres: String!
   telefono: String!
@@ -270,6 +289,7 @@ type RolResponse {
 }
 
 type Sucursal {
+  activo: Boolean!
   ciudad: String!
   id: Int!
   nombre: String!
@@ -288,6 +308,7 @@ type SucursalResponse {
 }
 
 input UpdateClienteInput {
+  activo: Boolean
   ciNit: String
   id: Int!
   nombres: String
@@ -306,6 +327,7 @@ input UpdateContratoInput {
 }
 
 input UpdateEmpleadoInput {
+  activo: Boolean
   apellidos: String
   id: Int!
   nombres: String
@@ -317,6 +339,7 @@ input UpdatePropiedadInput {
   areaM2: Float
   estadoPropiedadId: Int
   id: Int!
+  imagenesUrls: [String!]
   precioBase: Float
   propietarioId: Int
   tipoOperacionId: Int
@@ -325,13 +348,16 @@ input UpdatePropiedadInput {
 }
 
 input UpdatePropietarioInput {
+  activo: Boolean
   ciNit: String
+  fotoUrl: String
   id: Int!
   nombres: String
   telefono: String
 }
 
 input UpdateSucursalInput {
+  activo: Boolean
   ciudad: String
   id: Int!
   nombre: String
@@ -340,6 +366,7 @@ input UpdateSucursalInput {
 input UpdateVisitaInput {
   clienteId: Int
   empleadoId: Int
+  estado: String
   fechaVisita: DateTime
   id: Int!
   propiedadId: Int
@@ -354,6 +381,7 @@ type UsuarioAuthListResponse {
 type UsuarioAuthOutput {
   activo: Boolean!
   correo: String!
+  fotoUrl: String
   id: Int!
   rolId: Int!
 }
@@ -367,6 +395,7 @@ type UsuarioAuthResponse {
 type Visita {
   clienteId: Int!
   empleadoId: Int!
+  estado: String!
   fechaVisita: DateTime!
   id: Int!
   propiedadId: Int!

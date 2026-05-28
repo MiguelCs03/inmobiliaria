@@ -1,4 +1,5 @@
 import { InputType, Int, Field } from '@nestjs/graphql';
+import { IsOptional, IsBoolean } from 'class-validator';
 
 @InputType()
 export class CreateEmpleadoInput {
@@ -13,4 +14,9 @@ export class CreateEmpleadoInput {
 
   @Field(() => String)
   apellidos!: string;
+
+  @Field(() => Boolean, { nullable: true })
+  @IsOptional()
+  @IsBoolean()
+  activo?: boolean;
 }

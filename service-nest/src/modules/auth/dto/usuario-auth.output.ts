@@ -13,4 +13,7 @@ export class UsuarioAuthOutput {
 
   @Field(() => Boolean)
   activo!: boolean;
+
+  @Field(() => String, { nullable: true })
+  fotoUrl?: string;
 }

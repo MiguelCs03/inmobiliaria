@@ -34,6 +34,10 @@ export class Cliente {
   @Column({ name: 'ci_nit', type: 'varchar', length: 30 })
   ciNit!: string;
 
+  @Field(() => Boolean)
+  @Column({ type: 'boolean', default: true })
+  activo!: boolean;
+
   @OneToOne(() => Usuario, (usuario) => usuario.cliente)
   @JoinColumn({ name: 'usuario_id' })
   usuario?: Usuario | null;

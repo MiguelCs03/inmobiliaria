@@ -69,6 +69,7 @@ export class Propiedad {
   @JoinColumn({ name: 'estado_propiedad_id' })
   estadoPropiedad!: EstadoPropiedad;
 
+  @Field(() => [PropiedadImagen], { nullable: true })
   @OneToMany(() => PropiedadImagen, (imagen) => imagen.propiedad)
   imagenes!: PropiedadImagen[];
 

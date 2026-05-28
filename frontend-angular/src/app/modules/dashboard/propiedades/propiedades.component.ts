@@ -1,8 +1,9 @@
-import { Component, OnInit, inject } from '@angular/core';
+import { Component, OnInit, inject, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Apollo } from 'apollo-angular';
 import { gql } from '@apollo/client/core';
+import { UploadService } from '../../../core/services/upload.service';
 
 export interface Propiedad {
   id: number;
@@ -13,6 +14,7 @@ export interface Propiedad {
   precioBase: number;
   areaM2: number;
   ubicacion: string | null;
+  imagenes?: { id: number; urlS3: string }[];
 }
 
 export interface Propietario {
@@ -54,6 +56,8 @@ interface CreatePropiedadMutationResponse {
 export class PropiedadesComponent implements OnInit {
   private fb = inject(FormBuilder);
   private apollo = inject(Apollo);
+  private cdr = inject(ChangeDetectorRef);
+  private uploadService = inject(UploadService);
 
   propiedadForm!: FormGroup;
   propiedades: Propiedad[] = [];
@@ -65,9 +69,37 @@ export class PropiedadesComponent implements OnInit {
   submitting = false;
   showModal = false; // Control de visualización del modal emergente
 
+  uploadedImagenesUrls: string[] = [];
+  uploadingImagen = false;
+
   successMessage = '';
   errorMessage = '';
   filterType = '0'; // 0 = Todos, 1 = Venta, 2 = Alquiler, 3 = Anticrético
+
+  private successTimeout: any = null;
+  private errorTimeout: any = null;
+
+  showSuccess(message: string): void {
+    if (this.successTimeout) clearTimeout(this.successTimeout);
+    this.successMessage = message;
+    this.errorMessage = '';
+    this.cdr.detectChanges();
+    this.successTimeout = setTimeout(() => {
+      this.successMessage = '';
+      this.cdr.detectChanges();
+    }, 4000);
+  }
+
+  showError(message: string): void {
+    if (this.errorTimeout) clearTimeout(this.errorTimeout);
+    this.errorMessage = message;
+    this.successMessage = '';
+    this.cdr.detectChanges();
+    this.errorTimeout = setTimeout(() => {
+      this.errorMessage = '';
+      this.cdr.detectChanges();
+    }, 4000);
+  }
 
   // Catálogos locales para mapear IDs a nombres descriptivos
   tiposPropiedad = [
@@ -103,6 +135,10 @@ export class PropiedadesComponent implements OnInit {
           precioBase
           areaM2
           ubicacion
+          imagenes {
+            id
+            urlS3
+          }
         }
       }
     }
@@ -135,6 +171,10 @@ export class PropiedadesComponent implements OnInit {
           precioBase
           areaM2
           ubicacion
+          imagenes {
+            id
+            urlS3
+          }
         }
       }
     }
@@ -160,6 +200,8 @@ export class PropiedadesComponent implements OnInit {
 
   openModal(): void {
     this.showModal = true;
+    this.uploadedImagenesUrls = [];
+    this.uploadingImagen = false;
     this.successMessage = '';
     this.errorMessage = '';
     this.loadPropietarios(); // Recargar propietarios por si acaso
@@ -167,6 +209,8 @@ export class PropiedadesComponent implements OnInit {
 
   closeModal(): void {
     this.showModal = false;
+    this.uploadedImagenesUrls = [];
+    this.uploadingImagen = false;
     this.propiedadForm.reset({
       propietarioId: '',
       tipoPropiedadId: '',
@@ -177,6 +221,7 @@ export class PropiedadesComponent implements OnInit {
 
   loadPropietarios(): void {
     this.loadingPropietarios = true;
+    this.cdr.detectChanges();
     this.apollo.watchQuery<PropietariosQueryResponse>({
       query: this.GET_PROPIETARIOS,
       fetchPolicy: 'network-only'
@@ -186,17 +231,19 @@ export class PropiedadesComponent implements OnInit {
         if (result.data?.propietarios?.success && result.data.propietarios.data) {
           this.propietarios = result.data.propietarios.data as Propietario[];
         }
+        this.cdr.detectChanges();
       },
       error: (err) => {
         this.loadingPropietarios = false;
         console.error('Error loading owners:', err);
+        this.cdr.detectChanges();
       }
     });
   }
 
   loadPropiedades(): void {
     this.loadingList = true;
-    this.errorMessage = '';
+    this.cdr.detectChanges();
 
     this.apollo.watchQuery<PropiedadesQueryResponse>({
       query: this.GET_PROPIEDADES,
@@ -208,15 +255,50 @@ export class PropiedadesComponent implements OnInit {
           this.propiedades = (result.data?.propiedades?.data || []) as Propiedad[];
           this.applyFilter();
         } else {
-          this.errorMessage = result.data?.propiedades?.message || 'Error al obtener propiedades.';
+          this.showError(result.data?.propiedades?.message || 'Error al obtener propiedades.');
         }
+        this.cdr.detectChanges();
       },
       error: (err) => {
         this.loadingList = false;
         console.error('Error loading properties:', err);
-        this.errorMessage = 'No se pudo conectar con el servidor. Verifique si el API Gateway y el microservicio están activos.';
+        this.showError('No se pudo conectar con el servidor. Verifique si el API Gateway y el microservicio están activos.');
+        this.cdr.detectChanges();
       }
     });
+  }
+
+  onFileSelected(event: any): void {
+    const files = event.target.files;
+    if (!files || files.length === 0) return;
+
+    this.uploadingImagen = true;
+    this.cdr.detectChanges();
+
+    const file = files[0];
+    this.uploadService.uploadImage(file).subscribe({
+      next: (res) => {
+        this.uploadingImagen = false;
+        if (res.success && res.url) {
+          this.uploadedImagenesUrls.push(res.url);
+          this.showSuccess('Imagen cargada correctamente.');
+        } else {
+          this.showError(res.message || 'Error al cargar imagen.');
+        }
+        this.cdr.detectChanges();
+      },
+      error: (err) => {
+        this.uploadingImagen = false;
+        console.error('Error uploading property image:', err);
+        this.showError('Error de red al intentar subir la imagen.');
+        this.cdr.detectChanges();
+      }
+    });
+  }
+
+  removeUploadedImage(index: number): void {
+    this.uploadedImagenesUrls.splice(index, 1);
+    this.cdr.detectChanges();
   }
 
   onSubmit(): void {
@@ -226,8 +308,7 @@ export class PropiedadesComponent implements OnInit {
     }
 
     this.submitting = true;
-    this.successMessage = '';
-    this.errorMessage = '';
+    this.cdr.detectChanges();
 
     const formValues = this.propiedadForm.value;
     const input = {
@@ -237,7 +318,8 @@ export class PropiedadesComponent implements OnInit {
       estadoPropiedadId: parseInt(formValues.estadoPropiedadId, 10),
       precioBase: parseFloat(formValues.precioBase),
       areaM2: parseFloat(formValues.areaM2),
-      ubicacion: formValues.ubicacion
+      ubicacion: formValues.ubicacion,
+      imagenesUrls: this.uploadedImagenesUrls
     };
 
     this.apollo.mutate<CreatePropiedadMutationResponse>({
@@ -248,19 +330,19 @@ export class PropiedadesComponent implements OnInit {
         this.submitting = false;
         const res = result.data?.createPropiedad;
         if (res?.success && res.data) {
-          this.successMessage = '¡Casa/Inmueble registrado de forma exitosa!';
+          this.showSuccess('¡Casa/Inmueble registrado de forma exitosa!');
           this.closeModal();
           this.loadPropiedades();
-          
-          setTimeout(() => this.successMessage = '', 4000);
         } else {
-          this.errorMessage = res?.message || 'Error al registrar propiedad.';
+          this.showError(res?.message || 'Error al registrar propiedad.');
         }
+        this.cdr.detectChanges();
       },
       error: (err) => {
         this.submitting = false;
         console.error('Error creating property:', err);
-        this.errorMessage = 'Error de red al intentar registrar. Intente más tarde.';
+        this.showError('Error de red al intentar registrar. Intente más tarde.');
+        this.cdr.detectChanges();
       }
     });
   }

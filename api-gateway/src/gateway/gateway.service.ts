@@ -13,7 +13,7 @@ export class GatewayService {
 
   constructor(private readonly configService: ConfigService) {
     this.gestionUrl =
-      this.configService.get<string>('GATEWAY_GESTION_URL') ?? 'http://localhost:3000/api/v1/gestion';
+      this.configService.get<string>('GATEWAY_GESTION_URL') ?? 'http://localhost:3003/api/v1/gestion';
     this.djangoUrl =
       this.configService.get<string>('GATEWAY_DJANGO_URL') ??
       this.configService.get<string>('GATEWAY_IA_URL') ??

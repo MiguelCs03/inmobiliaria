@@ -1,4 +1,5 @@
 import { InputType, Int, Field, GraphQLISODateTime } from '@nestjs/graphql';
+import { IsOptional, IsString } from 'class-validator';
 
 @InputType()
 export class CreateVisitaInput {
@@ -13,4 +14,9 @@ export class CreateVisitaInput {
 
   @Field(() => GraphQLISODateTime)
   fechaVisita!: Date;
+
+  @Field(() => String, { nullable: true })
+  @IsOptional()
+  @IsString()
+  estado?: string;
 }

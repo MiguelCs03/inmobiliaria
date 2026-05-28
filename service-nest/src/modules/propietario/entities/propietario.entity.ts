@@ -21,6 +21,14 @@ export class Propietario {
   @Column({ name: 'ci_nit', type: 'varchar', length: 30 })
   ciNit!: string;
 
+  @Field(() => Boolean)
+  @Column({ type: 'boolean', default: true })
+  activo!: boolean;
+
+  @Field(() => String, { nullable: true })
+  @Column({ name: 'foto_url', type: 'varchar', length: 255, nullable: true })
+  fotoUrl?: string | null;
+
   @OneToMany(() => Propiedad, (propiedad) => propiedad.propietario)
   propiedades!: Propiedad[];
 }

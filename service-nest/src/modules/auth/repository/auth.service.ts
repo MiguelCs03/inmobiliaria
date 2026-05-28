@@ -68,6 +68,7 @@ export class AuthService {
       correo: usuario.correo,
       rolId: usuario.rolId,
       activo: usuario.activo,
+      fotoUrl: usuario.fotoUrl || undefined,
     };
   }
 

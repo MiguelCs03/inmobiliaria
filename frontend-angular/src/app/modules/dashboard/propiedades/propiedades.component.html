@@ -129,9 +129,40 @@
           </div>
         </div>
 
+        <!-- Premium Multi-Image Upload Section -->
+        <div class="property-images-upload-section">
+          <label class="form-group-label">Galería de Fotos del Inmueble</label>
+          
+          <div class="images-grid-preview">
+            <div class="image-preview-card" *ngFor="let url of uploadedImagenesUrls; let idx = index">
+              <img [src]="url" alt="Foto Propiedad" class="property-preview-img" />
+              <button type="button" class="delete-preview-btn" (click)="removeUploadedImage(idx)" title="Eliminar Foto">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="delete-btn-icon">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+            
+            <label class="add-image-placeholder-card" *ngIf="uploadedImagenesUrls.length < 6">
+              <input type="file" accept="image/*" (change)="onFileSelected($event)" style="display: none;" [disabled]="uploadingImagen" />
+              <div class="add-card-content" *ngIf="!uploadingImagen">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="plus-icon">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v6m3-3H9m12 0a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                <span>Añadir Foto</span>
+              </div>
+              <div class="add-card-content" *ngIf="uploadingImagen">
+                <span class="loader-spinner blue-spinner"></span>
+                <span>Subiendo...</span>
+              </div>
+            </label>
+          </div>
+          <p class="upload-tip">Puedes subir hasta 6 imágenes en Cloudinary (PNG/JPG hasta 5MB).</p>
+        </div>
+
         <div class="modal-footer-actions">
           <button type="button" class="cancel-btn" (click)="closeModal()">Cancelar</button>
-          <button type="submit" class="submit-btn" [disabled]="submitting || propiedadForm.invalid">
+          <button type="submit" class="submit-btn" [disabled]="submitting || uploadingImagen || propiedadForm.invalid">
             <span *ngIf="!submitting">Guardar Propiedad</span>
             <span *ngIf="submitting" class="loader-spinner"></span>
           </button>
@@ -176,7 +207,7 @@
       <div class="properties-cards-grid" *ngIf="!loadingList && filteredPropiedades.length > 0">
         <div class="property-card-item" *ngFor="let p of filteredPropiedades">
           
-          <div class="property-thumbnail-header">
+          <div class="property-thumbnail-header" [style.background-image]="p.imagenes && p.imagenes.length > 0 ? 'url(' + p.imagenes[0].urlS3 + ')' : ''">
             <span class="tag-operation" 
                   [class.tag-rent]="p.tipoOperacionId === 2" 
                   [class.tag-anti]="p.tipoOperacionId === 3">

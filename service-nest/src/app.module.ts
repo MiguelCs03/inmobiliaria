@@ -16,6 +16,7 @@ import { PropiedadModule } from './modules/propiedad/propiedad.module';
 import { PropietarioModule } from './modules/propietario/propietario.module';
 import { SucursalModule } from './modules/sucursal/sucursal.module';
 import { VisitaModule } from './modules/visita/visita.module';
+import { UploadModule } from './modules/upload/upload.module';
 
 @Module({
   imports: [
@@ -40,6 +41,7 @@ import { VisitaModule } from './modules/visita/visita.module';
     PropietarioModule,
     SucursalModule,
     VisitaModule,
+    UploadModule,
   ],
   controllers: [AppController],
   providers: [AppService],

@@ -62,12 +62,7 @@ export class DashboardLayoutComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    // Si no está autenticado, redirigir al login
-    if (!this.authService.isAuthenticated()) {
-      this.router.navigate(['/intranet']);
-      return;
-    }
-
+    // La proteccion de rutas se maneja en guards
     this.userRole = this.authService.getUserRole();
     this.roleName = this.userRole === 1 ? 'Administrador' : 'Agente Inmobiliario';
 

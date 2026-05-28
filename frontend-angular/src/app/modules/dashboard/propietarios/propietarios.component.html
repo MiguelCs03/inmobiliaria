@@ -38,8 +38,8 @@
     <div class="modal-container" (click)="$event.stopPropagation()">
       <div class="modal-header">
         <div class="modal-header-text">
-          <h3>Registrar Propietario</h3>
-          <p>Completa la información formal del propietario para afiliarlo al sistema.</p>
+          <h3>{{ isEditing ? 'Editar Propietario' : 'Registrar Propietario' }}</h3>
+          <p>{{ isEditing ? 'Modifica los datos registrados del afiliado.' : 'Completa la información formal del propietario para afiliarlo al sistema.' }}</p>
         </div>
         <button class="close-modal-btn" (click)="closeModal()">
           <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="close-icon">
@@ -49,6 +49,33 @@
       </div>
 
       <form [formGroup]="propietarioForm" (ngSubmit)="onSubmit()" class="form-body">
+        <!-- Elegant Profile Photo Upload Section -->
+        <div class="profile-photo-upload-section">
+          <div class="avatar-preview-container">
+            <img [src]="uploadedFotoUrl" alt="Foto de Perfil" class="profile-avatar-preview" *ngIf="uploadedFotoUrl" />
+            <div class="default-avatar-placeholder" *ngIf="!uploadedFotoUrl">
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="placeholder-avatar-icon">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 6a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0ZM4.501 20.118a7.5 7.5 0 0 1 14.998 0A17.933 17.933 0 0 1 12 21.75c-2.676 0-5.216-.584-7.499-1.632Z" />
+              </svg>
+            </div>
+            <div class="upload-loader-overlay" *ngIf="uploadingFoto">
+              <span class="loader-spinner white-spinner"></span>
+            </div>
+          </div>
+          
+          <div class="upload-controls">
+            <label class="custom-file-upload-btn">
+              <input type="file" accept="image/*" (change)="onFileSelected($event)" style="display: none;" [disabled]="uploadingFoto" />
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="upload-btn-icon">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M6.827 6.175A2.31 2.31 0 0 1 5.186 7.23c-.38.054-.757.112-1.134.175C2.999 7.58 2.25 8.507 2.25 9.574V18a2.25 2.25 0 0 0 2.25 2.25h15A2.25 2.25 0 0 0 21.75 18V9.574c0-1.067-.75-1.994-1.802-2.169a47.865 47.865 0 0 0-1.134-.175 2.31 2.31 0 0 1-1.64-1.055l-.822-1.316a2.192 2.192 0 0 0-1.736-1.039 48.774 48.774 0 0 0-5.232 0 2.192 2.192 0 0 0-1.736 1.039l-.821 1.316Z" />
+                <path stroke-linecap="round" stroke-linejoin="round" d="M16.5 12.75a4.5 4.5 0 1 1-9 0 4.5 4.5 0 0 1 9 0ZM18.75 10.5h.008v.008h-.008V10.5Z" />
+              </svg>
+              <span>{{ uploadingFoto ? 'Subiendo...' : (uploadedFotoUrl ? 'Cambiar Foto' : 'Subir Foto') }}</span>
+            </label>
+            <p class="upload-tip">Formatos PNG o JPG de hasta 5MB. Se cargará en Cloudinary.</p>
+          </div>
+        </div>
+
         <div class="form-group">
           <label for="nombres">Nombres y Apellidos Completos</label>
           <div class="input-wrapper" [class.invalid]="isFieldInvalid('nombres')">
@@ -58,7 +85,7 @@
             Nombres requeridos (mínimo 3 caracteres).
           </span>
         </div>
-
+ 
         <div class="form-row">
           <div class="form-group">
             <label for="ciNit">Cédula de Identidad (CI / NIT)</label>
@@ -69,7 +96,7 @@
               Documento de identidad requerido.
             </span>
           </div>
-
+ 
           <div class="form-group">
             <label for="telefono">Número de Teléfono</label>
             <div class="input-wrapper" [class.invalid]="isFieldInvalid('telefono')">
@@ -80,15 +107,81 @@
             </span>
           </div>
         </div>
-
+ 
         <div class="modal-footer-actions">
           <button type="button" class="cancel-btn" (click)="closeModal()">Cancelar</button>
-          <button type="submit" class="submit-btn" [disabled]="submitting || propietarioForm.invalid">
-            <span *ngIf="!submitting">Guardar Registro</span>
+          <button type="submit" class="submit-btn" [disabled]="submitting || uploadingFoto || propietarioForm.invalid">
+            <span *ngIf="!submitting">{{ isEditing ? 'Guardar Cambios' : 'Guardar Registro' }}</span>
             <span *ngIf="submitting" class="loader-spinner"></span>
           </button>
         </div>
       </form>
+    </div>
+  </div>
+ 
+  <!-- Detail View Modal -->
+  <div class="modal-overlay" *ngIf="showDetailModal" (click)="closeDetailModal()">
+    <div class="modal-container detail-container" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <div class="modal-header-text">
+          <h3>Detalles del Propietario</h3>
+          <p>Información registrada del afiliado en el sistema.</p>
+        </div>
+        <button class="close-modal-btn" (click)="closeDetailModal()">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="close-icon">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        </button>
+      </div>
+      <div class="detail-body" *ngIf="selectedPropietario">
+        <!-- Profile Banner -->
+        <div class="detail-avatar-banner" *ngIf="selectedPropietario.fotoUrl">
+          <img [src]="selectedPropietario.fotoUrl" alt="Foto de Perfil" class="detail-avatar-img" />
+        </div>
+        <div class="detail-row">
+          <span class="detail-label">ID Sistema</span>
+          <span class="detail-value id-value">PROPIETARIO #{{ selectedPropietario.id }}</span>
+        </div>
+        <div class="detail-row">
+          <span class="detail-label">Nombre Completo</span>
+          <span class="detail-value">{{ selectedPropietario.nombres }}</span>
+        </div>
+        <div class="detail-row">
+          <span class="detail-label">CI / NIT</span>
+          <span class="detail-value mono-value">{{ selectedPropietario.ciNit }}</span>
+        </div>
+        <div class="detail-row">
+          <span class="detail-label">Teléfono de Contacto</span>
+          <span class="detail-value mono-value">{{ selectedPropietario.telefono }}</span>
+        </div>
+      </div>
+      <div class="modal-footer-actions">
+        <button type="button" class="cancel-btn" (click)="closeDetailModal()">Cerrar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toggle State Confirmation Modal -->
+  <div class="modal-overlay" *ngIf="showToggleConfirm" (click)="cancelToggle()">
+    <div class="modal-container confirm-container" (click)="$event.stopPropagation()">
+      <div class="confirm-icon-row">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="warn-icon">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z" />
+        </svg>
+      </div>
+      <h3 class="confirm-title">{{ selectedPropietario?.activo ? 'Desactivar Propietario' : 'Activar Propietario' }}</h3>
+      <p class="confirm-desc" *ngIf="selectedPropietario?.activo">
+        ¿Está seguro de desactivar a <strong>{{ selectedPropietario?.nombres }}</strong>? El afiliado quedará inhabilitado en el sistema.
+      </p>
+      <p class="confirm-desc" *ngIf="!selectedPropietario?.activo">
+        ¿Está seguro de activar a <strong>{{ selectedPropietario?.nombres }}</strong>? El afiliado volverá a estar disponible en el sistema.
+      </p>
+      <div class="modal-footer-actions confirm-actions">
+        <button type="button" class="cancel-btn" (click)="cancelToggle()">Cancelar</button>
+        <button type="button" class="toggle-confirm-btn" [class.toggle-off]="selectedPropietario?.activo" [class.toggle-on]="!selectedPropietario?.activo" (click)="confirmToggle()">
+          {{ selectedPropietario?.activo ? 'Sí, Desactivar' : 'Sí, Activar' }}
+        </button>
+      </div>
     </div>
   </div>
 
@@ -125,14 +218,54 @@
               <th>Nombre Completo del Afiliado</th>
               <th>Documento (CI / NIT)</th>
               <th>Teléfono de Contacto</th>
+              <th>Estado</th>
+              <th class="th-actions">Acciones</th>
             </tr>
           </thead>
           <tbody>
             <tr *ngFor="let propietario of filteredPropietarios" class="table-row">
               <td class="id-cell">PROPIETARIO #{{ propietario.id }}</td>
-              <td class="name-cell">{{ propietario.nombres }}</td>
+              <td class="name-cell">
+                <div class="owner-name-avatar-wrapper">
+                  <div class="owner-avatar-thumbnail">
+                    <img [src]="propietario.fotoUrl" alt="Avatar" class="avatar-img" *ngIf="propietario.fotoUrl" />
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="avatar-placeholder-icon" *ngIf="!propietario.fotoUrl">
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 6a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0ZM4.501 20.118a7.5 7.5 0 0 1 14.998 0A17.933 17.933 0 0 1 12 21.75c-2.676 0-5.216-.584-7.499-1.632Z" />
+                    </svg>
+                  </div>
+                  <span>{{ propietario.nombres }}</span>
+                </div>
+              </td>
               <td class="document-cell">{{ propietario.ciNit }}</td>
               <td class="phone-cell">{{ propietario.telefono }}</td>
+              <td class="estado-cell">
+                <span class="estado-badge" [class.activo]="propietario.activo" [class.inactivo]="!propietario.activo">
+                  {{ propietario.activo ? 'Activo' : 'Inactivo' }}
+                </span>
+              </td>
+              <td class="actions-cell">
+                <button class="action-btn view-btn" (click)="viewPropietario(propietario)" title="Ver datos">
+                  <svg fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="action-icon">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178z" />
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                  </svg>
+                </button>
+                <button class="action-btn edit-btn" (click)="editPropietario(propietario)" title="Modificar">
+                  <svg fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="action-icon">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0115.75 21H5.25A2.25 2.25 0 013 18.75V8.25A2.25 2.25 0 015.25 6H10" />
+                  </svg>
+                </button>
+                <button *ngIf="propietario.activo" class="action-btn toggle-off-btn" (click)="openToggleConfirm(propietario)" title="Desactivar">
+                  <svg fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="action-icon">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636" />
+                  </svg>
+                </button>
+                <button *ngIf="!propietario.activo" class="action-btn toggle-on-btn" (click)="openToggleConfirm(propietario)" title="Activar">
+                  <svg fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="action-icon">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                </button>
+              </td>
             </tr>
           </tbody>
         </table>

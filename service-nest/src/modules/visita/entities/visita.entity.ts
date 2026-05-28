@@ -33,6 +33,10 @@ export class Visita {
   @Column({ name: 'fecha_visita', type: 'timestamp' })
   fechaVisita!: Date;
 
+  @Field(() => String)
+  @Column({ type: 'varchar', length: 20, default: 'Pendiente' })
+  estado!: string;
+
   @ManyToOne(() => Propiedad, (propiedad) => propiedad.visitas)
   @JoinColumn({ name: 'propiedad_id' })
   propiedad!: Propiedad;

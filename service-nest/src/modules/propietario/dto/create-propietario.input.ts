@@ -1,5 +1,5 @@
 import { InputType, Field } from '@nestjs/graphql';
-import { IsString, IsNotEmpty } from 'class-validator';
+import { IsString, IsNotEmpty, IsOptional, IsBoolean } from 'class-validator';
 
 @InputType()
 export class CreatePropietarioInput {
@@ -17,4 +17,14 @@ export class CreatePropietarioInput {
   @IsString()
   @IsNotEmpty()
   ciNit!: string;
+
+  @Field(() => Boolean, { nullable: true })
+  @IsOptional()
+  @IsBoolean()
+  activo?: boolean;
+
+  @Field(() => String, { nullable: true })
+  @IsOptional()
+  @IsString()
+  fotoUrl?: string;
 }

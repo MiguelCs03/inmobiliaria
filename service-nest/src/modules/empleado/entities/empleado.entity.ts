@@ -36,6 +36,10 @@ export class Empleado {
   @Column({ type: 'varchar', length: 100 })
   apellidos!: string;
 
+  @Field(() => Boolean)
+  @Column({ type: 'boolean', default: true })
+  activo!: boolean;
+
   @OneToOne(() => Usuario, (usuario) => usuario.empleado)
   @JoinColumn({ name: 'usuario_id' })
   usuario!: Usuario;

@@ -17,6 +17,10 @@ export class Sucursal {
   @Column({ type: 'varchar', length: 50 })
   ciudad!: string;
 
+  @Field(() => Boolean)
+  @Column({ type: 'boolean', default: true })
+  activo!: boolean;
+
   @OneToMany(() => Empleado, (empleado) => empleado.sucursal)
   empleados!: Empleado[];
 }
