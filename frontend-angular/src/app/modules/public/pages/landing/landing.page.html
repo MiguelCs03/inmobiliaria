@@ -1,0 +1,76 @@
+<section class="hero-container">
+  <div class="hero-overlay"></div>
+  <div class="hero-content">
+    <h1>Encuentra tu próximo hogar</h1>
+    <p>Descubre las mejores casas y departamentos disponibles para ti.</p>
+
+    <div class="search-bar-box">
+      <div class="search-tabs">
+        <button 
+          [class.active]="filtroTipoOperacion === 'ALQUILER'" 
+          (click)="filtroTipoOperacion = 'ALQUILER'">Alquilar</button>
+        <button 
+          [class.active]="filtroTipoOperacion === 'VENTA'" 
+          (click)="filtroTipoOperacion = 'VENTA'">Comprar</button>
+      </div>
+
+      <div class="search-inputs">
+        <div class="input-group">
+          <label>¿Qué buscas?</label>
+          <select [(ngModel)]="filtroTipoPropiedad">
+            <option value="">Todos los tipos</option>
+            <option value="CASA">Casa</option>
+            <option value="DEPARTAMENTO">Departamento</option>
+            <option value="TERRENO">Terreno</option>
+          </select>
+        </div>
+
+        <div class="input-group">
+          <label>Ubicación / Zona</label>
+          <input 
+            type="text" 
+            [(ngModel)]="filtroUbicacion"
+            placeholder="Ej. Equipetrol, Zona Norte...">
+        </div>
+
+        <button class="btn-search" (click)="buscar()">
+          <span class="search-icon"></span> Buscar
+        </button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="featured-section">
+  <div class="section-header">
+    <h2>Propiedades Destacadas</h2>
+    <p>Nuestras opciones más exclusivas y recientes en el mercado</p>
+  </div>
+
+  <div class="properties-grid">
+    @for (propiedad of propiedadesDestacadas; track propiedad.id) {
+      <div class="property-card" (click)="verDetalle(propiedad.id)">
+        <div class="card-image-wrap">
+          <img [src]="propiedad.imagen" [alt]="propiedad.titulo">
+          <span class="badge" [class.badge-sale]="propiedad.tipoOperacion === 'VENTA'">
+            {{ propiedad.tipoOperacion }}
+          </span>
+        </div>
+        
+        <div class="card-body">
+          <h3 class="card-price">
+            {{ propiedad.tipoOperacion === 'VENTA' ? '$' : '$' }}{{ propiedad.precio | number }}
+            <small>{{ propiedad.tipoOperacion === 'ALQUILER' ? '/mes' : '' }}</small>
+          </h3>
+          <h4 class="card-title">{{ propiedad.titulo }}</h4>
+          <p class="card-location"> {{ propiedad.ubicacion }}</p>
+          
+          <div class="card-features">
+            <span> {{ propiedad.area }} m²</span>
+            <span> {{ propiedad.habitaciones }} {{ propiedad.habitaciones === 1 ? 'Dorm' : 'Dorms' }}</span>
+          </div>
+        </div>
+      </div>
+    }
+  </div>
+</section>
