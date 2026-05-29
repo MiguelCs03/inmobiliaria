@@ -1,0 +1,127 @@
+<section class="detalle-container">
+
+  <a class="back-link" routerLink="/">
+    Volver al inicio
+  </a>
+
+  <div class="detalle-hero">
+
+    <div class="hero-text">
+      <h1>
+        {{ propiedad ? titulo : 'Detalle de propiedad' }}
+      </h1>
+
+      <p class="subtitle">
+        Explora la información completa de esta propiedad.
+      </p>
+    </div>
+
+    <div class="hero-badge" *ngIf="propiedad">
+      <span>{{ tipoOperacionNombre }}</span>
+    </div>
+
+  </div>
+
+  <!-- Loading -->
+
+  <div class="status" *ngIf="loading">
+    <span class="loading-dot"></span>
+    <span>Cargando detalle...</span>
+  </div>
+
+  <!-- Error -->
+
+  <div class="status error" *ngIf="!loading && errorMessage">
+    <span>{{ errorMessage }}</span>
+  </div>
+
+  <!-- Contenido -->
+
+  <div
+    class="detalle-grid"
+    *ngIf="!loading && !errorMessage && propiedad"
+  >
+
+    <!-- Galería -->
+
+    <div class="gallery">
+
+      <img
+        class="main-image"
+        [src]="mainImageUrl"
+        alt="Imagen principal"
+      >
+
+      <div class="thumbs">
+
+        @for (img of imagenes; track $index) {
+
+          <img
+            class="thumb"
+            [src]="img"
+            alt="Imagen de propiedad"
+          >
+
+        }
+
+      </div>
+
+    </div>
+
+    <!-- Card -->
+
+    <div class="detalle-card">
+
+      <div class="price-row">
+
+        <h2>
+          ${{ propiedad.precioBase | number }}
+        </h2>
+
+        <span class="estado">
+          {{ estadoPropiedadNombre }}
+        </span>
+
+      </div>
+
+      <div class="meta">
+
+        <div>
+          <span class="label">Tipo</span>
+          <span>{{ tipoPropiedadNombre }}</span>
+        </div>
+
+        <div>
+          <span class="label">Operación</span>
+          <span>{{ tipoOperacionNombre }}</span>
+        </div>
+
+        <div>
+          <span class="label">Área</span>
+          <span>{{ propiedad.areaM2 }} m²</span>
+        </div>
+
+        <div>
+          <span class="label">Ubicación</span>
+          <span>{{ ubicacionTexto }}</span>
+        </div>
+
+      </div>
+
+      <div class="cta-box">
+
+        <p>
+          Coordina una visita o deja tus datos para contacto.
+        </p>
+
+        <button class="cta-btn">
+          Solicitar visita
+        </button>
+
+      </div>
+
+    </div>
+
+  </div>
+
+</section>

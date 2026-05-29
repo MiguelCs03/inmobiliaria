@@ -162,6 +162,34 @@
   gap: 30px;
 }
 
+.list-status {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  margin-bottom: 25px;
+  color: var(--text-muted);
+  font-weight: 600;
+}
+
+.list-status.error {
+  color: #b91c1c;
+}
+
+.loading-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--primary);
+  animation: pulse 0.9s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0% { opacity: 0.3; transform: scale(0.9); }
+  50% { opacity: 1; transform: scale(1); }
+  100% { opacity: 0.3; transform: scale(0.9); }
+}
+
 /* --- PROPERTY CARD --- */
 .property-card {
   background: #fff;
@@ -241,6 +269,60 @@
   padding-top: 12px;
   font-size: 0.85rem;
   color: var(--text-muted);
+}
+
+.btn-detail {
+  margin-top: 14px;
+  width: 100%;
+  background: #ffffff;
+  border: 1px solid #cbd5e1;
+  color: var(--dark);
+  padding: 10px 14px;
+  border-radius: 6px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btn-detail:hover {
+  border-color: var(--primary);
+  color: var(--primary);
+  box-shadow: 0 6px 12px -6px rgba(37, 99, 235, 0.4);
+}
+
+.pagination {
+  margin-top: 30px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 16px;
+}
+
+.page-btn {
+  background: #ffffff;
+  border: 1px solid #cbd5e1;
+  color: var(--dark);
+  padding: 8px 18px;
+  border-radius: 6px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.page-btn:hover:not(:disabled) {
+  border-color: var(--primary);
+  color: var(--primary);
+  box-shadow: 0 6px 12px -6px rgba(37, 99, 235, 0.4);
+}
+
+.page-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.page-info {
+  font-weight: 700;
+  color: var(--dark);
 }
 
 /* --- RESPONSIVE DESIGN --- */

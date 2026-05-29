@@ -19,9 +19,10 @@
           <label>¿Qué buscas?</label>
           <select [(ngModel)]="filtroTipoPropiedad">
             <option value="">Todos los tipos</option>
-            <option value="CASA">Casa</option>
-            <option value="DEPARTAMENTO">Departamento</option>
-            <option value="TERRENO">Terreno</option>
+            <option value="Casa">Casa</option>
+            <option value="Departamento">Departamento</option>
+            <option value="Terreno">Terreno</option>
+            <option value="Oficina">Oficina</option>
           </select>
         </div>
 
@@ -43,34 +44,61 @@
 
 <section class="featured-section">
   <div class="section-header">
-    <h2>Propiedades Destacadas</h2>
-    <p>Nuestras opciones más exclusivas y recientes en el mercado</p>
+    <h2>Propiedades Disponibles</h2>
+    <p>Catálogo público actualizado desde el sistema</p>
+  </div>
+
+  <div class="list-status" *ngIf="loadingList">
+    <span class="loading-dot"></span>
+    <span>Cargando propiedades disponibles...</span>
+  </div>
+
+  <div class="list-status error" *ngIf="!loadingList && errorMessage">
+    <span>{{ errorMessage }}</span>
+  </div>
+
+  <div class="list-status" *ngIf="!loadingList && !errorMessage && propiedadesFiltradas.length === 0">
+    <span>No hay propiedades disponibles con estos filtros.</span>
   </div>
 
   <div class="properties-grid">
-    @for (propiedad of propiedadesDestacadas; track propiedad.id) {
+    @for (propiedad of propiedadesFiltradas; track propiedad.id) {
       <div class="property-card" (click)="verDetalle(propiedad.id)">
         <div class="card-image-wrap">
-          <img [src]="propiedad.imagen" [alt]="propiedad.titulo">
-          <span class="badge" [class.badge-sale]="propiedad.tipoOperacion === 'VENTA'">
-            {{ propiedad.tipoOperacion }}
+          <img [src]="getImagenUrl(propiedad)" [alt]="getPropiedadTitulo(propiedad)">
+          <span class="badge" [class.badge-sale]="propiedad.tipoOperacionId === 1">
+            {{ getTipoOperacionNombre(propiedad.tipoOperacionId) }}
           </span>
         </div>
         
         <div class="card-body">
           <h3 class="card-price">
-            {{ propiedad.tipoOperacion === 'VENTA' ? '$' : '$' }}{{ propiedad.precio | number }}
-            <small>{{ propiedad.tipoOperacion === 'ALQUILER' ? '/mes' : '' }}</small>
+            ${{ propiedad.precioBase | number }}
+            <small>{{ propiedad.tipoOperacionId === 2 ? '/mes' : '' }}</small>
           </h3>
-          <h4 class="card-title">{{ propiedad.titulo }}</h4>
-          <p class="card-location"> {{ propiedad.ubicacion }}</p>
+          <h4 class="card-title">{{ getPropiedadTitulo(propiedad) }}</h4>
+          <p class="card-location">{{ propiedad.ubicacion || 'Sin ubicacion registrada' }}</p>
           
           <div class="card-features">
-            <span> {{ propiedad.area }} m²</span>
-            <span> {{ propiedad.habitaciones }} {{ propiedad.habitaciones === 1 ? 'Dorm' : 'Dorms' }}</span>
+            <span> {{ propiedad.areaM2 }} m²</span>
+            <span> {{ getTipoPropiedadNombre(propiedad.tipoPropiedadId) }}</span>
           </div>
+
+          <button class="btn-detail" (click)="verDetalle(propiedad.id); $event.stopPropagation()">
+            Ver detalles
+          </button>
         </div>
       </div>
     }
+  </div>
+
+  <div class="pagination" *ngIf="!loadingList && !errorMessage && propiedades.length > 0">
+    <button class="page-btn" (click)="prevPage()" [disabled]="currentPage === 1">
+      Anterior
+    </button>
+    <span class="page-info">Pagina {{ currentPage }}</span>
+    <button class="page-btn" (click)="nextPage()" [disabled]="!hasMore">
+      Siguiente
+    </button>
   </div>
 </section>

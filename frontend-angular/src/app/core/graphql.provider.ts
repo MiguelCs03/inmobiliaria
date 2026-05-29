@@ -2,7 +2,7 @@ import { inject } from '@angular/core';
 import { Apollo, APOLLO_OPTIONS } from 'apollo-angular';
 import { HttpLink } from 'apollo-angular/http';
 import { InMemoryCache } from '@apollo/client/core';
-import { provideHttpClient } from '@angular/common/http';
+import { provideHttpClient,withFetch } from '@angular/common/http';
 import { environment } from '../../environments/environment';
 
 export function apolloOptionsFactory(httpLink: HttpLink): any {
@@ -29,7 +29,7 @@ export function apolloOptionsFactory(httpLink: HttpLink): any {
 
 export const provideGraphQL = () => {
   return [
-    provideHttpClient(),
+    provideHttpClient(withFetch()),
     {
       provide: APOLLO_OPTIONS,
       useFactory: apolloOptionsFactory,
