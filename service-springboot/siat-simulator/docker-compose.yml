@@ -1,0 +1,35 @@
+services:
+  siat-db:
+    image: postgres:17.6
+    container_name: siat_db
+    restart: always
+    environment:
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASS}
+      POSTGRES_DB: ${DB_NAME}
+    ports:
+      - "${DB_PORT:-5435}:5432"
+    volumes:
+      - siat_db_data:/var/lib/postgresql/data
+
+  siat-simulator:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: siat_simulator
+    restart: always
+    environment:
+      - APP_PORT=${APP_PORT:-8081}
+      - DB_HOST=siat-db
+      - DB_PORT=5432
+      - DB_NAME=${DB_NAME}
+      - DB_USER=${DB_USER}
+      - DB_PASS=${DB_PASS}
+      - JPA_DDL_AUTO=${JPA_DDL_AUTO:-update}
+    ports:
+      - "${APP_PORT:-8081}:8081"
+    depends_on:
+      - siat-db
+
+volumes:
+  siat_db_data:

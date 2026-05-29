@@ -17,6 +17,7 @@ services:
       - GATEWAY_IA_URL=${GATEWAY_IA_URL:-http://host.docker.internal:8000/api/v1}
       - GATEWAY_DOCUMENTOS_URL=${GATEWAY_DOCUMENTOS_URL:-http://host.docker.internal:8080}
       - GATEWAY_GRAPHQL_URL=${GATEWAY_GRAPHQL_URL:-http://host.docker.internal:3003/graphql}
+      - GATEWAY_SIAT_URL=${GATEWAY_SIAT_URL:-http://host.docker.internal:8081}
     volumes:
       - .:/app
       - /app/node_modules

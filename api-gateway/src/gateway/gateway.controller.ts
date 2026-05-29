@@ -64,6 +64,18 @@ export class GatewayController {
     );
   }
 
+  @All('siat')
+  async proxySiatBase(@Req() req: Request, @Res() res: Response) {
+    // Encamina la raiz hacia el simulador SIAT
+    return this.gatewayService.proxyToService(req, res, '/siat', this.gatewayService.getSiatUrl());
+  }
+
+  @All('siat/*')
+  async proxySiat(@Req() req: Request, @Res() res: Response) {
+    // Encamina hacia el simulador SIAT
+    return this.gatewayService.proxyToService(req, res, '/siat', this.gatewayService.getSiatUrl());
+  }
+
   @All('graphql')
   async proxyGraphql(@Req() req: Request, @Res() res: Response) {
     // Encamina GraphQL al servicio principal

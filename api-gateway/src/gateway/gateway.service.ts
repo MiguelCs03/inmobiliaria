@@ -10,6 +10,7 @@ export class GatewayService {
   private readonly djangoUrl: string;
   private readonly documentosUrl: string;
   private readonly graphqlUrl: string;
+  private readonly siatUrl: string;
 
   constructor(private readonly configService: ConfigService) {
     this.gestionUrl =
@@ -21,6 +22,7 @@ export class GatewayService {
     this.documentosUrl =
       this.configService.get<string>('GATEWAY_DOCUMENTOS_URL') ?? 'http://localhost:8080';
     this.graphqlUrl = this.configService.get<string>('GATEWAY_GRAPHQL_URL') ?? 'http://localhost:3003/graphql';
+    this.siatUrl = this.configService.get<string>('GATEWAY_SIAT_URL') ?? 'http://localhost:8081';
   }
 
   // Reenvia la solicitud al microservicio destino
@@ -69,6 +71,10 @@ export class GatewayService {
 
   getDocumentosUrl(): string {
     return this.documentosUrl;
+  }
+
+  getSiatUrl(): string {
+    return this.siatUrl;
   }
 
   private buildTargetUrl(originalUrl: string, basePath: string, targetBaseUrl: string): string {
