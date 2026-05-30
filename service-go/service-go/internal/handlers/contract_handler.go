@@ -44,3 +44,24 @@ func GetContracts(c *fiber.Ctx) error {
 
 	return c.JSON(contracts)
 }
+
+func GetContract(c *fiber.Ctx) error {
+
+	id := c.Params("id")
+
+	contract, err := services.GetContractByID(id)
+
+	if err != nil {
+		return c.Status(500).JSON(fiber.Map{
+			"error": err.Error(),
+		})
+	}
+
+	if contract == nil {
+		return c.Status(404).JSON(fiber.Map{
+			"error": "contract not found",
+		})
+	}
+
+	return c.JSON(contract)
+}

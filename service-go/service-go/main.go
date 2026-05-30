@@ -44,6 +44,10 @@ func main() {
 
 	database.CreateAuditTable()
 
+	database.CreateSignaturesTable()
+
+	database.CreateBiometricTable()
+
 	app := fiber.New()
 
 	routes.SetupRoutes(app)

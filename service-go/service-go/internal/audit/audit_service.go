@@ -33,3 +33,7 @@ func CreateAuditLog(
 func GetAuditLogs() ([]models.Audit, error) {
 	return repositories.GetAuditLogs()
 }
+
+func GetAuditByContractID(contractID string) ([]models.Audit, error) {
+	return repositories.GetAuditByContractID(contractID)
+}

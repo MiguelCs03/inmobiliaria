@@ -10,9 +10,9 @@ import (
 	"github.com/aws/aws-sdk-go-v2/service/dynamodb"
 )
 
-func CreateAudit(audit models.Audit) error {
+func CreateSignature(signature models.Signature) error {
 
-	item, err := attributevalue.MarshalMap(audit)
+	item, err := attributevalue.MarshalMap(signature)
 
 	if err != nil {
 		return err
@@ -21,7 +21,7 @@ func CreateAudit(audit models.Audit) error {
 	_, err = database.DynamoClient.PutItem(
 		context.TODO(),
 		&dynamodb.PutItemInput{
-			TableName: awsString("audit_logs"),
+			TableName: awsString("contract_signatures"),
 			Item:      item,
 		},
 	)
@@ -29,12 +29,14 @@ func CreateAudit(audit models.Audit) error {
 	return err
 }
 
-func GetAuditLogs() ([]models.Audit, error) {
+func GetSignaturesByContractID(
+	contractID string,
+) ([]models.Signature, error) {
 
 	result, err := database.DynamoClient.Scan(
 		context.TODO(),
 		&dynamodb.ScanInput{
-			TableName: awsString("audit_logs"),
+			TableName: awsString("contract_signatures"),
 		},
 	)
 
@@ -42,37 +44,25 @@ func GetAuditLogs() ([]models.Audit, error) {
 		return nil, err
 	}
 
-	var audits []models.Audit
+	var signatures []models.Signature
 
 	err = attributevalue.UnmarshalListOfMaps(
 		result.Items,
-		&audits,
+		&signatures,
 	)
 
 	if err != nil {
 		return nil, err
 	}
 
-	return audits, nil
-}
+	var filtered []models.Signature
 
-//Auditoria de la obtencion del contrato 
-func GetAuditByContractID(contractID string) ([]models.Audit, error) {
+	for _, signature := range signatures {
 
-	audits, err := GetAuditLogs()
-
-	if err != nil {
-		return nil, err
-	}
-
-	var result []models.Audit
-
-	for _, audit := range audits {
-
-		if audit.EntityID == contractID {
-			result = append(result, audit)
+		if signature.ContractID == contractID {
+			filtered = append(filtered, signature)
 		}
 	}
 
-	return result, nil
+	return filtered, nil
 }

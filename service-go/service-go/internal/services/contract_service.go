@@ -5,6 +5,7 @@ import (
 	"service-go/internal/crypto"
 	"service-go/internal/models"
 	"service-go/internal/repositories"
+	"service-go/internal/constants"
 
 	"service-go/internal/audit"
 
@@ -37,6 +38,7 @@ func CreateContract(title string) error {
 		Title:            title,
 		DocumentHash:     hash,
 		DigitalSignature: encodedSignature,
+		Status:       constants.StatusPending,
 	}
 
 	err = audit.CreateAuditLog(
@@ -56,4 +58,9 @@ func CreateContract(title string) error {
 
 func GetContracts() ([]models.Contract, error) {
 	return repositories.GetContracts()
+}
+
+//Servicio para obtener el contrato por ID
+func GetContractByID(id string) (*models.Contract, error) {
+	return repositories.GetContractByID(id)
 }

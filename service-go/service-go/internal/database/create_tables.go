@@ -78,3 +78,70 @@ func CreateAuditTable() {
 
 	log.Println("audit_logs table created")
 }
+
+func CreateSignaturesTable() {
+
+	_, err := DynamoClient.CreateTable(
+		context.TODO(),
+		&dynamodb.CreateTableInput{
+			TableName: awsString("contract_signatures"),
+
+			AttributeDefinitions: []dynamodbtypes.AttributeDefinition{
+				{
+					AttributeName: awsString("id"),
+					AttributeType: dynamodbtypes.ScalarAttributeTypeS,
+				},
+			},
+
+			KeySchema: []dynamodbtypes.KeySchemaElement{
+				{
+					AttributeName: awsString("id"),
+					KeyType:       dynamodbtypes.KeyTypeHash,
+				},
+			},
+
+			BillingMode: dynamodbtypes.BillingModePayPerRequest,
+		},
+	)
+
+	if err != nil {
+		log.Println(err)
+		return
+	}
+
+	log.Println("contract_signatures table created")
+}
+
+//tabla para la biometrica
+func CreateBiometricTable() {
+
+	_, err := DynamoClient.CreateTable(
+		context.TODO(),
+		&dynamodb.CreateTableInput{
+			TableName: awsString("biometric_evidence"),
+
+			AttributeDefinitions: []dynamodbtypes.AttributeDefinition{
+				{
+					AttributeName: awsString("id"),
+					AttributeType: dynamodbtypes.ScalarAttributeTypeS,
+				},
+			},
+
+			KeySchema: []dynamodbtypes.KeySchemaElement{
+				{
+					AttributeName: awsString("id"),
+					KeyType:       dynamodbtypes.KeyTypeHash,
+				},
+			},
+
+			BillingMode: dynamodbtypes.BillingModePayPerRequest,
+		},
+	)
+
+	if err != nil {
+		log.Println(err)
+		return
+	}
+
+	log.Println("biometric_evidence table created")
+}

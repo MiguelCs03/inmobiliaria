@@ -38,3 +38,43 @@ func VerifyContract(c *fiber.Ctx) error {
 		"message": "contract verified",
 	})
 }
+
+func VerifyContractByID(c *fiber.Ctx) error {
+
+	id := c.Params("id")
+
+	contract, err := services.GetContractByID(id)
+
+	if err != nil {
+
+		return c.Status(500).JSON(fiber.Map{
+			"error": err.Error(),
+		})
+	}
+
+	if contract == nil {
+
+		return c.Status(404).JSON(fiber.Map{
+			"error": "contract not found",
+		})
+	}
+
+	err = services.VerifyContract(
+		contract.DocumentHash,
+		contract.DigitalSignature,
+	)
+
+	if err != nil {
+
+		return c.JSON(fiber.Map{
+			"valid": false,
+			"error": err.Error(),
+		})
+	}
+
+	return c.JSON(fiber.Map{
+		"contract_id": contract.ID,
+		"status":      contract.Status,
+		"valid":       true,
+	})
+}
