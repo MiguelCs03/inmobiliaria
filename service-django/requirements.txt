@@ -10,13 +10,12 @@ redis>=5.0.3
 
 # ML / Data
 scikit-learn>=1.4.2
+
+# Deep Learning
+tensorflow>=2.17.0
 pandas>=2.2.2
 numpy>=1.26.4
 joblib>=1.4.2
-
-# Deep Learning
-torch>=2.2.2
-torchvision>=0.17.2
 
 # Images
 Pillow>=10.3.0

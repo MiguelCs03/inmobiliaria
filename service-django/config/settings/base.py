@@ -18,10 +18,10 @@ INSTALLED_APPS = [
     'rest_framework.authtoken',
     'corsheaders',
     'django_filters',
-    'apps.valuations',
-    'apps.clients',
-    'apps.image_analysis',
+    'apps.random_forest_valuations',
+    'apps.kmeans_clients',
     'apps.training',
+    'apps.tf_cnn',
 ]
 
 MIDDLEWARE = [
@@ -80,7 +80,7 @@ MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / config('MEDIA_ROOT', default='media')
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-ML_MODELS_DIR = BASE_DIR / config('ML_MODELS_DIR', default='ml_models/trained')
+ML_MODELS_DIR = BASE_DIR / config('ML_MODELS_DIR', default='ml_models')
 
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': ['rest_framework.authentication.TokenAuthentication'],
