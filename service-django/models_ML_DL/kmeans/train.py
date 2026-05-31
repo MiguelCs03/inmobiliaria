@@ -1,6 +1,6 @@
 """
 Entrena K-Means para segmentación de clientes.
-Uso: python ml_models/kmeans/train.py
+Uso: python models_ML_DL/kmeans/train.py
 """
 import pandas as pd, numpy as np, joblib
 from pathlib import Path
@@ -9,8 +9,8 @@ from sklearn.preprocessing import StandardScaler, LabelEncoder
 from sklearn.metrics import silhouette_score
 import warnings; warnings.filterwarnings('ignore')
 
-CSV_PATH = 'ml_models/kmeans/data/ML_NoSupervisado_Clustering_Clientes (1).csv'
-MODEL_PATH = 'ml_models/kmeans/models/kmeans_clients_v1.pkl'
+CSV_PATH = 'models_ML_DL/kmeans/data/ML_NoSupervisado_Clustering_Clientes (1).csv'
+MODEL_PATH = 'models_ML_DL/kmeans/models/kmeans_clients_v1.pkl'
 
 df = pd.read_csv(CSV_PATH)
 print(f'KM — Datos cargados: {df.shape}')

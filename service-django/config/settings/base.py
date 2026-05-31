@@ -21,7 +21,7 @@ INSTALLED_APPS = [
     'apps.random_forest_valuations',
     'apps.kmeans_clients',
     'apps.training',
-    'apps.tf_cnn',
+    'apps.tensorflow_cnn',
 ]
 
 MIDDLEWARE = [
@@ -80,7 +80,7 @@ MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / config('MEDIA_ROOT', default='media')
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-ML_MODELS_DIR = BASE_DIR / config('ML_MODELS_DIR', default='ml_models')
+ML_MODELS_DIR = BASE_DIR / config('ML_MODELS_DIR', default='models_ML_DL')
 
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': ['rest_framework.authentication.TokenAuthentication'],
@@ -92,10 +92,3 @@ REST_FRAMEWORK = {
 
 CORS_ALLOWED_ORIGINS = config('CORS_ALLOWED_ORIGINS', default='').split(',')
 CORS_ALLOW_CREDENTIALS = True
-
-CELERY_BROKER_URL = config('REDIS_URL', default='redis://localhost:6379/0')
-CELERY_RESULT_BACKEND = CELERY_BROKER_URL
-CELERY_TASK_SERIALIZER = 'json'
-CELERY_ACCEPT_CONTENT = ['json']
-CELERY_RESULT_SERIALIZER = 'json'
-CELERY_TIMEZONE = 'America/La_Paz'

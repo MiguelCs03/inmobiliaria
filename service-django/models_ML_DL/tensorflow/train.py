@@ -81,9 +81,9 @@ def data_generator(df, batch_size, augment=False):
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument('--csv', default='ml_models/tensorflow/data/dl_imagenes/dataset.csv')
-    parser.add_argument('--img_dir', default='ml_models/tensorflow/data/dl_imagenes')
-    parser.add_argument('--output', default='ml_models/tensorflow/models/cnn_scratch_v1.h5')
+    parser.add_argument('--csv', default='models_ML_DL/tensorflow/data/dl_imagenes/dataset.csv')
+    parser.add_argument('--img_dir', default='models_ML_DL/tensorflow/data/dl_imagenes')
+    parser.add_argument('--output', default='models_ML_DL/tensorflow/models/cnn_scratch_v1.h5')
     parser.add_argument('--epochs', type=int, default=EPOCHS)
     parser.add_argument('--batch_size', type=int, default=BATCH_SIZE)
     args = parser.parse_args()

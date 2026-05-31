@@ -1,6 +1,6 @@
 """
 Entrena Random Forest para predicción de precio de propiedades.
-Uso: python ml_models/random_forest/train.py
+Uso: python models_ML_DL/random_forest/train.py
 """
 import pandas as pd, numpy as np, joblib
 from pathlib import Path
@@ -10,8 +10,8 @@ from sklearn.preprocessing import LabelEncoder
 from sklearn.metrics import mean_absolute_error, r2_score
 import warnings; warnings.filterwarnings('ignore')
 
-CSV_PATH = 'ml_models/random_forest/data/ML_Supervisado_Prediccion_Precio (1).csv'
-MODEL_PATH = 'ml_models/random_forest/models/random_forest_v1.pkl'
+CSV_PATH = 'models_ML_DL/random_forest/data/ML_Supervisado_Prediccion_Precio (1).csv'
+MODEL_PATH = 'models_ML_DL/random_forest/models/random_forest_v1.pkl'
 
 df = pd.read_csv(CSV_PATH)
 print(f'RF — Datos cargados: {df.shape}')
