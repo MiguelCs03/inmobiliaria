@@ -1,0 +1,106 @@
+:host {
+  --blue: #2563eb;
+  --green: #059669;
+  --amber: #d97706;
+  --purple: #7c3aed;
+  --red: #dc2626;
+  --teal: #0d9488;
+}
+
+.kpi-card {
+  background: var(--bg-white, #ffffff);
+  border: 1px solid var(--border-color, #e2e8f0);
+  border-radius: 0.75rem;
+  padding: 1.25rem 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  transition: all 0.15s ease-in-out;
+  box-shadow: var(--shadow-sm, 0 1px 3px rgba(0,0,0,0.06));
+  border-top: 3px solid var(--blue);
+}
+
+.kpi-card:hover {
+  box-shadow: var(--shadow-md, 0 4px 12px rgba(0,0,0,0.06));
+  transform: translateY(-1px);
+}
+
+.kpi-card.accent-blue   { border-top-color: var(--blue); }
+.kpi-card.accent-green  { border-top-color: var(--green); }
+.kpi-card.accent-amber  { border-top-color: var(--amber); }
+.kpi-card.accent-purple { border-top-color: var(--purple); }
+.kpi-card.accent-red    { border-top-color: var(--red); }
+.kpi-card.accent-teal   { border-top-color: var(--teal); }
+
+.kpi-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.kpi-label {
+  font-size: 0.75rem;
+  color: var(--text-muted, #94a3b8);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+.kpi-trend {
+  font-size: 0.7rem;
+  font-weight: 600;
+  color: var(--green);
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+}
+
+.kpi-trend.trend-down {
+  color: var(--red);
+}
+
+.trend-icon {
+  width: 0.75rem;
+  height: 0.75rem;
+}
+
+.kpi-body {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+}
+
+.kpi-value {
+  font-size: 1.75rem;
+  font-weight: 700;
+  letter-spacing: -0.03em;
+  color: var(--text-primary, #1e293b);
+  line-height: 1.1;
+}
+
+.kpi-icon {
+  width: 2.25rem;
+  height: 2.25rem;
+  border-radius: 0.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.15s ease;
+}
+
+.kpi-icon svg {
+  width: 1.15rem;
+  height: 1.15rem;
+}
+
+.icon-blue   { background: #dbeafe; color: var(--blue); }
+.icon-green  { background: #d1fae5; color: var(--green); }
+.icon-amber  { background: #fef3c7; color: var(--amber); }
+.icon-purple { background: #ede9fe; color: var(--purple); }
+.icon-red    { background: #fee2e2; color: var(--red); }
+.icon-teal   { background: #ccfbf1; color: var(--teal); }
+
+.kpi-subtitle {
+  font-size: 0.75rem;
+  color: var(--text-secondary, #64748b);
+}

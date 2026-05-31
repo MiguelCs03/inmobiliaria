@@ -3,58 +3,222 @@
   <div class="welcome-banner">
     <div class="welcome-text">
       <h1>¡Bienvenido al Portal, {{ roleName }}!</h1>
-      <p>Resumen general y panel de control del sistema de gestión inmobiliaria.</p>
-    </div>
-    <div class="date-badge">
+      <p>Panel de control — KPIs generales del sistema inmobiliario.</p>
     </div>
   </div>
 
-  <!-- Metric Grid (Flat Slabs) -->
+  <!-- Top-level Metric Cards -->
   <div class="metrics-grid">
-    <div class="metric-card" *ngFor="let metric of metrics">
-      <div class="metric-header">
-        <span class="metric-title">{{ metric.title }}</span>
-        <span class="metric-badge-trend">{{ metric.change }}</span>
+    <app-kpi-card
+      [value]="formatNumber(clientsKPI?.total_clients ?? 0)"
+      label="Total Clientes"
+      icon="users"
+      color="blue"
+      subtitle="Segmentados por K-Means"
+    ></app-kpi-card>
+
+    <app-kpi-card
+      [value]="clientsKPI ? formatCurrency(clientsKPI.avg_budget) : '$0'"
+      label="Presupuesto Promedio"
+      icon="currency"
+      color="green"
+      subtitle="Por cliente"
+    ></app-kpi-card>
+
+    <app-kpi-card
+      [value]="valuationsKPI ? formatNumber(valuationsKPI.total_properties) : '0'"
+      label="Propiedades (Dataset)"
+      icon="building"
+      color="purple"
+      subtitle="Entrenamiento RF"
+    ></app-kpi-card>
+
+    <app-kpi-card
+      [value]="valuationsKPI ? formatCurrency(valuationsKPI.avg_price) : '$0'"
+      label="Precio Promedio"
+      icon="tag"
+      color="amber"
+      subtitle="USD"
+    ></app-kpi-card>
+  </div>
+
+  <!-- Valuation Filters -->
+  <div class="filters-bar" *ngIf="uniqueZones.length || uniqueTypes.length">
+    <span class="filter-label">Filtros Valuaciones:</span>
+    <select class="filter-select" [(ngModel)]="valuationFilters.zona" (change)="applyValuationFilters()">
+      <option value="">Todas las zonas</option>
+      <option *ngFor="let z of uniqueZones" [value]="z">{{ z }}</option>
+    </select>
+    <select class="filter-select" [(ngModel)]="valuationFilters.tipo_propiedad" (change)="applyValuationFilters()">
+      <option value="">Todos los tipos</option>
+      <option *ngFor="let t of uniqueTypes" [value]="t">{{ t }}</option>
+    </select>
+    <button class="filter-reset" (click)="resetValuationFilters()">Reset</button>
+  </div>
+
+  <!-- Valuations KPI Section -->
+  <div class="kpi-section">
+    <h2 class="section-title">Valuaciones — Análisis de Precios</h2>
+    <div *ngIf="loadingValuations" class="loading">Cargando KPIs de valuaciones...</div>
+    <div *ngIf="valuationsError" class="error">{{ valuationsError }}</div>
+
+    <ng-container *ngIf="valuationsKPI && !loadingValuations">
+      <div class="metrics-grid four-col">
+        <app-kpi-card
+          [value]="formatCurrency(valuationsKPI.avg_price_m2)"
+          label="Precio Promedio m²"
+          icon="chart"
+          color="blue"
+          [subtitle]="'Rango: ' + formatCurrency(valuationsKPI.price_range.min) + ' — ' + formatCurrency(valuationsKPI.price_range.max)"
+        ></app-kpi-card>
+        <app-kpi-card
+          [value]="valuationsKPI.avg_rooms"
+          label="Promedio Habitaciones"
+          icon="home"
+          color="green"
+          [subtitle]="valuationsKPI.avg_bathrooms + ' baños en promedio'"
+        ></app-kpi-card>
+        <app-kpi-card
+          [value]="valuationsKPI.avg_surface.total + ' m²'"
+          label="Superficie Total Prom."
+          icon="building"
+          color="teal"
+          [subtitle]="valuationsKPI.avg_surface.construida + ' m² construidos'"
+        ></app-kpi-card>
+        <app-kpi-card
+          [value]="formatCurrency(valuationsKPI.price_range.min)"
+          label="Precio Mínimo"
+          icon="tag"
+          color="red"
+          [subtitle]="'Máximo: ' + formatCurrency(valuationsKPI.price_range.max)"
+        ></app-kpi-card>
       </div>
-      <div class="metric-body">
-        <span class="metric-value">{{ metric.value }}</span>
-        <div class="metric-icon-wrapper">
-          <svg *ngIf="metric.icon === 'home'" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
-          </svg>
-          <svg *ngIf="metric.icon === 'users'" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
-          </svg>
-          <svg *ngIf="metric.icon === 'document'" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-          </svg>
-          <svg *ngIf="metric.icon === 'calendar'" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-          </svg>
+
+      <div class="charts-row">
+        <div class="chart-card">
+          <h3 class="chart-title">Propiedades por Zona</h3>
+          <app-kpi-chart-bar
+            [labels]="zoneLabels"
+            [values]="zoneCounts"
+            label1="Cantidad"
+            [horizontal]="true"
+            [height]="Math.min(300, zoneLabels.length * 30 + 40)"
+          ></app-kpi-chart-bar>
+        </div>
+        <div class="chart-card">
+          <h3 class="chart-title">Propiedades por Tipo</h3>
+          <app-kpi-chart-bar
+            [labels]="typeLabels"
+            [values]="typeCounts"
+            label1="Cantidad"
+            [horizontal]="true"
+            [height]="Math.min(250, typeLabels.length * 30 + 40)"
+          ></app-kpi-chart-bar>
         </div>
       </div>
-    </div>
+
+      <div class="charts-row">
+        <div class="chart-card">
+          <h3 class="chart-title">Precio Promedio por Zona (USD)</h3>
+          <app-kpi-chart-bar
+            [labels]="zoneLabels"
+            [values]="zonePrices"
+            label1="Precio USD"
+            [horizontal]="true"
+            [height]="Math.min(300, zoneLabels.length * 30 + 40)"
+          ></app-kpi-chart-bar>
+        </div>
+        <div class="chart-card">
+          <h3 class="chart-title">Precio Promedio por Habitaciones</h3>
+          <app-kpi-chart-bar
+            [labels]="roomsLabels"
+            [values]="roomsPrices"
+            label1="Precio USD"
+            [horizontal]="true"
+            [height]="Math.min(250, roomsLabels.length * 30 + 40)"
+          ></app-kpi-chart-bar>
+        </div>
+      </div>
+    </ng-container>
   </div>
 
-  <!-- Sober Corporate Notice Banner (No neon glows) -->
-  <div class="construction-container">
-    <div class="construction-content">
-      <div class="construction-header-icon">
-        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor" class="warn-icon">
-          <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z" />
-        </svg>
+  <!-- Client Filters -->
+  <div class="filters-bar" *ngIf="uniqueClientZones.length || uniqueClientTypes.length">
+    <span class="filter-label">Filtros Clientes:</span>
+    <select class="filter-select" [(ngModel)]="clientFilters.zona_pref" (change)="applyClientFilters()">
+      <option value="">Todas las zonas</option>
+      <option *ngFor="let z of uniqueClientZones" [value]="z">{{ z }}</option>
+    </select>
+    <select class="filter-select" [(ngModel)]="clientFilters.tipo_prop_pref" (change)="applyClientFilters()">
+      <option value="">Todos los tipos</option>
+      <option *ngFor="let t of uniqueClientTypes" [value]="t">{{ t }}</option>
+    </select>
+    <button class="filter-reset" (click)="resetClientFilters()">Reset</button>
+  </div>
+
+  <!-- Clients KPI Section -->
+  <div class="kpi-section">
+    <h2 class="section-title">Clientes — Segmentación y Comportamiento</h2>
+    <div *ngIf="loadingClients" class="loading">Cargando KPIs de clientes...</div>
+    <div *ngIf="clientsError" class="error">{{ clientsError }}</div>
+
+    <ng-container *ngIf="clientsKPI && !loadingClients">
+      <div class="metrics-grid three-col">
+        <app-kpi-card
+          [value]="formatNumber(clientsKPI.total_clients)"
+          label="Total Clientes"
+          icon="users"
+          color="blue"
+        ></app-kpi-card>
+        <app-kpi-card
+          [value]="formatCurrency(clientsKPI.avg_budget)"
+          label="Presupuesto Promedio"
+          icon="currency"
+          color="green"
+        ></app-kpi-card>
+        <app-kpi-card
+          [value]="clientsKPI.avg_searches"
+          label="Búsquedas Promedio"
+          icon="search"
+          color="purple"
+          [subtitle]="clientsKPI.avg_interactions + ' interacciones en promedio'"
+        ></app-kpi-card>
       </div>
-      <h2>Módulo de Inteligencia y Análisis en Desarrollo</h2>
-      <p class="description">Esta sección alojará próximamente los tableros analíticos e informes automatizados mediante la integración con los microservicios de Django y Go. Los módulos de registro comercial y bases de datos centrales ya se encuentran completamente operativos.</p>
-      
-      <div class="cta-actions">
-        <button class="cta-btn" (click)="navigateTo('propietarios')">
-          Acceder a Propietarios
-        </button>
-        <button class="cta-btn secondary" (click)="navigateTo('propiedades')">
-          Acceder a Casas / Propiedades
-        </button>
+
+      <div class="charts-row">
+        <div class="chart-card chart-card--half">
+          <h3 class="chart-title">Distribución por Segmento</h3>
+          <app-kpi-chart-doughnut
+            [labels]="segmentLabels"
+            [values]="segmentValues"
+            [colors]="['#2563eb','#0ea5e9','#8b5cf6','#059669','#d97706']"
+            [height]="260"
+          ></app-kpi-chart-doughnut>
+        </div>
+        <div class="chart-card chart-card--half">
+          <h3 class="chart-title">Clientes por Zona Preferida</h3>
+          <app-kpi-chart-bar
+            [labels]="clientZoneLabels()"
+            [values]="clientZoneCounts()"
+            label1="Clientes"
+            [horizontal]="true"
+            [height]="Math.min(260, clientZoneLabels().length * 28 + 40)"
+          ></app-kpi-chart-bar>
+        </div>
       </div>
+    </ng-container>
+  </div>
+
+  <!-- Navigation -->
+  <div class="nav-section">
+    <h2 class="section-title">Gestión Comercial</h2>
+    <div class="cta-actions">
+      <button class="cta-btn" (click)="navigateTo('propietarios')">
+        Propietarios
+      </button>
+      <button class="cta-btn secondary" (click)="navigateTo('propiedades')">
+        Propiedades / Casas
+      </button>
     </div>
   </div>
 </div>

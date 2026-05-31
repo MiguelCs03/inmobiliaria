@@ -1,0 +1,12 @@
+HTTP/1.1 200 OK
+X-Powered-By: Express
+Vary: Origin
+Access-Control-Allow-Credentials: true
+Content-Type: application/json; charset=utf-8
+Content-Length: 111
+ETag: W/"6f-Gh7Z4s1jadgs9qwBfhgS0Fa0zYg"
+Date: Sun, 31 May 2026 17:13:18 GMT
+Connection: keep-alive
+Keep-Alive: timeout=5
+
+{"success":false,"data":null,"message":"Expected property name or '}' in JSON at position 1 (line 1 column 2)"}

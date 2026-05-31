@@ -39,8 +39,9 @@ envFileContent.split(/\r?\n/).forEach((line) => {
   }
 });
 
-// Determinar el valor de la URL de GraphQL (por defecto http://localhost:3001/graphql)
+// Determinar el valor de las URLs (por defecto http://localhost:3001)
 const graphqlUri = envVars['GATEWAY_GRAPHQL_URL'] || 'http://localhost:3001/graphql';
+const apiRestUri = envVars['GATEWAY_REST_URL'] || 'http://localhost:3001/ia';
 
 // Asegurar que el directorio de salida exista
 const targetDir = path.join(__dirname, 'src', 'environments');
@@ -56,7 +57,8 @@ const environmentFileContent = `// =============================================
 
 export const environment = {
   production: false,
-  graphqlUri: '${graphqlUri}'
+  graphqlUri: '${graphqlUri}',
+  apiRestUri: '${apiRestUri}'
 };
 `;
 
