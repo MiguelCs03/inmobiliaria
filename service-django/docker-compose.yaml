@@ -1,6 +1,7 @@
 services:
   db:
     image: postgres:15-alpine
+    container_name: db_service_django
     environment:
       POSTGRES_DB: inmobilaria_django
       POSTGRES_USER: postgres
@@ -17,6 +18,7 @@ services:
 
   web:
     build: .
+    container_name: app_service_django
     command: python manage.py runserver 0.0.0.0:8000
     env_file: .env
     ports:
