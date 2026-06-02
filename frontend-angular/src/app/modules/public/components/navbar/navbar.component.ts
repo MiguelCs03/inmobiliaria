@@ -1,6 +1,6 @@
-import { Component, HostListener } from '@angular/core';
+import { Component, HostListener, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { RouterModule } from '@angular/router';
+import { Router, RouterModule } from '@angular/router';
 
 @Component({
   selector: 'app-public-navbar',
@@ -10,8 +10,13 @@ import { RouterModule } from '@angular/router';
   styleUrls: ['./navbar.component.css']
 })
 export class NavbarComponent {
+  private router = inject(Router);
   menuOpen = false;
   scrolled = false;
+
+  get isDetalle(): boolean {
+    return this.router.url.startsWith('/propiedades/');
+  }
 
   @HostListener('window:scroll', [])
   onScroll(): void {

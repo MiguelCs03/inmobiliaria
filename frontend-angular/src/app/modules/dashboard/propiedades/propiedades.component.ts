@@ -1,6 +1,7 @@
-import { Component, OnInit, inject, ChangeDetectorRef } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { Component, OnInit, inject, ChangeDetectorRef, PLATFORM_ID } from '@angular/core';
+import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+import { RouterModule } from '@angular/router';
 import { Apollo } from 'apollo-angular';
 import { gql } from '@apollo/client/core';
 import { UploadService } from '../../../core/services/upload.service';
@@ -49,7 +50,7 @@ interface CreatePropiedadMutationResponse {
 @Component({
   selector: 'app-propiedades',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule],
+  imports: [CommonModule, ReactiveFormsModule, RouterModule],
   templateUrl: './propiedades.component.html',
   styleUrls: ['./propiedades.component.css']
 })
@@ -58,11 +59,19 @@ export class PropiedadesComponent implements OnInit {
   private apollo = inject(Apollo);
   private cdr = inject(ChangeDetectorRef);
   private uploadService = inject(UploadService);
+  private platformId = inject(PLATFORM_ID);
 
   propiedadForm!: FormGroup;
   propiedades: Propiedad[] = [];
   propietarios: Propietario[] = [];
   filteredPropiedades: Propiedad[] = [];
+
+  // Listado de empleados / agentes
+  empleados: any[] = [];
+  filteredEmpleados: any[] = [];
+  selectedEmpleado: any = null;
+  showEmpleadoDropdown = false;
+  searchEmpleadoTerm = '';
 
   loadingList = false;
   loadingPropietarios = false;
@@ -72,34 +81,23 @@ export class PropiedadesComponent implements OnInit {
   uploadedImagenesUrls: string[] = [];
   uploadingImagen = false;
 
+  // Drag & Drop y simulación de IA
+  isDragging = false;
+  aiTags: { [url: string]: string } = {}; // Almacena las etiquetas detectadas por IA
+  detectingIa: { [url: string]: boolean } = {}; // Carga de estado para análisis de IA
+
+  // Leaflet Map properties
+  private map: any;
+  private marker: any;
+  private readonly defaultLat = -17.783327; // Coordenada por defecto (Santa Cruz de la Sierra, Bolivia)
+  private readonly defaultLng = -63.182140;
+
   successMessage = '';
   errorMessage = '';
   filterType = '0'; // 0 = Todos, 1 = Venta, 2 = Alquiler, 3 = Anticrético
 
   private successTimeout: any = null;
   private errorTimeout: any = null;
-
-  showSuccess(message: string): void {
-    if (this.successTimeout) clearTimeout(this.successTimeout);
-    this.successMessage = message;
-    this.errorMessage = '';
-    this.cdr.detectChanges();
-    this.successTimeout = setTimeout(() => {
-      this.successMessage = '';
-      this.cdr.detectChanges();
-    }, 4000);
-  }
-
-  showError(message: string): void {
-    if (this.errorTimeout) clearTimeout(this.errorTimeout);
-    this.errorMessage = message;
-    this.successMessage = '';
-    this.cdr.detectChanges();
-    this.errorTimeout = setTimeout(() => {
-      this.errorMessage = '';
-      this.cdr.detectChanges();
-    }, 4000);
-  }
 
   // Catálogos locales para mapear IDs a nombres descriptivos
   tiposPropiedad = [
@@ -121,6 +119,7 @@ export class PropiedadesComponent implements OnInit {
     { id: 3, nombre: 'Vendido / Rentado' }
   ];
 
+  // Queries y Mutaciones GraphQL
   private readonly GET_PROPIEDADES = gql`
     query GetPropiedades {
       propiedades {
@@ -157,6 +156,20 @@ export class PropiedadesComponent implements OnInit {
     }
   `;
 
+  private readonly GET_EMPLEADOS = gql`
+    query GetEmpleados {
+      empleados {
+        success
+        message
+        data {
+          id
+          nombres
+          apellidos
+        }
+      }
+    }
+  `;
+
   private readonly CREATE_PROPIEDAD = gql`
     mutation CreatePropiedad($input: CreatePropiedadInput!) {
       createPropiedad(createPropiedadInput: $input) {
@@ -183,6 +196,7 @@ export class PropiedadesComponent implements OnInit {
   ngOnInit(): void {
     this.initForm();
     this.loadPropietarios();
+    this.loadEmpleados();
     this.loadPropiedades();
   }
 
@@ -194,31 +208,315 @@ export class PropiedadesComponent implements OnInit {
       estadoPropiedadId: ['', [Validators.required]],
       precioBase: ['', [Validators.required, Validators.min(100)]],
       areaM2: ['', [Validators.required, Validators.min(5)]],
-      ubicacion: ['', [Validators.required, Validators.minLength(5)]]
+      direccionReferencia: ['', [Validators.required, Validators.minLength(5)]],
+      descripcion: ['', [Validators.required, Validators.minLength(10)]],
+      latitud: [{ value: '', disabled: true }, [Validators.required]],
+      longitud: [{ value: '', disabled: true }, [Validators.required]],
+      agenteId: ['', [Validators.required]] // ID del empleado responsable
     });
+  }
+
+  showSuccess(message: string): void {
+    if (this.successTimeout) clearTimeout(this.successTimeout);
+    this.successMessage = message;
+    this.errorMessage = '';
+    this.cdr.detectChanges();
+    this.successTimeout = setTimeout(() => {
+      this.successMessage = '';
+      this.cdr.detectChanges();
+    }, 4000);
+  }
+
+  showError(message: string): void {
+    if (this.errorTimeout) clearTimeout(this.errorTimeout);
+    this.errorMessage = message;
+    this.successMessage = '';
+    this.cdr.detectChanges();
+    this.errorTimeout = setTimeout(() => {
+      this.errorMessage = '';
+      this.cdr.detectChanges();
+    }, 4000);
   }
 
   openModal(): void {
     this.showModal = true;
     this.uploadedImagenesUrls = [];
+    this.aiTags = {};
+    this.detectingIa = {};
     this.uploadingImagen = false;
+    this.selectedEmpleado = null;
     this.successMessage = '';
     this.errorMessage = '';
-    this.loadPropietarios(); // Recargar propietarios por si acaso
+    this.loadPropietarios();
+    this.loadEmpleados();
+    
+    // Inicializar el mapa Leaflet en el modal después de que el DOM se haya renderizado
+    this.initFormMap();
   }
 
   closeModal(): void {
     this.showModal = false;
     this.uploadedImagenesUrls = [];
+    this.aiTags = {};
+    this.detectingIa = {};
     this.uploadingImagen = false;
+    this.selectedEmpleado = null;
+    this.showEmpleadoDropdown = false;
     this.propiedadForm.reset({
       propietarioId: '',
       tipoPropiedadId: '',
       tipoOperacionId: '',
-      estadoPropiedadId: ''
+      estadoPropiedadId: '',
+      agenteId: ''
+    });
+
+    if (this.map) {
+      this.map.remove();
+      this.map = null;
+      this.marker = null;
+    }
+  }
+
+  // --- LÓGICA DE AGENTES / EMPLEADOS ---
+  loadEmpleados(): void {
+    this.apollo.watchQuery<any>({
+      query: this.GET_EMPLEADOS,
+      fetchPolicy: 'network-only'
+    }).valueChanges.subscribe({
+      next: (result) => {
+        if (result.data?.empleados?.success && result.data.empleados.data) {
+          this.empleados = result.data.empleados.data;
+          this.filteredEmpleados = [...this.empleados];
+        } else {
+          this.loadMockEmpleados();
+        }
+        this.cdr.detectChanges();
+      },
+      error: (err) => {
+        console.error('Error al consultar empleados del backend. Cargando mocks...', err);
+        this.loadMockEmpleados();
+        this.cdr.detectChanges();
+      }
     });
   }
 
+  private loadMockEmpleados(): void {
+    // Lista de agentes premium mockeados para wow factor y fallback
+    this.empleados = [
+      { id: 101, nombres: 'Carlos Alberto', apellidos: 'Mendoza Soliz', fotoUrl: 'https://images.unsplash.com/photo-1560250097-0b93528c311a?w=150&auto=format&fit=crop&q=60', telefono: '+591 77012345' },
+      { id: 102, nombres: 'Sofía Vanessa', apellidos: 'Arandia Justiniano', fotoUrl: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=150&auto=format&fit=crop&q=60', telefono: '+591 76098765' },
+      { id: 103, nombres: 'Mariano Hugo', apellidos: 'Pinto Becerra', fotoUrl: 'https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?w=150&auto=format&fit=crop&q=60', telefono: '+591 69024680' },
+      { id: 104, nombres: 'Valeria Nicole', apellidos: 'Rojas Cabrera', fotoUrl: 'https://images.unsplash.com/photo-1580489944761-15a19d654956?w=150&auto=format&fit=crop&q=60', telefono: '+591 78054321' }
+    ];
+    this.filteredEmpleados = [...this.empleados];
+  }
+
+  toggleEmpleadoDropdown(event: Event): void {
+    event.stopPropagation();
+    this.showEmpleadoDropdown = !this.showEmpleadoDropdown;
+  }
+
+  onSearchEmpleado(event: any): void {
+    this.searchEmpleadoTerm = event.target.value;
+    const term = this.searchEmpleadoTerm.toLowerCase();
+    this.filteredEmpleados = this.empleados.filter(e => 
+      `${e.nombres} ${e.apellidos}`.toLowerCase().includes(term)
+    );
+  }
+
+  selectEmpleado(empleado: any): void {
+    this.selectedEmpleado = empleado;
+    this.propiedadForm.get('agenteId')?.setValue(empleado.id);
+    this.showEmpleadoDropdown = false;
+    this.searchEmpleadoTerm = '';
+    this.filteredEmpleados = [...this.empleados];
+    this.cdr.detectChanges();
+  }
+
+  // --- LÓGICA DE GEOLOCALIZACIÓN INTERACTIVA (LEAFLET) ---
+  private async initFormMap(): Promise<void> {
+    if (!isPlatformBrowser(this.platformId)) return;
+
+    // Pequeño retardo para asegurar que el contenedor #intranetMap existe en el DOM tras abrir el modal
+    setTimeout(async () => {
+      try {
+        const L = await import('leaflet');
+        const mapContainer = document.getElementById('intranetMap');
+        if (!mapContainer) return;
+
+        if (this.map) {
+          this.map.remove();
+        }
+
+        // Estilo adaptativo de mapa (CartoDB Dark Matter si es oscuro, Voyager si es claro)
+        const isDark = document.body.classList.contains('dark');
+        const tileUrl = isDark
+          ? 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png'
+          : 'https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png';
+
+        this.map = L.map('intranetMap', {
+          center: [this.defaultLat, this.defaultLng],
+          zoom: 14,
+          zoomControl: true
+        });
+
+        L.tileLayer(tileUrl, {
+          attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>',
+          maxZoom: 20
+        }).addTo(this.map);
+
+        // Icono de Pin Inmobiliario personalizado premium (Azul Profundo Inmobiliario)
+        const customIcon = L.icon({
+          iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-blue.png',
+          shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png',
+          iconSize: [25, 41],
+          iconAnchor: [12, 41],
+          popupAnchor: [1, -34],
+          shadowSize: [41, 41]
+        });
+
+        // Crear marcador draggable en el centro por defecto
+        this.marker = L.marker([this.defaultLat, this.defaultLng], {
+          icon: customIcon,
+          draggable: true
+        }).addTo(this.map);
+
+        // Rellenar valores iniciales en los inputs de solo lectura
+        this.updateCoordinates(this.defaultLat, this.defaultLng);
+
+        // Escuchar el evento dragend del marcador para capturar coordenadas al arrastrar el Pin
+        this.marker.on('dragend', () => {
+          const position = this.marker.getLatLng();
+          this.updateCoordinates(position.lat, position.lng);
+        });
+
+        // Escuchar clics en el mapa para mover el marcador visualmente y actualizar coordenadas
+        this.map.on('click', (e: any) => {
+          const coords = e.latlng;
+          this.marker.setLatLng(coords);
+          this.updateCoordinates(coords.lat, coords.lng);
+        });
+
+        // Corregir tamaño del contenedor del mapa
+        setTimeout(() => {
+          if (this.map) {
+            this.map.invalidateSize();
+          }
+        }, 400);
+
+      } catch (err) {
+        console.error('Error al inicializar Leaflet en el formulario de la Intranet:', err);
+      }
+    }, 200);
+  }
+
+  private updateCoordinates(lat: number, lng: number): void {
+    this.propiedadForm.get('latitud')?.setValue(lat.toFixed(6));
+    this.propiedadForm.get('longitud')?.setValue(lng.toFixed(6));
+    this.cdr.detectChanges();
+  }
+
+  // --- DRAG AND DROP E INTELIGENCIA ARTIFICIAL (IA) SIMULADA ---
+  onDragOver(event: DragEvent): void {
+    event.preventDefault();
+    event.stopPropagation();
+    this.isDragging = true;
+  }
+
+  onDragLeave(event: DragEvent): void {
+    event.preventDefault();
+    event.stopPropagation();
+    this.isDragging = false;
+  }
+
+  onDrop(event: DragEvent): void {
+    event.preventDefault();
+    event.stopPropagation();
+    this.isDragging = false;
+
+    const files = event.dataTransfer?.files;
+    if (files && files.length > 0) {
+      this.processAndUploadFile(files[0]);
+    }
+  }
+
+  onFileSelected(event: any): void {
+    const files = event.target.files;
+    if (!files || files.length === 0) return;
+    this.processAndUploadFile(files[0]);
+  }
+
+  private processAndUploadFile(file: File): void {
+    this.uploadingImagen = true;
+    this.cdr.detectChanges();
+
+    this.uploadService.uploadImage(file).subscribe({
+      next: (res) => {
+        this.uploadingImagen = false;
+        if (res.success && res.url) {
+          const url = res.url;
+          this.uploadedImagenesUrls.push(url);
+          this.showSuccess('Imagen subida con éxito. Analizando con IA...');
+          
+          // Simular respuesta del microservicio de IA
+          this.simulateAiDetection(url, file.name);
+        } else {
+          this.showError(res.message || 'Error al subir la imagen.');
+        }
+        this.cdr.detectChanges();
+      },
+      error: (err) => {
+        this.uploadingImagen = false;
+        console.error('Error al subir imagen:', err);
+        this.showError('Error de red al intentar subir la imagen.');
+        this.cdr.detectChanges();
+      }
+    });
+  }
+
+  private simulateAiDetection(url: string, filename: string): void {
+    this.detectingIa[url] = true;
+    this.cdr.detectChanges();
+
+    // Simulamos que la red neuronal tarda 1.5 segundos en emitir un veredicto
+    setTimeout(() => {
+      this.detectingIa[url] = false;
+      const nameLower = filename.toLowerCase();
+      let roomDetected = '';
+      let confidence = Math.floor(Math.random() * 8) + 91; // 91% a 98% de confianza
+
+      if (nameLower.includes('cocina') || nameLower.includes('kitchen')) {
+        roomDetected = 'Cocina';
+      } else if (nameLower.includes('fachada') || nameLower.includes('frente') || nameLower.includes('exterior')) {
+        roomDetected = 'Fachada';
+      } else if (nameLower.includes('baño') || nameLower.includes('bathroom') || nameLower.includes('wc')) {
+        roomDetected = 'Baño';
+      } else if (nameLower.includes('dormitorio') || nameLower.includes('bedroom') || nameLower.includes('habita')) {
+        roomDetected = 'Dormitorio';
+      } else if (nameLower.includes('living') || nameLower.includes('sala') || nameLower.includes('comedor')) {
+        roomDetected = 'Sala de estar';
+      } else if (nameLower.includes('patio') || nameLower.includes('jardin') || nameLower.includes('garden')) {
+        roomDetected = 'Jardín / Patio';
+      } else {
+        // Fallback aleatorio elegante
+        const areas = ['Cocina', 'Fachada', 'Dormitorio', 'Sala de estar', 'Jardín', 'Baño'];
+        roomDetected = areas[Math.floor(Math.random() * areas.length)];
+      }
+
+      this.aiTags[url] = `${roomDetected} detectada al ${confidence}%`;
+      this.cdr.detectChanges();
+    }, 1500);
+  }
+
+  removeUploadedImage(index: number): void {
+    const url = this.uploadedImagenesUrls[index];
+    this.uploadedImagenesUrls.splice(index, 1);
+    delete this.aiTags[url];
+    delete this.detectingIa[url];
+    this.cdr.detectChanges();
+  }
+
+  // --- MÉTODOS DE LA LISTA Y DE CARGA ---
   loadPropietarios(): void {
     this.loadingPropietarios = true;
     this.cdr.detectChanges();
@@ -268,39 +566,6 @@ export class PropiedadesComponent implements OnInit {
     });
   }
 
-  onFileSelected(event: any): void {
-    const files = event.target.files;
-    if (!files || files.length === 0) return;
-
-    this.uploadingImagen = true;
-    this.cdr.detectChanges();
-
-    const file = files[0];
-    this.uploadService.uploadImage(file).subscribe({
-      next: (res) => {
-        this.uploadingImagen = false;
-        if (res.success && res.url) {
-          this.uploadedImagenesUrls.push(res.url);
-          this.showSuccess('Imagen cargada correctamente.');
-        } else {
-          this.showError(res.message || 'Error al cargar imagen.');
-        }
-        this.cdr.detectChanges();
-      },
-      error: (err) => {
-        this.uploadingImagen = false;
-        console.error('Error uploading property image:', err);
-        this.showError('Error de red al intentar subir la imagen.');
-        this.cdr.detectChanges();
-      }
-    });
-  }
-
-  removeUploadedImage(index: number): void {
-    this.uploadedImagenesUrls.splice(index, 1);
-    this.cdr.detectChanges();
-  }
-
   onSubmit(): void {
     if (this.propiedadForm.invalid) {
       this.propiedadForm.markAllAsTouched();
@@ -310,7 +575,17 @@ export class PropiedadesComponent implements OnInit {
     this.submitting = true;
     this.cdr.detectChanges();
 
-    const formValues = this.propiedadForm.value;
+    const formValues = this.propiedadForm.getRawValue(); // Usa getRawValue para capturar latitud/longitud deshabilitados
+    
+    // Serialización estructurada de geolocalización y agente en el campo string 'ubicacion' compatible
+    const ubicacionEstructurada = JSON.stringify({
+      direccion: formValues.direccionReferencia,
+      descripcion: formValues.descripcion,
+      lat: parseFloat(formValues.latitud),
+      lng: parseFloat(formValues.longitud),
+      agenteId: parseInt(formValues.agenteId, 10)
+    });
+
     const input = {
       propietarioId: parseInt(formValues.propietarioId, 10),
       tipoPropiedadId: parseInt(formValues.tipoPropiedadId, 10),
@@ -318,7 +593,7 @@ export class PropiedadesComponent implements OnInit {
       estadoPropiedadId: parseInt(formValues.estadoPropiedadId, 10),
       precioBase: parseFloat(formValues.precioBase),
       areaM2: parseFloat(formValues.areaM2),
-      ubicacion: formValues.ubicacion,
+      ubicacion: ubicacionEstructurada,
       imagenesUrls: this.uploadedImagenesUrls
     };
 
@@ -330,7 +605,7 @@ export class PropiedadesComponent implements OnInit {
         this.submitting = false;
         const res = result.data?.createPropiedad;
         if (res?.success && res.data) {
-          this.showSuccess('¡Casa/Inmueble registrado de forma exitosa!');
+          this.showSuccess('¡Inmueble registrado y geolocalizado de forma exitosa!');
           this.closeModal();
           this.loadPropiedades();
         } else {
@@ -361,7 +636,7 @@ export class PropiedadesComponent implements OnInit {
     this.filteredPropiedades = this.propiedades.filter(p => p.tipoOperacionId === filterId);
   }
 
-  // Helpers para mostrar textos amigables en las tarjetas
+  // --- HELPERS DE TEXTO PARA LA VISTA ---
   getTipoPropiedadNombre(id: number): string {
     return this.tiposPropiedad.find(t => t.id === id)?.nombre || 'Propiedad';
   }
@@ -376,6 +651,17 @@ export class PropiedadesComponent implements OnInit {
 
   getPropietarioNombre(id: number): string {
     return this.propietarios.find(p => p.id === id)?.nombres || `Propietario #${id}`;
+  }
+
+  getDireccionReferencia(ubicacionJsonStr: string | null): string {
+    if (!ubicacionJsonStr) return 'Sin dirección registrada';
+    if (!ubicacionJsonStr.startsWith('{')) return ubicacionJsonStr; // legacy string
+    try {
+      const parsed = JSON.parse(ubicacionJsonStr);
+      return parsed.direccion || 'Sin dirección';
+    } catch {
+      return ubicacionJsonStr;
+    }
   }
 
   isFieldInvalid(field: string): boolean {

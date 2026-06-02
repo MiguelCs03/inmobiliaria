@@ -196,3 +196,171 @@
     align-items: flex-start;
   }
 }
+
+/* ==========================================================================
+   ESTILOS ADICIONALES PREMIUM - VISTA CLIENTE DETALLE DE PROPIEDAD
+   ========================================================================== */
+
+/* Resaltador de Miniaturas Activas */
+.thumb {
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.thumb:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.thumb.active-thumb {
+  border-color: #10b981 !important;
+  box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.2);
+  transform: scale(1.02);
+}
+
+/* Modificadores de Estado Inmobiliario */
+.estado.disponible {
+  background: #dcfce7 !important;
+  color: #16a34a !important;
+}
+
+.estado.reservado {
+  background: #fef3c7 !important;
+  color: #d97706 !important;
+}
+
+.estado.vendido {
+  background: #fef2f2 !important;
+  color: #dc2626 !important;
+}
+
+/* Mapa Georeferenciado Público */
+.public-location-map-section {
+  transition: all 0.3s ease;
+  box-shadow: 0 10px 25px -15px rgba(15, 23, 42, 0.12);
+}
+
+.public-location-map-section:hover {
+  box-shadow: 0 15px 30px -10px rgba(15, 23, 42, 0.18);
+  border-color: #e2e8f0;
+}
+
+body.dark .public-location-map-section {
+  background: #1e293b;
+  border-color: #334155;
+}
+
+.leaflet-public-map-wrapper {
+  position: relative;
+  width: 100%;
+}
+
+.public-leaflet-container {
+  height: 300px;
+  width: 100%;
+  border-radius: 0.75rem;
+  border: 1px solid var(--border-color);
+  z-index: 1;
+}
+
+/* Tarjeta de Contacto del Agente Responsable */
+.agent-profile-card {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  transition: all 0.25s ease;
+  background: #ffffff;
+  box-shadow: 0 8px 20px -10px rgba(15, 23, 42, 0.1);
+}
+
+body.dark .agent-profile-card {
+  background: #1e293b;
+  border-color: #334155;
+}
+
+.agent-title-lbl {
+  font-size: 0.7rem;
+  font-weight: 700;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin: 0;
+}
+
+.agent-name-text {
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--dark);
+  margin: 0;
+  line-height: 1.25;
+}
+
+body.dark .agent-name-text {
+  color: #f8fafc;
+}
+
+.agent-position-text {
+  font-size: 0.75rem;
+  color: var(--muted);
+  margin: 0;
+}
+
+.agent-intro-text {
+  font-size: 0.775rem;
+  line-height: 1.45;
+  color: var(--muted);
+  margin: 0;
+}
+
+.agent-online-indicator {
+  position: absolute;
+  bottom: 0px;
+  right: 0px;
+  width: 0.85rem;
+  height: 0.85rem;
+  background-color: #22c55e;
+  border: 2px solid #ffffff;
+  border-radius: 50%;
+  animation: pulseGreen 2.2s infinite ease-in-out;
+}
+
+body.dark .agent-online-indicator {
+  border-color: #1e293b;
+}
+
+@keyframes pulseGreen {
+  0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.5); }
+  70% { transform: scale(1.05); box-shadow: 0 0 0 6px rgba(34, 197, 94, 0); }
+  100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(34, 197, 94, 0); }
+}
+
+/* Botón Exclusivo de WhatsApp */
+.whatsapp-action-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  width: 100%;
+  background: #25d366;
+  color: #ffffff !important;
+  text-decoration: none;
+  font-weight: 700;
+  font-size: 0.875rem;
+  padding: 0.75rem 1.25rem;
+  border-radius: 0.75rem;
+  cursor: pointer;
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  box-shadow: 0 4px 12px rgba(37, 211, 102, 0.3);
+}
+
+.whatsapp-action-btn:hover {
+  background: #20ba59;
+  transform: translateY(-1.5px);
+  box-shadow: 0 6px 18px rgba(37, 211, 102, 0.45);
+}
+
+.whatsapp-action-btn:active {
+  transform: translateY(0);
+  box-shadow: 0 2px 6px rgba(37, 211, 102, 0.3);
+}
+

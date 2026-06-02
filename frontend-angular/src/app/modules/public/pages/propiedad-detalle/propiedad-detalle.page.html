@@ -1,122 +1,158 @@
 <section class="detalle-container">
 
-  <a class="back-link" routerLink="/">
-    Volver al inicio
+  <a class="back-link flex items-center gap-1.5" routerLink="/">
+    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" class="w-4 h-4">
+      <path stroke-linecap="round" stroke-linejoin="round" d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18" />
+    </svg>
+    Volver al catálogo
   </a>
 
   <div class="detalle-hero">
-
     <div class="hero-text">
       <h1>
-        {{ propiedad ? titulo : 'Detalle de propiedad' }}
+        {{ propiedad ? titulo : 'Cargando propiedad...' }}
       </h1>
-
       <p class="subtitle">
-        Explora la información completa de esta propiedad.
+        Explora la información completa y coordenadas geográficas de esta propiedad.
       </p>
     </div>
 
     <div class="hero-badge" *ngIf="propiedad">
       <span>{{ tipoOperacionNombre }}</span>
     </div>
-
   </div>
 
-  <!-- Loading -->
-
+  <!-- Barra de Carga -->
   <div class="status" *ngIf="loading">
     <span class="loading-dot"></span>
-    <span>Cargando detalle...</span>
+    <span>Obteniendo detalles del servidor...</span>
   </div>
 
-  <!-- Error -->
-
+  <!-- Barra de Error -->
   <div class="status error" *ngIf="!loading && errorMessage">
     <span>{{ errorMessage }}</span>
   </div>
 
-  <!-- Contenido -->
+  <!-- Contenido Principal -->
+  <div class="detalle-grid" *ngIf="!loading && !errorMessage && propiedad">
 
-  <div
-    class="detalle-grid"
-    *ngIf="!loading && !errorMessage && propiedad"
-  >
+    <!-- COLUMNA IZQUIERDA: GALERÍA Y MAPA -->
+    <div class="left-column flex flex-col gap-5">
+      
+      <!-- Galería Multimedia -->
+      <div class="gallery">
+        <div class="main-image-wrapper">
+          <img class="main-image" [src]="mainImageUrl" alt="Imagen principal del inmueble" />
+        </div>
+        <div class="thumbs" *ngIf="imagenes.length > 1">
+          <img class="thumb" *ngFor="let img of imagenes" [src]="img" 
+               [class.active-thumb]="img === mainImageUrl"
+               (click)="setMainImage(img)" alt="Miniatura de ambiente" />
+        </div>
+      </div>
 
-    <!-- Galería -->
+      <!-- Descripción General del Inmueble -->
+      <div class="description-section bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 rounded-2xl p-5 shadow-lg flex flex-col gap-2">
+        <h4 class="text-sm font-bold text-slate-800 dark:text-slate-100 mb-2 flex items-center gap-2 border-b border-slate-100 dark:border-slate-800 pb-2">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" class="w-4 h-4 text-blue-600">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z" />
+          </svg>
+          Descripción General del Inmueble
+        </h4>
+        <p class="text-xs text-slate-600 dark:text-slate-300 leading-relaxed font-normal whitespace-pre-line" style="line-height: 1.6;">
+          {{ descripcion }}
+        </p>
+      </div>
 
-    <div class="gallery">
-
-      <img
-        class="main-image"
-        [src]="mainImageUrl"
-        alt="Imagen principal"
-      >
-
-      <div class="thumbs">
-
-        @for (img of imagenes; track $index) {
-
-          <img
-            class="thumb"
-            [src]="img"
-            alt="Imagen de propiedad"
-          >
-
-        }
-
+      <!-- 2. MAPA DE LEAFLET EN EL DETALLE (VISTA CLIENTE) -->
+      <div class="public-location-map-section bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 rounded-2xl p-5 shadow-lg">
+        <h4 class="text-sm font-bold text-slate-800 dark:text-slate-100 mb-2 flex items-center gap-2">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" class="w-4 h-4 text-green-600">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M15 10.5a3 3 0 11-6 0 3 3 0 016 0z" />
+            <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1115 0z" />
+          </svg>
+          Explora la Zona y Entorno
+        </h4>
+        <p class="text-xs text-slate-400 mb-4 leading-relaxed">
+          El inmueble está ubicado geográficamente en la zona de: <strong>{{ ubicacionTexto }}</strong>. Explora el vecindario a través del mapa interactivo:
+        </p>
+        
+        <!-- Contenedor del mapa Leaflet -->
+        <div class="leaflet-public-map-wrapper">
+          <div id="publicMap" class="public-leaflet-container rounded-xl border border-slate-200 dark:border-slate-700 overflow-hidden shadow-inner"></div>
+        </div>
       </div>
 
     </div>
 
-    <!-- Card -->
+    <!-- COLUMNA DERECHA: PANELES DE INFORMACIÓN Y TARJETA DEL AGENTE -->
+    <div class="right-column flex flex-col gap-5">
 
-    <div class="detalle-card">
-
-      <div class="price-row">
-
-        <h2>
-          ${{ propiedad.precioBase | number }}
-        </h2>
-
-        <span class="estado">
-          {{ estadoPropiedadNombre }}
-        </span>
-
-      </div>
-
-      <div class="meta">
-
-        <div>
-          <span class="label">Tipo</span>
-          <span>{{ tipoPropiedadNombre }}</span>
+      <!-- Ficha Técnica Comercial -->
+      <div class="detalle-card">
+        <div class="price-row">
+          <h2>${{ propiedad.precioBase | number:'1.2-2' }} USD</h2>
+          <span class="estado font-semibold uppercase text-xs tracking-wider" 
+                [class.disponible]="propiedad.estadoPropiedadId === 1"
+                [class.reservado]="propiedad.estadoPropiedadId === 2"
+                [class.vendido]="propiedad.estadoPropiedadId === 3">
+            {{ estadoPropiedadNombre }}
+          </span>
         </div>
 
-        <div>
-          <span class="label">Operación</span>
-          <span>{{ tipoOperacionNombre }}</span>
+        <div class="meta border-t border-b border-slate-100 dark:border-slate-800 py-4 my-2">
+          <div>
+            <span class="label">Tipo de Inmueble</span>
+            <span class="val font-semibold text-slate-800 dark:text-slate-100">{{ tipoPropiedadNombre }}</span>
+          </div>
+
+          <div>
+            <span class="label">Operación</span>
+            <span class="val font-semibold text-slate-800 dark:text-slate-100">{{ tipoOperacionNombre }}</span>
+          </div>
+
+          <div>
+            <span class="label">Área Construida</span>
+            <span class="val font-mono font-semibold text-slate-800 dark:text-slate-100">{{ propiedad.areaM2 }} m²</span>
+          </div>
+
+          <div>
+            <span class="label">Ubicación Registrada</span>
+            <span class="val font-semibold text-slate-800 dark:text-slate-100">{{ ubicacionTexto }}</span>
+          </div>
         </div>
 
-        <div>
-          <span class="label">Área</span>
-          <span>{{ propiedad.areaM2 }} m²</span>
+        <!-- 1. TARJETA FLOTANTE DEL AGENTE ENCARGADO -->
+        <div class="agent-profile-card border border-slate-100 dark:border-slate-800/80 rounded-2xl p-5 bg-slate-50/50 dark:bg-slate-900/40">
+          <h4 class="agent-title-lbl">Agente Responsable del Inmueble</h4>
+          
+          <div class="flex items-center gap-4 mb-4" *ngIf="agenteAsignado">
+            <div class="relative flex-shrink-0">
+              <img [src]="agenteAsignado.fotoUrl || 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=80&auto=format&fit=crop&q=60'" 
+                   alt="Foto Agente Encargado" class="w-12 h-12 rounded-full object-cover border-2 border-blue-500 shadow-sm" />
+              <span class="agent-online-indicator" title="Online en WhatsApp"></span>
+            </div>
+            <div class="flex-1">
+              <h5 class="agent-name-text">
+                {{ agenteAsignado.nombres }} {{ agenteAsignado.apellidos }}
+              </h5>
+              <p class="agent-position-text">Asesor de Bienes Raíces</p>
+            </div>
+          </div>
+
+          <p class="agent-intro-text">
+            ¿Tiene consultas sobre este inmueble? Reciba asesoría personalizada inmediata sobre visitas presenciales, financiamiento bancario y trámites.
+          </p>
+
+          <!-- Botón de acción principal llamativo con el logo de WhatsApp -->
+          <a [href]="whatsappLink" target="_blank" class="whatsapp-action-btn">
+            <!-- Icono Oficial SVG de WhatsApp -->
+            <svg class="w-5 h-5 fill-current flex-shrink-0" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+              <path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946C.06 5.348 5.397.01 12.008.01c3.202.001 6.212 1.246 8.477 3.514 2.266 2.268 3.507 5.28 3.505 8.484-.004 6.657-5.34 11.997-11.953 11.997-2.005-.001-3.973-.502-5.724-1.457L0 24zm6.59-4.846c1.6.95 3.188 1.449 4.825 1.451 5.436 0 9.86-4.37 9.864-9.799.002-2.63-1.023-5.101-2.885-6.968C16.574 3.971 14.1 2.946 11.482 2.946c-5.446 0-9.877 4.37-9.88 9.8-.001 1.774.475 3.507 1.378 5.041l-.997 3.64 3.738-.973zm12.39-7.147c-.269-.134-1.595-.785-1.842-.875-.246-.089-.427-.134-.608.135-.182.268-.702.875-.861 1.054-.159.178-.318.201-.587.067-.269-.134-1.137-.419-2.166-1.336-.801-.714-1.342-1.597-1.5-1.865-.158-.268-.017-.413.118-.547.121-.12.269-.314.403-.471.135-.157.179-.268.269-.447.09-.179.045-.335-.022-.47-.068-.134-.608-1.464-.833-2.002-.219-.526-.46-.454-.608-.462l-.517-.006c-.181 0-.476.068-.725.337-.249.268-.952.931-.952 2.267s.975 2.627 1.111 2.805c.135.179 1.917 2.907 4.646 4.08 1.258.541 2.235.86 3.001 1.102.684.218 1.307.187 1.8.114.549-.08 1.595-.65 1.82-1.277.224-.627.224-1.164.157-1.277-.067-.113-.247-.18-.517-.315z"/>
+            </svg>
+            <span>Contactar vía WhatsApp</span>
+          </a>
         </div>
-
-        <div>
-          <span class="label">Ubicación</span>
-          <span>{{ ubicacionTexto }}</span>
-        </div>
-
-      </div>
-
-      <div class="cta-box">
-
-        <p>
-          Coordina una visita o deja tus datos para contacto.
-        </p>
-
-        <button class="cta-btn">
-          Solicitar visita
-        </button>
 
       </div>
 

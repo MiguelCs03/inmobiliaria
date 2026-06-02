@@ -1,4 +1,4 @@
-<nav class="navbar" [class.scrolled]="scrolled">
+<nav class="navbar" [class.scrolled]="scrolled || isDetalle">
   <div class="nav-container">
     <!-- Logo -->
     <a class="nav-logo" routerLink="/" (click)="closeMenu()">
