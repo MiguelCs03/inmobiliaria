@@ -7,6 +7,7 @@ services:
       POSTGRES_USER: ${DB_USER}
       POSTGRES_DB: ${DB_NAME}
       POSTGRES_PASSWORD: ${DB_PASS}
+      TZ: "America/La_Paz"
     ports:
       - "5434:5432"
     volumes:
@@ -27,6 +28,7 @@ services:
     environment:
       - NODE_ENV=development
       - PORT=3003
+      - TZ=America/La_Paz
       - DB_MASTER_HOST=host.docker.internal
       - DB_MASTER_PORT=5434
       - DB_MASTER_USER=${DB_USER}
