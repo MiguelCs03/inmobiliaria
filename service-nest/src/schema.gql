@@ -30,13 +30,20 @@ type ClienteResponse {
 }
 
 type Contrato {
+  blockchainContractId: String
   clienteId: Int!
+  documentHash: String
   documentoNosqlId: String
   empleadoId: Int!
   estadoContrato: String
+  fechaFin: DateTime
+  fechaInicio: DateTime
   id: Int!
   montoTotal: Float!
+  observaciones: String
+  pdfUrl: String
   propiedadId: Int!
+  titulo: String!
 }
 
 type ContratoListResponse {
@@ -65,8 +72,12 @@ input CreateContratoInput {
   documentoNosqlId: String
   empleadoId: Int!
   estadoContrato: String
+  fechaFin: DateTime
+  fechaInicio: DateTime
   montoTotal: Float!
+  observaciones: String
   propiedadId: Int!
+  titulo: String!
 }
 
 input CreateEmpleadoInput {
@@ -361,9 +372,13 @@ input UpdateContratoInput {
   documentoNosqlId: String
   empleadoId: Int
   estadoContrato: String
+  fechaFin: DateTime
+  fechaInicio: DateTime
   id: Int!
   montoTotal: Float
+  observaciones: String
   propiedadId: Int
+  titulo: String
 }
 
 input UpdateEmpleadoInput {

@@ -1,0 +1,129 @@
+/* ==========================================================================
+   ESTILOS DE DETALLE DE CONTRATO (VISTA INDIVIDUAL)
+   ========================================================================== */
+
+/* Layout de dos columnas: Datos a la izquierda, Acciones secundarias a la derecha */
+.detail-grid-container {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  gap: 1.5rem;
+  margin-top: 0.5rem;
+}
+
+@media (max-width: 768px) {
+  .detail-grid-container {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Bloque contenedor de Metadatos */
+.detail-info-block {
+  background: #ffffff;
+  border: 1px solid var(--border-color);
+  border-radius: 0.75rem;
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+/* Filas individuales de datos */
+.detail-row {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  border-bottom: 1px solid rgba(226, 232, 240, 0.6);
+  padding-bottom: 0.75rem;
+}
+
+.detail-row:last-child {
+  border-bottom: none;
+  padding-bottom: 0;
+}
+
+.detail-row.full-width-row {
+  border-bottom: none;
+}
+
+/* Etiquetas y Valores */
+.detail-label {
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: var(--text-secondary);
+  letter-spacing: 0.05em;
+}
+
+.detail-value {
+  font-size: 1rem;
+  color: var(--text-primary);
+}
+
+/* Visualizador de Observaciones con estilo similar a tus cajas de lectura */
+.detail-textarea-display {
+  background: #f8fafc;
+  border: 1px solid var(--border-color);
+  border-radius: 0.5rem;
+  padding: 0.85rem 1rem;
+  font-size: 0.875rem;
+  color: var(--text-primary);
+  line-height: 1.5;
+  white-space: pre-wrap; /* Respeta los saltos de línea guardados */
+  min-height: 80px;
+}
+
+/* Panel de Acciones Laterales Secundarias */
+.detail-actions-panel {
+  background: #f8fafc;
+  border: 1px solid var(--border-color);
+  border-radius: 0.75rem;
+  padding: 1.25rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  height: fit-content;
+}
+
+.panel-subtitle {
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+  margin: 0 0 0.25rem 0;
+}
+
+/* Botones Interactivos del Panel Secundario */
+.btn-secondary-action {
+  background: var(--bg-white);
+  border: 1px solid var(--border-color);
+  color: var(--text-primary);
+  padding: 0.65rem 1rem;
+  border-radius: 0.5rem;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  transition: all 0.15s ease-in-out;
+  box-shadow: var(--shadow-sm);
+}
+
+.btn-secondary-action:hover {
+  background: #f1f5f9;
+  border-color: #cbd5e1;
+  color: var(--blue-primary);
+  transform: translateX(2px);
+}
+
+.action-panel-icon {
+  width: 1.1rem;
+  height: 1.1rem;
+  color: var(--text-muted);
+  transition: color 0.15s ease;
+}
+
+.btn-secondary-action:hover .action-panel-icon {
+  color: var(--blue-primary);
+}

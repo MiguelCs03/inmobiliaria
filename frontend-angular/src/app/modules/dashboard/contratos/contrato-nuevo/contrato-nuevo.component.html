@@ -9,7 +9,7 @@
     </div>
 
     <!-- Cuerpo del Formulario -->
-    <form [formGroup]="contratoFormulario" (ngSubmit)="generaPreviaVista()" class="form-body">
+    <form [formGroup]="contratoFormulario" (ngSubmit)="guardar()" class="form-body">
 
         <!-- Campo: Título -->
         <div class="form-group">
@@ -27,10 +27,10 @@
         <!-- Campo: Cliente / Usuario -->
         <div class="form-group">
             <label>Cliente / Propietario</label>
-            <div class="input-wrapper"
+            <!-- <div class="input-wrapper"
                 [class.invalid]="contratoFormulario.get('usuario')?.invalid && contratoFormulario.get('usuario')?.touched">
                 <input type="text" formControlName="usuario" placeholder="Nombre completo del cliente">
-            </div>
+            </div> -->
             <!-- <div *ngIf="contratoFormulario.get('usuario')?.invalid && contratoFormulario.get('usuario')?.touched" class="error-text">
                 Debe asignar un cliente válido.
             </div> -->

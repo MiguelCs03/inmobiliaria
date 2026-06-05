@@ -1,0 +1,96 @@
+@if (contrato$ | async; as contrato) {
+
+<div class="propiedades-wrapper card catalog-full-card">
+    
+    <!-- Header del Detalle -->
+    <div class="section-header-bar">
+        <div class="title-text">
+            <h1>Contrato #{{contrato.id}}</h1>
+            <p>Ficha técnica del documento legal registrado</p>
+        </div>
+        
+        <!-- Acción Principal -->
+        <button type="button" class="primary-action-btn">
+            <svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                <polyline points="14 2 14 8 20 8"></polyline>
+                <line x1="16" y1="13" x2="8" y2="13"></line>
+                <line x1="16" y1="17" x2="8" y2="17"></line>
+                <polyline points="10 9 9 9 8 9"></polyline>
+            </svg>
+            Generar PDF
+        </button>
+    </div>
+
+    <!-- Contenido del Detalle -->
+    <div class="detail-grid-container">
+        
+        <!-- Bloque de Información Principal -->
+        <div class="detail-info-block">
+            
+            <div class="detail-row">
+                <span class="detail-label">Título del Documento</span>
+                <span class="detail-value font-semibold">{{contrato.titulo}}</span>
+            </div>
+
+            <div class="detail-row">
+                <span class="detail-label">Monto Operación</span>
+                <span class="detail-value property-price">{{contrato.montoTotal}}</span>
+            </div>
+
+            <div class="detail-row">
+                <span class="detail-label">Estado Actual</span>
+                <div>
+                    <!-- El estado cambia dinámicamente según tu lógica de diseño -->
+                    <span class="tag-status" 
+                          [class.reserved]="contrato.estadoContrato === 'PENDING'">
+                        {{contrato.estadoContrato}}
+                    </span>
+                </div>
+            </div>
+
+            <div class="detail-row full-width-row">
+                <span class="detail-label">Observaciones y Cláusulas</span>
+                <div class="detail-textarea-display">
+                    {{contrato.observaciones || 'Sin observaciones registradas.'}}
+                </div>
+            </div>
+
+        </div>
+
+        <!-- Barra de Acciones y Procesos Secundarios -->
+        <div class="detail-actions-panel">
+            <h4 class="panel-subtitle">Acciones de Verificación y Seguridad</h4>
+            
+            <button type="button" class="btn-secondary-action">
+                <svg class="action-panel-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <rect x="2" y="2" width="20" height="20" rx="2.18" ry="2.18"></rect>
+                    <line x1="7" y1="2" x2="7" y2="22"></line>
+                    <line x1="17" y1="2" x2="17" y2="22"></line>
+                    <line x1="2" y1="12" x2="22" y2="12"></line>
+                </svg>
+                <span>Registrar Blockchain</span>
+            </button>
+
+            <button type="button" class="btn-secondary-action">
+                <svg class="action-panel-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                    <circle cx="12" cy="7" r="4"></circle>
+                </svg>
+                <span>Ver Firmas</span>
+            </button>
+
+            <button type="button" class="btn-secondary-action">
+                <svg class="action-panel-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="12" cy="12" r="10"></circle>
+                    <polyline points="12 6 12 12 16 14"></polyline>
+                </svg>
+                <span>Ver Auditoría</span>
+            </button>
+        </div>
+
+    </div>
+
+</div>
+
+}

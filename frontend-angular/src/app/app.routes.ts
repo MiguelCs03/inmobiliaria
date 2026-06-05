@@ -30,6 +30,7 @@ export const routes: Routes = [
       { path: 'propiedades', loadComponent: () => import('./modules/dashboard/propiedades/propiedades.component').then(m => m.PropiedadesComponent) },
       { path: 'contratos', loadComponent: () => import('./modules/dashboard/contratos/contratos-lista/contratos-lista.component').then(m => m.ContractosListaComponent) },
       { path: 'contrato-nuevo', loadComponent: () => import('./modules/dashboard/contratos/contrato-nuevo/contrato-nuevo.component').then(m => m.ContratoNuevoComponent) },
+      { path: 'contratos/:id', loadComponent:()=> import('./modules/dashboard/contratos/contrato-detalle/contrato-detalle.component').then(m=>m.ContratoDetalleComponent)},
       { path: 'perfil', loadComponent: () => import('./modules/dashboard/perfil/perfil.component').then(m => m.PerfilComponent) }
     ]
   },
