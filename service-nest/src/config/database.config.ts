@@ -6,29 +6,46 @@ const toPort = (value: string | undefined, fallback: number): number => {
 	return Number.isNaN(parsed) ? fallback : parsed;
 };
 
-export const getDatabaseConfig = (configService: ConfigService): TypeOrmModuleOptions => ({
-	type: 'postgres',
-	replication: {
-		master: {
-			host: configService.get<string>('DB_MASTER_HOST') ?? 'localhost',
-			port: toPort(configService.get<string>('DB_MASTER_PORT'), 5432),
-			username: configService.get<string>('DB_MASTER_USER') ?? 'postgres',
-			password: configService.get<string>('DB_MASTER_PASS') ?? 'postgres',
-			database: configService.get<string>('DB_MASTER_NAME') ?? 'inmobiliaria',
-		},
-		slaves: [
-			{
-				host: configService.get<string>('DB_SLAVE_HOST') ?? 'localhost',
-				port: toPort(configService.get<string>('DB_SLAVE_PORT'), 5432),
-				username: configService.get<string>('DB_SLAVE_USER') ?? 'postgres',
-				password: configService.get<string>('DB_SLAVE_PASS') ?? 'postgres',
-				database: configService.get<string>('DB_SLAVE_NAME') ?? 'inmobiliaria',
+export const getDatabaseConfig = (configService: ConfigService): TypeOrmModuleOptions => {
+	const databaseUrl = configService.get<string>('DATABASE_URL');
+
+	// Si DATABASE_URL está definida (producción con Neon), usar conexión directa
+	if (databaseUrl) {
+		return {
+			type: 'postgres',
+			url: databaseUrl,
+			ssl: { rejectUnauthorized: false },
+			entities: [__dirname + '/../**/*.entity{.ts,.js}'],
+			synchronize: false,
+			dropSchema: false,
+			logging: false,
+		};
+	}
+
+	// Desarrollo local con replicación master/slave
+	return {
+		type: 'postgres',
+		replication: {
+			master: {
+				host: configService.get<string>('DB_MASTER_HOST') ?? 'localhost',
+				port: toPort(configService.get<string>('DB_MASTER_PORT'), 5432),
+				username: configService.get<string>('DB_MASTER_USER') ?? 'postgres',
+				password: configService.get<string>('DB_MASTER_PASS') ?? 'postgres',
+				database: configService.get<string>('DB_MASTER_NAME') ?? 'inmobiliaria',
 			},
-		],
-	},
-	entities: [__dirname + '/../**/*.entity{.ts,.js}'],
-	synchronize: false, //a mi me funciona con true
-	//autoLoadEntities: true,
-	dropSchema: false,
-	logging: false, //aqui tambien
-});
+			slaves: [
+				{
+					host: configService.get<string>('DB_SLAVE_HOST') ?? 'localhost',
+					port: toPort(configService.get<string>('DB_SLAVE_PORT'), 5432),
+					username: configService.get<string>('DB_SLAVE_USER') ?? 'postgres',
+					password: configService.get<string>('DB_SLAVE_PASS') ?? 'postgres',
+					database: configService.get<string>('DB_SLAVE_NAME') ?? 'inmobiliaria',
+				},
+			],
+		},
+		entities: [__dirname + '/../**/*.entity{.ts,.js}'],
+		synchronize: false,
+		dropSchema: false,
+		logging: false,
+	};
+};

@@ -1,0 +1,29 @@
+version: '3.8'
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: production
+    container_name: service_nest_prod
+    restart: always
+    ports:
+      - "3003:3003"
+    environment:
+      - NODE_ENV=production
+      - PORT=3003
+      - TZ=America/La_Paz
+      # URL de conexión a Neon Postgres
+      - DATABASE_URL=${DATABASE_URL}
+      # JWT / Auth
+      - JWT_SECRET=${JWT_SECRET}
+      - TOKEN_DURATION_MS=${TOKEN_DURATION_MS:-7200000}
+      # Cloudinary
+      - CLOUDINARY_CLOUD_NAME=${CLOUDINARY_CLOUD_NAME}
+      - CLOUDINARY_API_KEY=${CLOUDINARY_API_KEY}
+      - CLOUDINARY_API_SECRET=${CLOUDINARY_API_SECRET}
+      # CORS
+      - ALLOWED_ORIGINS=${ALLOWED_ORIGINS:-http://localhost:4200}
+    env_file:
+      - .env
