@@ -11,12 +11,27 @@ export class ContratoService {
   constructor(
     @InjectRepository(Contrato)
     private readonly contratoRepository: Repository<Contrato>,
-  ) {}
+  ) { }
 
-  async create(createContratoInput: CreateContratoInput): Promise<Contrato> {
-    // Crear la entidad con los datos recibidos
-    const contrato = this.contratoRepository.create(createContratoInput);
-    return this.contratoRepository.save(contrato);
+  async create(
+    createContratoInput:
+      CreateContratoInput
+  ): Promise<Contrato> {
+
+    const contrato =
+      this.contratoRepository.create({
+        ...createContratoInput,
+
+        estadoContrato:
+          createContratoInput
+            .estadoContrato ??
+          'DRAFT'
+      });
+
+    return this.contratoRepository.save(
+      contrato
+    );
+
   }
 
   async findAll(pagination?: PaginationInput): Promise<Contrato[]> {

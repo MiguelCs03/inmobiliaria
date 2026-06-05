@@ -27,7 +27,8 @@ export const getDatabaseConfig = (configService: ConfigService): TypeOrmModuleOp
 		],
 	},
 	entities: [__dirname + '/../**/*.entity{.ts,.js}'],
-	synchronize: false,
+	synchronize: false, //a mi me funciona con true
+	//autoLoadEntities: true,
 	dropSchema: false,
-	logging: false,
+	logging: false, //aqui tambien
 });

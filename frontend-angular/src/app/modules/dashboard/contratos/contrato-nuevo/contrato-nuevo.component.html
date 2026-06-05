@@ -1,0 +1,63 @@
+<div class="modal-container scrollable-modal-container">
+
+    <!-- Header del Formulario -->
+    <div class="modal-header">
+        <div class="modal-header-text">
+            <h3>Crear Nuevo Contrato</h3>
+            <p>Complete los datos requeridos para generar el documento legal.</p>
+        </div>
+    </div>
+
+    <!-- Cuerpo del Formulario -->
+    <form [formGroup]="contratoFormulario" (ngSubmit)="generaPreviaVista()" class="form-body">
+
+        <!-- Campo: Título -->
+        <div class="form-group">
+            <label>Título del Contrato</label>
+            <div class="input-wrapper"
+                [class.invalid]="contratoFormulario.get('titulo')?.invalid && contratoFormulario.get('titulo')?.touched">
+                <input type="text" formControlName="titulo"
+                    placeholder="Ej. Contrato de Arrendamiento - Departamento 2B">
+            </div>
+            <!-- <div *ngIf="contratoFormulario.get('titulo')?.invalid && contratoFormulario.get('titulo')?.touched" class="error-text">
+                El título es requerido.
+            </div> -->
+        </div>
+
+        <!-- Campo: Cliente / Usuario -->
+        <div class="form-group">
+            <label>Cliente / Propietario</label>
+            <div class="input-wrapper"
+                [class.invalid]="contratoFormulario.get('usuario')?.invalid && contratoFormulario.get('usuario')?.touched">
+                <input type="text" formControlName="usuario" placeholder="Nombre completo del cliente">
+            </div>
+            <!-- <div *ngIf="contratoFormulario.get('usuario')?.invalid && contratoFormulario.get('usuario')?.touched" class="error-text">
+                Debe asignar un cliente válido.
+            </div> -->
+        </div>
+
+        <!-- Campo: Observaciones (Textarea Premium) -->
+        <div class="form-group">
+            <label>Observaciones o Cláusulas Especiales</label>
+            <div class="textarea-wrapper"
+                [class.invalid]="contratoFormulario.get('observaciones')?.invalid && contratoFormulario.get('observaciones')?.touched">
+                <textarea formControlName="observaciones"
+                    placeholder="Detalles adicionales, penalizaciones o acuerdos específicos..."></textarea>
+            </div>
+        </div>
+
+        <!-- Acciones del Formulario -->
+        <div class="modal-footer-actions">
+            <button type="button" class="cancel-btn">
+                Cancelar
+            </button>
+            <button type="submit" class="submit-btn">
+                <span>Crear Contrato</span>
+            </button>
+        </div>
+    </form>
+
+    <app-contrato-previa-vista [contrato]="previewData">
+    </app-contrato-previa-vista>
+
+</div>

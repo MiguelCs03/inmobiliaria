@@ -1,0 +1,38 @@
+<div class="contract-document"  id="documentoContrato">
+
+    <h1>
+        {{contrato?.titulo}}
+    </h1>
+
+    <p>
+
+        Entre:
+
+        <strong>
+            {{contrato?.nombreCliente}}
+        </strong>
+
+        y
+
+        <strong>
+            {{contrato?.usuario}}
+        </strong>
+
+    </p>
+ 
+    <p>
+
+        Observaciones:
+        <strong>
+            {{contrato?.observaciones}}
+        </strong>
+
+    </p>
+</div>
+
+<button
+    (click)="descargarPDF()">
+
+    Descargar PDF
+
+</button>

@@ -96,3 +96,19 @@ Nest is an MIT-licensed open source project. It can grow thanks to the sponsors 
 ## License
 
 Nest is [MIT licensed](https://github.com/nestjs/nest/blob/master/LICENSE).
+
+
+
+
+## comando para agregar o alterar atributos en las tablas:
+npm run migration:generate
+y luego:
+npm run migration:run
+
+//debe estar limpio
+export class FixTables1780675634982 implements MigrationInterface {
+     name = 'FixTables1780675634982'//asi,
+suele crearse asi:
+export class  %npmConfigName%1780675634982 implements MigrationInterface {
+    name = ' %npmConfigName%1780675634982'
+

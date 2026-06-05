@@ -1,0 +1,102 @@
+.boton{
+    background-color: aqua;
+}/* Contenedor adaptado para tablas responsivas */
+.table-responsive {
+  width: 100%;
+  overflow-x: auto;
+  margin-top: 0.5rem;
+  border-radius: 0.5rem;
+  border: 1px solid var(--border-color);
+  background: var(--bg-white);
+}
+
+/* Estilos de la Tabla Base */
+.custom-table-catalog {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+  font-size: 0.875rem;
+}
+
+/* Encabezados */
+.custom-table-catalog thead tr {
+  background-color: #f8fafc;
+  border-bottom: 2px solid var(--border-color);
+}
+
+.custom-table-catalog th {
+  padding: 0.875rem 1rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  font-size: 0.725rem;
+  letter-spacing: 0.05em;
+  color: var(--text-secondary);
+}
+
+/* Celdas del Cuerpo */
+.custom-table-catalog tbody tr {
+  border-bottom: 1px solid var(--border-color);
+  transition: background-color 0.15s ease;
+}
+
+.custom-table-catalog tbody tr:last-child {
+  border-bottom: none;
+}
+
+.custom-table-catalog tbody tr:hover {
+  background-color: rgba(240, 244, 248, 0.5); /* Sutil hover usando tono bg-body */
+}
+
+.custom-table-catalog td {
+  padding: 1rem;
+  color: var(--text-primary);
+  vertical-align: middle;
+}
+
+/* Clases Utilitarias para Celdas */
+.font-mono {
+  font-family: monospace;
+  font-weight: 600;
+  color: var(--text-muted);
+}
+
+.font-semibold {
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.text-right {
+  text-align: right;
+}
+
+/* Botón de Acción "Ver" (Estilo Premium Minimalista) */
+.btn-action-view {
+  background: #f1f5f9;
+  border: 1px solid var(--border-color);
+  color: var(--text-secondary);
+  padding: 0.4rem 0.85rem;
+  border-radius: 0.375rem;
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  transition: all 0.15s ease;
+}
+
+.btn-action-view:hover {
+  background: var(--celeste-light);
+  border-color: #bae6fd;
+  color: var(--celeste);
+}
+
+.view-icon {
+  width: 0.95rem;
+  height: 0.95rem;
+  transition: transform 0.15s ease;
+}
+
+.btn-action-view:hover .view-icon {
+  transform: scale(1.05);
+}
