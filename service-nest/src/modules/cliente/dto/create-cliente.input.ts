@@ -6,6 +6,10 @@ export class CreateClienteInput {
   @Field(() => Int, { nullable: true })
   usuarioId?: number;
 
+  @Field(() => Int, { nullable: true })
+  @IsOptional()
+  segmentoId?: number;
+
   @Field(() => String)
   nombres!: string;
 

@@ -20,19 +20,21 @@ export class ClienteService {
   }
 
   async findAll(pagination?: PaginationInput): Promise<Cliente[]> {
-    if (!pagination) {
-      return this.clienteRepository.find();
+    const options: any = { relations: ['segmento', 'preferencias'] };
+    if (pagination) {
+      const page = pagination.page ?? 1;
+      const limit = pagination.limit ?? 10;
+      options.skip = (page - 1) * limit;
+      options.take = limit;
     }
-
-    // Aplicar paginacion simple cuando se envia
-    const page = pagination.page ?? 1;
-    const limit = pagination.limit ?? 10;
-    const skip = (page - 1) * limit;
-    return this.clienteRepository.find({ skip, take: limit });
+    return this.clienteRepository.find(options);
   }
 
   async findOne(id: number): Promise<Cliente> {
-    const cliente = await this.clienteRepository.findOne({ where: { id } });
+    const cliente = await this.clienteRepository.findOne({
+      where: { id },
+      relations: ['segmento', 'preferencias'],
+    });
     if (!cliente) {
       throw new NotFoundException('Cliente no encontrado');
     }

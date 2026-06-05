@@ -13,7 +13,9 @@ export class Gestion1779921042806 implements MigrationInterface {
         await queryRunner.query(`CREATE TABLE "empleado" ("id" BIGSERIAL NOT NULL, "usuario_id" bigint NOT NULL, "sucursal_id" integer NOT NULL, "nombres" character varying(100) NOT NULL, "apellidos" character varying(100) NOT NULL, "activo" boolean NOT NULL DEFAULT true, CONSTRAINT "REL_82d9465c3816fcbeded6c374ae" UNIQUE ("usuario_id"), CONSTRAINT "PK_d15e7688d5ed23e9fdb570b2e5d" PRIMARY KEY ("id"))`);
         await queryRunner.query(`CREATE TABLE "rol" ("id" SERIAL NOT NULL, "nombre" character varying(50) NOT NULL, CONSTRAINT "PK_c93a22388638fac311781c7f2dd" PRIMARY KEY ("id"))`);
         await queryRunner.query(`CREATE TABLE "usuario" ("id" BIGSERIAL NOT NULL, "rol_id" integer NOT NULL, "correo" character varying(150) NOT NULL, "contrasenia_hash" character varying(255) NOT NULL, "activo" boolean NOT NULL DEFAULT true, "foto_url" character varying(255), CONSTRAINT "UQ_349ecb64acc4355db443ca17cbd" UNIQUE ("correo"), CONSTRAINT "PK_a56c58e5cabaa04fb2c98d2d7e2" PRIMARY KEY ("id"))`);
-        await queryRunner.query(`CREATE TABLE "cliente" ("id" BIGSERIAL NOT NULL, "usuario_id" bigint, "nombres" character varying(100) NOT NULL, "telefono" character varying(20) NOT NULL, "ci_nit" character varying(30) NOT NULL, "activo" boolean NOT NULL DEFAULT true, CONSTRAINT "REL_51a4d9370abe0523f208ef3f43" UNIQUE ("usuario_id"), CONSTRAINT "PK_18990e8df6cf7fe71b9dc0f5f39" PRIMARY KEY ("id"))`);
+        await queryRunner.query(`CREATE TABLE "segmento" ("id" SERIAL NOT NULL, "nombre" character varying(100) NOT NULL, CONSTRAINT "PK_segmento" PRIMARY KEY ("id"))`);
+        await queryRunner.query(`CREATE TABLE "cliente" ("id" BIGSERIAL NOT NULL, "usuario_id" bigint, "segmento_id" bigint, "nombres" character varying(100) NOT NULL, "telefono" character varying(20) NOT NULL, "ci_nit" character varying(30) NOT NULL, "activo" boolean NOT NULL DEFAULT true, CONSTRAINT "REL_51a4d9370abe0523f208ef3f43" UNIQUE ("usuario_id"), CONSTRAINT "PK_18990e8df6cf7fe71b9dc0f5f39" PRIMARY KEY ("id"))`);
+        await queryRunner.query(`CREATE TABLE "preferencias" ("id" BIGSERIAL NOT NULL, "cliente_id" bigint NOT NULL, "presupuesto_max" numeric(12,2), "tipo_propiedad_buscada" character varying(100), "habitaciones_minimo" integer, "zona_preferida" character varying(150), CONSTRAINT "PK_preferencias" PRIMARY KEY ("id"))`);
         await queryRunner.query(`CREATE TABLE "pago" ("id" BIGSERIAL NOT NULL, "factura_id" bigint NOT NULL, "monto" numeric(12,2) NOT NULL, "metodo" character varying(50) NOT NULL, CONSTRAINT "PK_6be14be998d5e41f10e58c0e651" PRIMARY KEY ("id"))`);
         await queryRunner.query(`CREATE TABLE "factura" ("id" BIGSERIAL NOT NULL, "plan_pago_id" bigint NOT NULL, "nro_factura" character varying(30) NOT NULL, "monto_total" numeric(12,2) NOT NULL, "fecha_emision" TIMESTAMP NOT NULL, CONSTRAINT "UQ_26babef3ce3453fd7cc4eff9d2b" UNIQUE ("nro_factura"), CONSTRAINT "PK_ca804984009ea42a7b46adb9a86" PRIMARY KEY ("id"))`);
         await queryRunner.query(`CREATE TYPE "public"."plan_pagos_estado_enum" AS ENUM('Pendiente', 'Pagado')`);
@@ -26,6 +28,8 @@ export class Gestion1779921042806 implements MigrationInterface {
         await queryRunner.query(`ALTER TABLE "empleado" ADD CONSTRAINT "FK_49778622b1c20506be43d01066b" FOREIGN KEY ("sucursal_id") REFERENCES "sucursal"("id") ON DELETE NO ACTION ON UPDATE NO ACTION`);
         await queryRunner.query(`ALTER TABLE "usuario" ADD CONSTRAINT "FK_6c336b0a51b5c4d22614cb02533" FOREIGN KEY ("rol_id") REFERENCES "rol"("id") ON DELETE NO ACTION ON UPDATE NO ACTION`);
         await queryRunner.query(`ALTER TABLE "cliente" ADD CONSTRAINT "FK_51a4d9370abe0523f208ef3f43d" FOREIGN KEY ("usuario_id") REFERENCES "usuario"("id") ON DELETE NO ACTION ON UPDATE NO ACTION`);
+        await queryRunner.query(`ALTER TABLE "cliente" ADD CONSTRAINT "FK_cliente_segmento" FOREIGN KEY ("segmento_id") REFERENCES "segmento"("id") ON DELETE NO ACTION ON UPDATE NO ACTION`);
+        await queryRunner.query(`ALTER TABLE "preferencias" ADD CONSTRAINT "FK_preferencias_cliente" FOREIGN KEY ("cliente_id") REFERENCES "cliente"("id") ON DELETE CASCADE ON UPDATE NO ACTION`);
         await queryRunner.query(`ALTER TABLE "pago" ADD CONSTRAINT "FK_a120b7486ee0d2e5c1f21c72669" FOREIGN KEY ("factura_id") REFERENCES "factura"("id") ON DELETE NO ACTION ON UPDATE NO ACTION`);
         await queryRunner.query(`ALTER TABLE "factura" ADD CONSTRAINT "FK_014ce5e76a65d184e019eff73df" FOREIGN KEY ("plan_pago_id") REFERENCES "plan_pagos"("id") ON DELETE NO ACTION ON UPDATE NO ACTION`);
         await queryRunner.query(`ALTER TABLE "plan_pagos" ADD CONSTRAINT "FK_ac7a07bb5260f2d374cc9d6a1da" FOREIGN KEY ("contrato_id") REFERENCES "contrato"("id") ON DELETE NO ACTION ON UPDATE NO ACTION`);
@@ -56,6 +60,8 @@ export class Gestion1779921042806 implements MigrationInterface {
         await queryRunner.query(`ALTER TABLE "factura" DROP CONSTRAINT "FK_014ce5e76a65d184e019eff73df"`);
         await queryRunner.query(`ALTER TABLE "pago" DROP CONSTRAINT "FK_a120b7486ee0d2e5c1f21c72669"`);
         await queryRunner.query(`ALTER TABLE "cliente" DROP CONSTRAINT "FK_51a4d9370abe0523f208ef3f43d"`);
+        await queryRunner.query(`ALTER TABLE "preferencias" DROP CONSTRAINT "FK_preferencias_cliente"`);
+        await queryRunner.query(`ALTER TABLE "cliente" DROP CONSTRAINT "FK_cliente_segmento"`);
         await queryRunner.query(`ALTER TABLE "usuario" DROP CONSTRAINT "FK_6c336b0a51b5c4d22614cb02533"`);
         await queryRunner.query(`ALTER TABLE "empleado" DROP CONSTRAINT "FK_49778622b1c20506be43d01066b"`);
         await queryRunner.query(`ALTER TABLE "empleado" DROP CONSTRAINT "FK_82d9465c3816fcbeded6c374ae9"`);
@@ -67,7 +73,9 @@ export class Gestion1779921042806 implements MigrationInterface {
         await queryRunner.query(`DROP TYPE "public"."plan_pagos_estado_enum"`);
         await queryRunner.query(`DROP TABLE "factura"`);
         await queryRunner.query(`DROP TABLE "pago"`);
+        await queryRunner.query(`DROP TABLE "preferencias"`);
         await queryRunner.query(`DROP TABLE "cliente"`);
+        await queryRunner.query(`DROP TABLE "segmento"`);
         await queryRunner.query(`DROP TABLE "usuario"`);
         await queryRunner.query(`DROP TABLE "rol"`);
         await queryRunner.query(`DROP TABLE "empleado"`);

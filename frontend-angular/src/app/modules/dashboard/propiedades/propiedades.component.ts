@@ -5,6 +5,7 @@ import { RouterModule } from '@angular/router';
 import { Apollo } from 'apollo-angular';
 import { gql } from '@apollo/client/core';
 import { UploadService } from '../../../core/services/upload.service';
+import { AiAnalysisService, AiAnalysisResponse } from '../../../core/services/ai-analysis.service';
 
 export interface Propiedad {
   id: number;
@@ -59,6 +60,7 @@ export class PropiedadesComponent implements OnInit {
   private apollo = inject(Apollo);
   private cdr = inject(ChangeDetectorRef);
   private uploadService = inject(UploadService);
+  private aiAnalysisService = inject(AiAnalysisService);
   private platformId = inject(PLATFORM_ID);
 
   propiedadForm!: FormGroup;
@@ -81,10 +83,16 @@ export class PropiedadesComponent implements OnInit {
   uploadedImagenesUrls: string[] = [];
   uploadingImagen = false;
 
-  // Drag & Drop y simulación de IA
+  // Drag & Drop y análisis con IA (Django CNN)
   isDragging = false;
-  aiTags: { [url: string]: string } = {}; // Almacena las etiquetas detectadas por IA
+  aiResults: { [url: string]: AiAnalysisResponse } = {}; // Resultados reales del modelo CNN
   detectingIa: { [url: string]: boolean } = {}; // Carga de estado para análisis de IA
+  overallAnalysis: {
+    conservationCounts: { [key: string]: number };
+    ambientCounts: { [key: string]: number };
+    overallState: string;
+    recommendation: string;
+  } | null = null;
 
   // Leaflet Map properties
   private map: any;
@@ -241,8 +249,9 @@ export class PropiedadesComponent implements OnInit {
   openModal(): void {
     this.showModal = true;
     this.uploadedImagenesUrls = [];
-    this.aiTags = {};
+    this.aiResults = {};
     this.detectingIa = {};
+    this.overallAnalysis = null;
     this.uploadingImagen = false;
     this.selectedEmpleado = null;
     this.successMessage = '';
@@ -257,8 +266,9 @@ export class PropiedadesComponent implements OnInit {
   closeModal(): void {
     this.showModal = false;
     this.uploadedImagenesUrls = [];
-    this.aiTags = {};
+    this.aiResults = {};
     this.detectingIa = {};
+    this.overallAnalysis = null;
     this.uploadingImagen = false;
     this.selectedEmpleado = null;
     this.showEmpleadoDropdown = false;
@@ -452,17 +462,37 @@ export class PropiedadesComponent implements OnInit {
 
     this.uploadService.uploadImage(file).subscribe({
       next: (res) => {
-        this.uploadingImagen = false;
         if (res.success && res.url) {
           const url = res.url;
           this.uploadedImagenesUrls.push(url);
           this.showSuccess('Imagen subida con éxito. Analizando con IA...');
-          
-          // Simular respuesta del microservicio de IA
-          this.simulateAiDetection(url, file.name);
+
+          // Analizar con el modelo CNN de Django (via URL desde Cloudinary)
+          this.detectingIa[url] = true;
+          this.cdr.detectChanges();
+
+          this.aiAnalysisService.analyzeImageUrl(url).subscribe({
+            next: (aiResult) => {
+              this.detectingIa[url] = false;
+              this.aiResults[url] = aiResult;
+              this.updateOverallRecommendation();
+              this.cdr.detectChanges();
+            },
+            error: (err) => {
+              this.detectingIa[url] = false;
+              console.error('Error al analizar imagen con CNN:', err);
+              this.aiResults[url] = {
+                ambiente: null,
+                conservacion: null,
+                modo: 'error'
+              };
+              this.cdr.detectChanges();
+            }
+          });
         } else {
           this.showError(res.message || 'Error al subir la imagen.');
         }
+        this.uploadingImagen = false;
         this.cdr.detectChanges();
       },
       error: (err) => {
@@ -474,46 +504,69 @@ export class PropiedadesComponent implements OnInit {
     });
   }
 
-  private simulateAiDetection(url: string, filename: string): void {
-    this.detectingIa[url] = true;
-    this.cdr.detectChanges();
-
-    // Simulamos que la red neuronal tarda 1.5 segundos en emitir un veredicto
-    setTimeout(() => {
-      this.detectingIa[url] = false;
-      const nameLower = filename.toLowerCase();
-      let roomDetected = '';
-      let confidence = Math.floor(Math.random() * 8) + 91; // 91% a 98% de confianza
-
-      if (nameLower.includes('cocina') || nameLower.includes('kitchen')) {
-        roomDetected = 'Cocina';
-      } else if (nameLower.includes('fachada') || nameLower.includes('frente') || nameLower.includes('exterior')) {
-        roomDetected = 'Fachada';
-      } else if (nameLower.includes('baño') || nameLower.includes('bathroom') || nameLower.includes('wc')) {
-        roomDetected = 'Baño';
-      } else if (nameLower.includes('dormitorio') || nameLower.includes('bedroom') || nameLower.includes('habita')) {
-        roomDetected = 'Dormitorio';
-      } else if (nameLower.includes('living') || nameLower.includes('sala') || nameLower.includes('comedor')) {
-        roomDetected = 'Sala de estar';
-      } else if (nameLower.includes('patio') || nameLower.includes('jardin') || nameLower.includes('garden')) {
-        roomDetected = 'Jardín / Patio';
-      } else {
-        // Fallback aleatorio elegante
-        const areas = ['Cocina', 'Fachada', 'Dormitorio', 'Sala de estar', 'Jardín', 'Baño'];
-        roomDetected = areas[Math.floor(Math.random() * areas.length)];
-      }
-
-      this.aiTags[url] = `${roomDetected} detectada al ${confidence}%`;
-      this.cdr.detectChanges();
-    }, 1500);
-  }
-
   removeUploadedImage(index: number): void {
     const url = this.uploadedImagenesUrls[index];
     this.uploadedImagenesUrls.splice(index, 1);
-    delete this.aiTags[url];
+    delete this.aiResults[url];
     delete this.detectingIa[url];
+    this.updateOverallRecommendation();
     this.cdr.detectChanges();
+  }
+
+  private updateOverallRecommendation(): void {
+    const conservations = Object.values(this.aiResults)
+      .map(r => r?.conservacion?.clase)
+      .filter(Boolean) as string[];
+
+    const ambients = Object.values(this.aiResults)
+      .map(r => r?.ambiente?.clase)
+      .filter(Boolean) as string[];
+
+    if (conservations.length === 0) {
+      this.overallAnalysis = null;
+      return;
+    }
+
+    const conservationCounts: { [key: string]: number } = {};
+    for (const c of conservations) {
+      conservationCounts[c] = (conservationCounts[c] || 0) + 1;
+    }
+
+    const ambientCounts: { [key: string]: number } = {};
+    for (const a of ambients) {
+      ambientCounts[a] = (ambientCounts[a] || 0) + 1;
+    }
+
+    let maxCount = 0;
+    let overallState = 'Regular';
+    for (const [state, count] of Object.entries(conservationCounts)) {
+      if (count > maxCount) {
+        maxCount = count;
+        overallState = state;
+      }
+    }
+
+    let recommendation = '';
+    switch (overallState) {
+      case 'Excelente':
+        recommendation = 'La propiedad se encuentra en condiciones óptimas. Lista para comercialización inmediata a precio premium.';
+        break;
+      case 'Bueno':
+        recommendation = 'La propiedad está en buenas condiciones generales. Se recomienda realizar pequeñas mejoras estéticas antes de la venta para maximizar el valor.';
+        break;
+      case 'Regular':
+        recommendation = 'La propiedad requiere mantenimiento y reparaciones. Se recomienda invertir en renovaciones básicas para mejorar su valor de mercado.';
+        break;
+      default:
+        recommendation = 'No se pudo determinar el estado general de la propiedad. Se recomienda una inspección presencial.';
+    }
+
+    this.overallAnalysis = {
+      conservationCounts,
+      ambientCounts,
+      overallState,
+      recommendation
+    };
   }
 
   // --- MÉTODOS DE LA LISTA Y DE CARGA ---

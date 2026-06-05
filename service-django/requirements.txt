@@ -19,6 +19,7 @@ Pillow>=10.3.0
 # API extras
 django-cors-headers>=4.3.1
 django-filter>=24.2
+requests>=2.31.0
 
 # Experiment tracking
 mlflow>=2.13.0

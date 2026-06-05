@@ -65,6 +65,10 @@ export class AuthService {
       })
       .pipe(
         map((result: any) => {
+          if (result.errors?.length > 0) {
+            const msg = result.errors[0]?.message || 'Credenciales inválidas';
+            throw new Error(msg);
+          }
           if (result.error?.graphQLErrors?.length > 0) {
             const msg = result.error.graphQLErrors[0]?.message || 'Credenciales inválidas';
             throw new Error(msg);

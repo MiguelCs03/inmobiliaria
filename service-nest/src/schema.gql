@@ -12,6 +12,7 @@ type Cliente {
   ciNit: String!
   id: Int!
   nombres: String!
+  segmentoId: Int
   telefono: String!
   usuarioId: Int
 }
@@ -54,6 +55,7 @@ input CreateClienteInput {
   activo: Boolean
   ciNit: String!
   nombres: String!
+  segmentoId: Int
   telefono: String!
   usuarioId: Int
 }
@@ -73,6 +75,14 @@ input CreateEmpleadoInput {
   nombres: String!
   sucursalId: Int!
   usuarioId: Int!
+}
+
+input CreatePreferenciasInput {
+  clienteId: Int!
+  habitacionesMinimo: Int
+  presupuestoMax: Float
+  tipoPropiedadBuscada: String
+  zonaPreferida: String
 }
 
 input CreatePropiedadInput {
@@ -95,6 +105,10 @@ input CreatePropietarioInput {
 }
 
 input CreateRolInput {
+  nombre: String!
+}
+
+input CreateSegmentoInput {
   nombre: String!
 }
 
@@ -159,9 +173,11 @@ type Mutation {
   createCliente(createClienteInput: CreateClienteInput!): ClienteResponse!
   createContrato(createContratoInput: CreateContratoInput!): ContratoResponse!
   createEmpleado(createEmpleadoInput: CreateEmpleadoInput!): EmpleadoResponse!
+  createPreferencias(createPreferenciasInput: CreatePreferenciasInput!): Preferencias!
   createPropiedad(createPropiedadInput: CreatePropiedadInput!): PropiedadResponse!
   createPropietario(createPropietarioInput: CreatePropietarioInput!): PropietarioResponse!
   createRol(createRolInput: CreateRolInput!): RolResponse!
+  createSegmento(createSegmentoInput: CreateSegmentoInput!): Segmento!
   createSucursal(createSucursalInput: CreateSucursalInput!): SucursalResponse!
   createVisita(createVisitaInput: CreateVisitaInput!): VisitaResponse!
   login(loginInput: LoginInput!): LoginApiResponse!
@@ -169,16 +185,20 @@ type Mutation {
   removeCliente(id: Int!): ClienteResponse!
   removeContrato(id: Int!): ContratoResponse!
   removeEmpleado(id: Int!): EmpleadoResponse!
+  removePreferencias(id: Int!): Preferencias!
   removePropiedad(id: Int!): PropiedadResponse!
   removePropietario(id: Int!): PropietarioResponse!
+  removeSegmento(id: Int!): Segmento!
   removeSucursal(id: Int!): SucursalResponse!
   removeVisita(id: Int!): VisitaResponse!
   toggleActivoUsuario(id: Int!): UsuarioAuthResponse!
   updateCliente(updateClienteInput: UpdateClienteInput!): ClienteResponse!
   updateContrato(updateContratoInput: UpdateContratoInput!): ContratoResponse!
   updateEmpleado(updateEmpleadoInput: UpdateEmpleadoInput!): EmpleadoResponse!
+  updatePreferencias(updatePreferenciasInput: UpdatePreferenciasInput!): Preferencias!
   updatePropiedad(updatePropiedadInput: UpdatePropiedadInput!): PropiedadResponse!
   updatePropietario(updatePropietarioInput: UpdatePropietarioInput!): PropietarioResponse!
+  updateSegmento(updateSegmentoInput: UpdateSegmentoInput!): Segmento!
   updateSucursal(updateSucursalInput: UpdateSucursalInput!): SucursalResponse!
   updateVisita(updateVisitaInput: UpdateVisitaInput!): VisitaResponse!
 }
@@ -189,6 +209,15 @@ input PaginationInput {
   page: Int
   search: String
   startDate: String
+}
+
+type Preferencias {
+  clienteId: Int!
+  habitacionesMinimo: Int
+  id: Int!
+  presupuestoMax: Float
+  tipoPropiedadBuscada: String
+  zonaPreferida: String
 }
 
 type Propiedad {
@@ -250,12 +279,17 @@ type Query {
   contratos(pagination: PaginationInput): ContratoListResponse!
   empleado(id: Int!): EmpleadoResponse!
   empleados(pagination: PaginationInput): EmpleadoListResponse!
+  preferencia(id: Int!): Preferencias!
+  preferencias: [Preferencias!]!
+  preferenciasByCliente(clienteId: Int!): [Preferencias!]!
   propiedad(id: Int!): PropiedadResponse!
   propiedades(pagination: PaginationInput): PropiedadListResponse!
   propietario(id: Int!): PropietarioResponse!
   propietarios(pagination: PaginationInput): PropietarioListResponse!
   rol(id: Int!): RolResponse!
   roles: RolListResponse!
+  segmento(id: Int!): Segmento!
+  segmentos: [Segmento!]!
   sucursal(id: Int!): SucursalResponse!
   sucursales(pagination: PaginationInput): SucursalListResponse!
   usuario(id: Int!): UsuarioAuthResponse!
@@ -288,6 +322,11 @@ type RolResponse {
   success: Boolean!
 }
 
+type Segmento {
+  id: Int!
+  nombre: String!
+}
+
 type Sucursal {
   activo: Boolean!
   ciudad: String!
@@ -312,6 +351,7 @@ input UpdateClienteInput {
   ciNit: String
   id: Int!
   nombres: String
+  segmentoId: Int
   telefono: String
   usuarioId: Int
 }
@@ -335,6 +375,15 @@ input UpdateEmpleadoInput {
   usuarioId: Int
 }
 
+input UpdatePreferenciasInput {
+  clienteId: Int
+  habitacionesMinimo: Int
+  id: Int!
+  presupuestoMax: Float
+  tipoPropiedadBuscada: String
+  zonaPreferida: String
+}
+
 input UpdatePropiedadInput {
   areaM2: Float
   estadoPropiedadId: Int
@@ -354,6 +403,11 @@ input UpdatePropietarioInput {
   id: Int!
   nombres: String
   telefono: String
+}
+
+input UpdateSegmentoInput {
+  id: Int!
+  nombre: String
 }
 
 input UpdateSucursalInput {

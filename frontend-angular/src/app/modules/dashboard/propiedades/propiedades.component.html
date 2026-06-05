@@ -234,7 +234,7 @@
           </div>
         </div>
 
-        <!-- 3. CARGA MULTIMEDIA INTELIGENTE CON SIMULACIÓN DE IA -->
+        <!-- 3. CARGA MULTIMEDIA INTELIGENTE CON ANÁLISIS CNN (Django) -->
         <div class="property-images-upload-section">
           <label class="form-group-label flex-header-upload">
             <span>Galería de Fotos del Inmueble</span>
@@ -254,31 +254,75 @@
               <path stroke-linecap="round" stroke-linejoin="round" d="M12 16.5V9.75m0 0l3 3m-3-3l-3 3M6.75 19.5a4.5 4.5 0 01-1.41-8.775 5.25 5.25 0 0110.233-2.33 3 3 0 013.758 3.848A3.752 3.752 0 0118 19.5H6.75z" />
             </svg>
             <p class="drag-drop-text">Arrastra fotos de los ambientes aquí o <span class="browse-link text-blue-600 font-semibold hover:underline">explora archivos</span></p>
-            <p class="upload-limits-text">Imágenes PNG, JPG hasta 5MB. Nuestro microservicio clasificará el tipo de habitación.</p>
+            <p class="upload-limits-text">Imágenes PNG, JPG hasta 5MB. El modelo CNN clasificará el ambiente y estado de conservación.</p>
           </div>
 
-          <!-- Cuadrícula de fotos cargadas con Badges inteligentes de IA -->
-          <div class="images-grid-preview" *ngIf="uploadedImagenesUrls.length > 0">
-            <div class="image-preview-card border border-slate-200 dark:border-slate-700 flex flex-col" *ngFor="let url of uploadedImagenesUrls; let idx = index">
-              <div class="relative w-full h-24 bg-slate-100">
-                <img [src]="url" alt="Foto Propiedad" class="property-preview-img" />
-                <button type="button" class="delete-preview-btn" (click)="removeUploadedImage(idx)" title="Eliminar Foto">
-                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="delete-btn-icon">
+          <!-- Uploading indicator -->
+          <div class="uploading-overlay-fixed" *ngIf="uploadingImagen">
+            <span class="blue-spinner"></span>
+            <span>Subiendo imagen a Cloudinary...</span>
+          </div>
+
+          <!-- Cuadrícula de fotos cargadas con resultados del modelo CNN -->
+          <div class="images-grid-preview enhanced-grid" *ngIf="uploadedImagenesUrls.length > 0">
+            <div class="dl-card" *ngFor="let url of uploadedImagenesUrls; let idx = index">
+              
+              <!-- Imagen -->
+              <div class="dl-img-wrapper">
+                <img [src]="url" alt="Foto Propiedad" class="dl-img" />
+                <button type="button" class="dl-delete-btn" (click)="removeUploadedImage(idx)" title="Eliminar Foto">
+                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
                   </svg>
                 </button>
               </div>
 
-              <!-- Badges de IA simulados con efectos visuales -->
-              <div class="ai-analysis-footer">
-                <div class="ai-processing-loader" *ngIf="detectingIa[url]">
-                  <span class="spinner-ia"></span>
-                  <span>Clasificando...</span>
+              <!-- Resultados del modelo CNN -->
+              <div class="dl-footer">
+                <div class="dl-processing" *ngIf="detectingIa[url]">
+                  <span class="dl-spinner"></span>
+                  <span>Analizando con CNN...</span>
                 </div>
-                <div class="w-full text-center" *ngIf="!detectingIa[url]">
-                  <span class="ai-tag-badge" [class.ai-success]="aiTags[url]">
-                    {{ aiTags[url] || 'Cargado correctamente' }}
-                  </span>
+
+                <ng-container *ngIf="!detectingIa[url] && aiResults[url]">
+                  <div class="dl-result-row">
+                    <span class="dl-label">Ambiente</span>
+                    <div class="dl-badge-group">
+                      <span class="dl-badge dl-badge-ambiente" [title]="'Confianza: ' + ((aiResults[url].ambiente?.confianza || 0) * 100 | number:'1.1-1') + '%'">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="dl-badge-icon">
+                          <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.409a2.25 2.25 0 013.182 0l2.909 2.909M3.75 21h16.5A2.25 2.25 0 0022.5 18.75V5.25A2.25 2.25 0 0020.25 3H3.75A2.25 2.25 0 001.5 5.25v13.5A2.25 2.25 0 003.75 21z" />
+                        </svg>
+                        {{ aiResults[url].ambiente?.clase || '?' }}
+                      </span>
+                    </div>
+                    <div class="dl-confidence-bar">
+                      <div class="dl-bar-fill dl-bar-ambiente" [style.width.%]="(aiResults[url].ambiente?.confianza || 0) * 100"></div>
+                    </div>
+                    <span class="dl-confidence-text">{{ (aiResults[url].ambiente?.confianza || 0) * 100 | number:'1.1-1' }}%</span>
+                  </div>
+
+                  <div class="dl-result-row">
+                    <span class="dl-label">Conservación</span>
+                    <div class="dl-badge-group">
+                      <span class="dl-badge"
+                            [class.dl-badge-excelente]="aiResults[url].conservacion?.clase === 'Excelente'"
+                            [class.dl-badge-bueno]="aiResults[url].conservacion?.clase === 'Bueno'"
+                            [class.dl-badge-regular]="aiResults[url].conservacion?.clase === 'Regular'">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="dl-badge-icon">
+                          <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                        {{ aiResults[url].conservacion?.clase || '?' }}
+                      </span>
+                    </div>
+                    <div class="dl-confidence-bar">
+                      <div class="dl-bar-fill dl-bar-conservacion" [style.width.%]="(aiResults[url].conservacion?.confianza || 0) * 100"></div>
+                    </div>
+                    <span class="dl-confidence-text">{{ (aiResults[url].conservacion?.confianza || 0) * 100 | number:'1.1-1' }}%</span>
+                  </div>
+                </ng-container>
+
+                <div class="dl-error" *ngIf="!detectingIa[url] && aiResults[url]?.modo === 'error'">
+                  Error al analizar
                 </div>
               </div>
             </div>
@@ -286,6 +330,46 @@
           
           <div class="upload-tip-text mt-2" *ngIf="uploadedImagenesUrls.length === 0">
             <span>Puedes subir hasta 6 imágenes para que el cliente final explore la propiedad.</span>
+          </div>
+        </div>
+
+        <!-- 4. RECOMENDACIÓN AUTOMÁTICA DEL MODELO CNN (ANÁLISIS GENERAL) -->
+        <div class="dl-recommendation-section" *ngIf="overallAnalysis">
+          <div class="dl-reco-header">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="dl-reco-icon">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09z" />
+            </svg>
+            <span>Recomendación Automática — Deep Learning CNN</span>
+          </div>
+
+          <div class="dl-reco-stats">
+            <div class="dl-reco-stat">
+              <span class="dl-reco-stat-label">Ambientes</span>
+              <span class="dl-reco-stat-value">
+                <span *ngFor="let entry of overallAnalysis.ambientCounts | keyvalue; let last = last">
+                  <strong>{{ entry.key }}</strong> ({{ entry.value }}){{ last ? '' : ' · ' }}
+                </span>
+              </span>
+            </div>
+            <div class="dl-reco-stat">
+              <span class="dl-reco-stat-label">Conservación</span>
+              <span class="dl-reco-stat-value">
+                <span *ngFor="let entry of overallAnalysis.conservationCounts | keyvalue; let last = last">
+                  <strong>{{ entry.key }}</strong> ({{ entry.value }}){{ last ? '' : ' · ' }}
+                </span>
+              </span>
+            </div>
+          </div>
+
+          <div class="dl-verdict"
+               [class.dl-verdict-excelente]="overallAnalysis.overallState === 'Excelente'"
+               [class.dl-verdict-bueno]="overallAnalysis.overallState === 'Bueno'"
+               [class.dl-verdict-regular]="overallAnalysis.overallState === 'Regular'">
+            <div class="dl-verdict-stripe">
+              <span class="dl-verdict-badge">{{ overallAnalysis.overallState }}</span>
+              <span class="dl-verdict-label">Estado General</span>
+            </div>
+            <p class="dl-verdict-text">{{ overallAnalysis.recommendation }}</p>
           </div>
         </div>
 

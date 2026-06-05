@@ -14,6 +14,8 @@ import { ContratoModule } from './modules/contrato/contrato.module';
 import { EmpleadoModule } from './modules/empleado/empleado.module';
 import { PropiedadModule } from './modules/propiedad/propiedad.module';
 import { PropietarioModule } from './modules/propietario/propietario.module';
+import { SegmentoModule } from './modules/segmento/segmento.module';
+import { PreferenciasModule } from './modules/preferencias/preferencias.module';
 import { SucursalModule } from './modules/sucursal/sucursal.module';
 import { VisitaModule } from './modules/visita/visita.module';
 import { UploadModule } from './modules/upload/upload.module';
@@ -36,6 +38,8 @@ import { UploadModule } from './modules/upload/upload.module';
     AuthModule,
     ClienteModule,
     ContratoModule,
+    SegmentoModule,
+    PreferenciasModule,
     EmpleadoModule,
     PropiedadModule,
     PropietarioModule,

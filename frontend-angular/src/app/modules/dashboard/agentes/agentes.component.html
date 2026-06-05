@@ -1,0 +1,307 @@
+<div class="agentes-wrapper">
+  <div class="toast-overlay" *ngIf="toastVisible" [class.toast-success]="toastType === 'success'" [class.toast-error]="toastType === 'error'">
+    <svg *ngIf="toastType === 'success'" class="toast-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+      <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+    </svg>
+    <svg *ngIf="toastType === 'error'" class="toast-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+      <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+    </svg>
+    <span>{{ toastMessage }}</span>
+  </div>
+
+  <div class="section-header-bar">
+    <div class="title-text">
+      <h1>Gestión de Empleados</h1>
+      <p>Administra los agentes inmobiliarios, sus cuentas de usuario y sucursales.</p>
+    </div>
+    <button class="icon-action-btn" (click)="openModal()" title="Registrar Empleado">
+      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="person-plus-icon">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M19 7.5v3m0 0v3m0-3h3m-3 0h-3m-2.25-4.125a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0zM4 19.235v-.11a6.375 6.375 0 0112.75 0v.109A12.318 12.318 0 0110.374 21c-2.331 0-4.512-.645-6.374-1.766z" />
+      </svg>
+    </button>
+  </div>
+
+  <div class="filters-bar">
+    <div class="search-box">
+      <svg class="search-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+      </svg>
+      <input type="text" placeholder="Buscar por nombre o apellido..." (input)="onSearch($event)" />
+    </div>
+  </div>
+
+  <div class="modal-overlay" *ngIf="showModal" (click)="closeModal()">
+    <div class="modal-container modal-wide" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <div class="modal-header-text">
+          <h3>{{ isEditing ? 'Editar Empleado' : 'Registrar Empleado' }}</h3>
+          <p>{{ isEditing ? 'Modifica los datos del empleado seleccionado.' : 'Completa los pasos para crear un nuevo empleado con su cuenta de usuario.' }}</p>
+        </div>
+        <button class="close-modal-btn" (click)="closeModal()">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="close-icon">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        </button>
+      </div>
+
+      <div class="modal-body-scroll">
+        <form [formGroup]="agenteForm" (ngSubmit)="onSubmit()" class="form-body">
+
+          <div class="section-card" *ngIf="!isEditing">
+            <div class="section-card-header accent-blue">
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="section-icon">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z" />
+              </svg>
+              <span>Cuenta de Usuario</span>
+            </div>
+            <div class="section-card-body">
+              <div class="form-row">
+                <div class="form-group flex-2">
+                  <label for="correo">Correo Electrónico <span class="required">*</span></label>
+                  <div class="input-wrapper" [class.invalid]="isFieldInvalid('correo')">
+                    <input type="email" id="correo" formControlName="correo" placeholder="ej. juan@correo.com" autocomplete="off" />
+                  </div>
+                  <span class="error-text" *ngIf="f['correo'].errors?.['required'] && f['correo'].touched">Correo requerido.</span>
+                  <span class="error-text" *ngIf="f['correo'].errors?.['email'] && f['correo'].touched">Ingrese un correo válido.</span>
+                </div>
+                <div class="form-group flex-1">
+                  <label for="rolId">Rol <span class="required">*</span></label>
+                  <div class="input-wrapper" [class.invalid]="isFieldInvalid('rolId')">
+                    <select id="rolId" formControlName="rolId">
+                      <option [ngValue]="null" disabled>Seleccione...</option>
+                      <option *ngFor="let rol of roles" [ngValue]="rol.id">{{ rol.nombre }}</option>
+                    </select>
+                  </div>
+                  <span class="error-text" *ngIf="isFieldInvalid('rolId')">Seleccione un rol.</span>
+                </div>
+              </div>
+              <div class="form-group">
+                <label for="contrasenia">Contraseña <span class="required">*</span></label>
+                <div class="password-wrapper" [class.invalid]="isFieldInvalid('contrasenia')">
+                  <input [type]="showPassword ? 'text' : 'password'" id="contrasenia" formControlName="contrasenia" placeholder="Mínimo 6 caracteres" autocomplete="off" />
+                  <button type="button" class="password-toggle" (click)="togglePassword()" [title]="showPassword ? 'Ocultar' : 'Mostrar'">
+                    <svg *ngIf="!showPassword" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="eye-icon">
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178z" />
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                    </svg>
+                    <svg *ngIf="showPassword" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="eye-icon">
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M3.98 8.223A10.477 10.477 0 001.934 12C3.226 16.338 7.244 19.5 12 19.5c.993 0 1.953-.138 2.863-.395M6.228 6.228A10.45 10.45 0 0112 4.5c4.756 0 8.773 3.162 10.065 7.498a10.523 10.523 0 01-4.293 5.774M6.228 6.228L3 3m3.228 3.228l3.65 3.65m7.894 7.894L21 21m-3.228-3.228l-3.65-3.65m0 0a3 3 0 10-4.243-4.243m4.242 4.242L9.88 9.88" />
+                    </svg>
+                  </button>
+                </div>
+                <span class="error-text" *ngIf="f['contrasenia'].errors?.['required'] && f['contrasenia'].touched">Contraseña requerida.</span>
+                <span class="error-text" *ngIf="f['contrasenia'].errors?.['minlength'] && f['contrasenia'].touched">Mínimo 6 caracteres.</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="section-card">
+            <div class="section-card-header accent-green">
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="section-icon">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z" />
+              </svg>
+              <span>Datos Personales</span>
+            </div>
+            <div class="section-card-body">
+              <div class="form-row">
+                <div class="form-group">
+                  <label for="nombres">Nombres <span class="required">*</span></label>
+                  <div class="input-wrapper" [class.invalid]="isFieldInvalid('nombres')">
+                    <input type="text" id="nombres" formControlName="nombres" placeholder="Ej. Juan Carlos" autocomplete="off" />
+                  </div>
+                  <span class="error-text" *ngIf="isFieldInvalid('nombres')">Mínimo 3 caracteres.</span>
+                </div>
+                <div class="form-group">
+                  <label for="apellidos">Apellidos <span class="required">*</span></label>
+                  <div class="input-wrapper" [class.invalid]="isFieldInvalid('apellidos')">
+                    <input type="text" id="apellidos" formControlName="apellidos" placeholder="Ej. Pérez García" autocomplete="off" />
+                  </div>
+                  <span class="error-text" *ngIf="isFieldInvalid('apellidos')">Mínimo 3 caracteres.</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="section-card">
+            <div class="section-card-header accent-purple">
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="section-icon">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M15 10.5a3 3 0 11-6 0 3 3 0 016 0z" />
+                <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1115 0z" />
+              </svg>
+              <span>Asignación <span *ngIf="!isEditing" class="step-note">(opcional en edición)</span></span>
+            </div>
+            <div class="section-card-body">
+              <div class="form-group">
+                <label for="sucursalId">Sucursal <span class="required">*</span></label>
+                <div class="input-wrapper" [class.invalid]="isFieldInvalid('sucursalId')">
+                  <select id="sucursalId" formControlName="sucursalId">
+                    <option [ngValue]="null" disabled>Seleccione una sucursal...</option>
+                    <option *ngFor="let suc of sucursales" [ngValue]="suc.id">{{ suc.nombre }} — {{ suc.ciudad }}</option>
+                  </select>
+                </div>
+                <span class="error-text" *ngIf="isFieldInvalid('sucursalId')">Debe seleccionar una sucursal.</span>
+              </div>
+            </div>
+          </div>
+
+        </form>
+      </div>
+
+      <div class="modal-footer-actions">
+        <div class="footer-status" *ngIf="creatingUser">
+          <span class="loader-spinner"></span>
+          <span>Creando cuenta de usuario...</span>
+        </div>
+        <button type="button" class="cancel-btn" (click)="closeModal()" [disabled]="submitting">Cancelar</button>
+        <button type="button" class="submit-btn" (click)="onSubmit()" [disabled]="submitting || agenteForm.invalid">
+          <span *ngIf="!submitting">{{ isEditing ? 'Guardar Cambios' : 'Crear Empleado' }}</span>
+          <span *ngIf="submitting" class="loader-spinner"></span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal-overlay" *ngIf="showDetailModal" (click)="closeDetailModal()">
+    <div class="modal-container detail-container" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <div class="modal-header-text">
+          <h3>Detalles del Empleado</h3>
+          <p>Información registrada del agente en el sistema.</p>
+        </div>
+        <button class="close-modal-btn" (click)="closeDetailModal()">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="close-icon">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        </button>
+      </div>
+      <div class="detail-body" *ngIf="selectedAgente">
+        <div class="detail-row">
+          <span class="detail-label">ID Sistema</span>
+          <span class="detail-value id-value">EMPLEADO #{{ selectedAgente.id }}</span>
+        </div>
+        <div class="detail-row">
+          <span class="detail-label">Nombres</span>
+          <span class="detail-value">{{ selectedAgente.nombres }}</span>
+        </div>
+        <div class="detail-row">
+          <span class="detail-label">Apellidos</span>
+          <span class="detail-value">{{ selectedAgente.apellidos }}</span>
+        </div>
+        <div class="detail-row">
+          <span class="detail-label">Estado</span>
+          <span class="detail-value">
+            <span class="estado-badge" [class.activo]="selectedAgente.activo" [class.inactivo]="!selectedAgente.activo">
+              {{ selectedAgente.activo ? 'Activo' : 'Inactivo' }}
+            </span>
+          </span>
+        </div>
+      </div>
+      <div class="modal-footer-actions">
+        <button type="button" class="cancel-btn" (click)="closeDetailModal()">Cerrar</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal-overlay" *ngIf="showToggleConfirm" (click)="cancelToggle()">
+    <div class="modal-container confirm-container" (click)="$event.stopPropagation()">
+      <div class="confirm-icon-row">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="warn-icon">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z" />
+        </svg>
+      </div>
+      <h3 class="confirm-title">{{ selectedAgente?.activo ? 'Desactivar Empleado' : 'Activar Empleado' }}</h3>
+      <p class="confirm-desc" *ngIf="selectedAgente?.activo">
+        ¿Está seguro de desactivar a <strong>{{ selectedAgente?.nombres }} {{ selectedAgente?.apellidos }}</strong>? Quedará inhabilitado en el sistema.
+      </p>
+      <p class="confirm-desc" *ngIf="!selectedAgente?.activo">
+        ¿Está seguro de activar a <strong>{{ selectedAgente?.nombres }} {{ selectedAgente?.apellidos }}</strong>? Volverá a estar disponible en el sistema.
+      </p>
+      <div class="modal-footer-actions">
+        <button type="button" class="cancel-btn" (click)="cancelToggle()">Cancelar</button>
+        <button type="button" class="toggle-confirm-btn" [class.toggle-off]="selectedAgente?.activo" [class.toggle-on]="!selectedAgente?.activo" (click)="confirmToggle()">
+          {{ selectedAgente?.activo ? 'Sí, Desactivar' : 'Sí, Activar' }}
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <div class="card full-width-card">
+    <div class="card-header-list">
+      <div class="header-text">
+        <h3>Base de Datos de Empleados</h3>
+        <p>Agentes inmobiliarios registrados en el sistema centralizado de gestión.</p>
+      </div>
+      <span class="total-count">{{ filteredAgentes.length }} registro(s)</span>
+    </div>
+
+    <div class="list-body">
+      <div class="loading-overlay" *ngIf="loadingList">
+        <div class="spinner"></div>
+        <span>Cargando registros oficiales...</span>
+      </div>
+
+      <div class="empty-state" *ngIf="!loadingList && filteredAgentes.length === 0">
+        <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" class="empty-icon">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
+        </svg>
+        <p>No se encontraron empleados en los registros.</p>
+      </div>
+
+      <div class="table-responsive" *ngIf="!loadingList && filteredAgentes.length > 0">
+        <table class="owners-table">
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Nombre Completo</th>
+              <th>Estado</th>
+              <th class="th-actions">Acciones</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let agente of filteredAgentes" class="table-row">
+              <td class="id-cell">#{{ agente.id }}</td>
+              <td class="name-cell">
+                <div class="owner-name-avatar-wrapper">
+                  <div class="owner-avatar-thumbnail">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="avatar-placeholder-icon">
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 6a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0ZM4.501 20.118a7.5 7.5 0 0 1 14.998 0A17.933 17.933 0 0 1 12 21.75c-2.676 0-5.216-.584-7.499-1.632Z" />
+                    </svg>
+                  </div>
+                  <span>{{ agente.nombres }} {{ agente.apellidos }}</span>
+                </div>
+              </td>
+              <td class="estado-cell">
+                <span class="estado-badge" [class.activo]="agente.activo" [class.inactivo]="!agente.activo">
+                  {{ agente.activo ? 'Activo' : 'Inactivo' }}
+                </span>
+              </td>
+              <td class="actions-cell">
+                <button class="action-btn view-btn" (click)="viewAgente(agente)" title="Ver datos">
+                  <svg fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="action-icon">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178z" />
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                  </svg>
+                </button>
+                <button class="action-btn edit-btn" (click)="editAgente(agente)" title="Modificar">
+                  <svg fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="action-icon">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0115.75 21H5.25A2.25 2.25 0 013 18.75V8.25A2.25 2.25 0 015.25 6H10" />
+                  </svg>
+                </button>
+                <button *ngIf="agente.activo" class="action-btn toggle-off-btn" (click)="openToggleConfirm(agente)" title="Desactivar">
+                  <svg fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="action-icon">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636" />
+                  </svg>
+                </button>
+                <button *ngIf="!agente.activo" class="action-btn toggle-on-btn" (click)="openToggleConfirm(agente)" title="Activar">
+                  <svg fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="action-icon">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                </button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>

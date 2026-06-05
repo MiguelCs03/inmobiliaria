@@ -39,8 +39,17 @@ class CNNScratchService:
         try:
             self.model = load_model(str(self.model_path))
             logger.info(f'Modelo CNN cargado desde {self.model_path}')
+            self._warmup()
         except Exception as e:
             logger.error(f'Error cargando modelo: {e}')
+
+    def _warmup(self):
+        dummy = np.random.rand(1, *IMG_SIZE, 3).astype(np.float32)
+        try:
+            self.model.predict(dummy, verbose=0)
+            logger.info('Warm-up completado (predicción dummy ejecutada)')
+        except Exception as e:
+            logger.warning(f'Warm-up falló (no crítico): {e}')
 
     def predict(self, image_path):
         if self.model is None:
