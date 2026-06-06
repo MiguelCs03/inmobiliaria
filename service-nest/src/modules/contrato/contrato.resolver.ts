@@ -8,7 +8,7 @@ import { PaginationInput } from '../../common/dto/pagination.input';
 
 @Resolver(() => Contrato)
 export class ContratoResolver {
-  constructor(private readonly contratoService: ContratoService) {}
+  constructor(private readonly contratoService: ContratoService) { }
 
   @Mutation(() => ContratoResponse)
   async createContrato(
@@ -45,5 +45,70 @@ export class ContratoResolver {
   async removeContrato(@Args('id', { type: () => Int }) id: number): Promise<ContratoResponse> {
     const data = await this.contratoService.remove(id);
     return { success: true, data, message: 'Operacion exitosa' };
+  }
+
+  //sin blockchain, solo prueba
+  @Mutation(() => ContratoResponse)
+  async generateContractPdf(@Args('id', { type: () => Int })
+  id: number,): Promise<ContratoResponse> {
+    const data =
+      await this.contratoService
+        .generatePdf(id);
+    return {
+      success: true,
+      data,
+      message:
+        'PDF generado correctamente',
+    };
+
+  }
+  //con blockchain, s3
+  @Mutation(
+    () => ContratoResponse
+  )
+  async registerBlockchain(
+    @Args(
+      'id',
+      { type: () => Int }
+    )
+    id: number,
+  ): Promise<ContratoResponse> {
+
+    const data =
+      await this.contratoService
+        .registerBlockchain(id);
+
+    return {
+
+      success: true,
+
+      message:
+        'Contrato registrado en blockchain',
+
+      data,
+
+    };
+
+  }
+
+  //captura el pdf
+  @Query(
+    () => String
+  )
+  async contratoPdfUrl(
+
+    @Args(
+      'id',
+      {
+        type: () => Int
+      }
+    )
+    id: number,
+
+  ): Promise<string> {
+
+    return this.contratoService
+      .getPdfUrl(id);
+
   }
 }

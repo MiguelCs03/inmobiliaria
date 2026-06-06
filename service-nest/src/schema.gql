@@ -191,8 +191,10 @@ type Mutation {
   createSegmento(createSegmentoInput: CreateSegmentoInput!): Segmento!
   createSucursal(createSucursalInput: CreateSucursalInput!): SucursalResponse!
   createVisita(createVisitaInput: CreateVisitaInput!): VisitaResponse!
+  generateContractPdf(id: Int!): ContratoResponse!
   login(loginInput: LoginInput!): LoginApiResponse!
   register(registerUsuarioInput: RegisterUsuarioInput!): UsuarioAuthResponse!
+  registerBlockchain(id: Int!): ContratoResponse!
   removeCliente(id: Int!): ClienteResponse!
   removeContrato(id: Int!): ContratoResponse!
   removeEmpleado(id: Int!): EmpleadoResponse!
@@ -287,6 +289,7 @@ type Query {
   cliente(id: Int!): ClienteResponse!
   clientes(pagination: PaginationInput): ClienteListResponse!
   contrato(id: Int!): ContratoResponse!
+  contratoPdfUrl(id: Int!): String!
   contratos(pagination: PaginationInput): ContratoListResponse!
   empleado(id: Int!): EmpleadoResponse!
   empleados(pagination: PaginationInput): EmpleadoListResponse!

@@ -6,8 +6,11 @@ import (
 	"github.com/gofiber/fiber/v2"
 )
 
+
+
 type CreateContractRequest struct {
-	Title string `json:"title"`
+    Title  string `json:"title"`
+    PdfBase64 string `json:"pdf_base64"`
 }
 
 func CreateContract(c *fiber.Ctx) error {
@@ -20,17 +23,36 @@ func CreateContract(c *fiber.Ctx) error {
 		})
 	}
 
-	err := services.CreateContract(body.Title)
+	contract, err := services.CreateContract(
+		body.Title,
+		body.PdfBase64,
+	)
 
 	if err != nil {
-		return c.Status(500).JSON(fiber.Map{
+	return c.Status(500).JSON(
+		fiber.Map{
 			"error": err.Error(),
-		})
+			},
+		)
 	}
 
-	return c.JSON(fiber.Map{
-		"message": "Contract created",
-	})
+	return c.JSON(
+		fiber.Map{
+			"message": "Contract created",
+
+			"contract_id":
+				contract.ID,
+
+			"document_hash":
+				contract.DocumentHash,
+
+			"digital_signature":
+				contract.DigitalSignature,
+
+			"status":
+				contract.Status,
+		},
+	)
 }
 
 func GetContracts(c *fiber.Ctx) error {
