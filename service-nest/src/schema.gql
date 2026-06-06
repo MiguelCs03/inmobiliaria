@@ -38,6 +38,7 @@ type Contrato {
   estadoContrato: String
   fechaFin: DateTime
   fechaInicio: DateTime
+  firmas: [FirmaContrato!]
   id: Int!
   montoTotal: Float!
   observaciones: String
@@ -163,6 +164,20 @@ type EmpleadoResponse {
   success: Boolean!
 }
 
+type FirmaContrato {
+  contratoId: Int!
+  fechaFirma: DateTime!
+  id: Int!
+  signatureUrl: String!
+  tipoFirmante: String!
+}
+
+type FirmaContratoResponse {
+  data: FirmaContrato
+  message: String!
+  success: Boolean!
+}
+
 type LoginApiResponse {
   data: LoginResponse
   message: String!
@@ -204,6 +219,7 @@ type Mutation {
   removeSegmento(id: Int!): Segmento!
   removeSucursal(id: Int!): SucursalResponse!
   removeVisita(id: Int!): VisitaResponse!
+  signContract(signContractInput: SignContractInput!): FirmaContratoResponse!
   toggleActivoUsuario(id: Int!): UsuarioAuthResponse!
   updateCliente(updateClienteInput: UpdateClienteInput!): ClienteResponse!
   updateContrato(updateContratoInput: UpdateContratoInput!): ContratoResponse!
@@ -339,6 +355,12 @@ type RolResponse {
 type Segmento {
   id: Int!
   nombre: String!
+}
+
+input SignContractInput {
+  contractId: Int!
+  signatureBase64: String!
+  signerType: String!
 }
 
 type Sucursal {

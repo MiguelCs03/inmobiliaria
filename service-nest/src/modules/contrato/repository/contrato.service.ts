@@ -53,11 +53,30 @@ export class ContratoService {
   }
 
   async findOne(id: number): Promise<Contrato> {
-    const contrato = await this.contratoRepository.findOne({ where: { id } });
+
+    const contrato =
+      await this.contratoRepository.findOne({
+
+        where: {
+          id,
+        },
+
+        relations: [
+          'firmas',
+        ],
+
+      });
+
     if (!contrato) {
-      throw new NotFoundException('Contrato no encontrado');
+
+      throw new NotFoundException(
+        'Contrato no encontrado',
+      );
+
     }
+
     return contrato;
+
   }
 
   async update(id: number, updateContratoInput: UpdateContratoInput): Promise<Contrato> {

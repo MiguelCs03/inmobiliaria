@@ -59,6 +59,47 @@ export class StorageService {
     return `https://${process.env.AWS_S3_BUCKET}.s3.${process.env.AWS_REGION}.amazonaws.com/contracts/${fileName}`;
   }
 
+  //estp es para las firmas las imagenes donde se guardaran
+  async uploadSignature(
+    signatureBase64: string,
+    fileName: string,
+  ): Promise<string> {
+    
+    const cleanBase64 =
+      signatureBase64.replace(
+        /^data:image\/\w+;base64,/,
+        '',
+      );
+    const buffer =
+      Buffer.from(
+        cleanBase64,
+        'base64',
+      );
+
+    await this.s3.send(
+
+      new PutObjectCommand({
+
+        Bucket:
+          process.env.AWS_S3_BUCKET,
+
+        Key:
+          `signatures/${fileName}`,
+
+        Body:
+          buffer,
+
+        ContentType:
+          'image/png',
+
+      }),
+
+    );
+
+    return `https://${process.env.AWS_S3_BUCKET}.s3.${process.env.AWS_REGION}.amazonaws.com/signatures/${fileName}`;
+
+  }
+
   //aqui es para obener el pdf con permisos de aws s3
   async downloadPdf(
     pdfUrl: string,
