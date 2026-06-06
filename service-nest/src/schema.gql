@@ -221,6 +221,7 @@ type Mutation {
   createSucursal(createSucursalInput: CreateSucursalInput!): SucursalResponse!
   createVisita(createVisitaInput: CreateVisitaInput!): VisitaResponse!
   generateContractPdf(id: Int!): ContratoResponse!
+  generateSignedPdf(id: Int!): ContratoResponse!
   login(loginInput: LoginInput!): LoginApiResponse!
   register(registerUsuarioInput: RegisterUsuarioInput!): UsuarioAuthResponse!
   registerBlockchain(id: Int!): ContratoResponse!

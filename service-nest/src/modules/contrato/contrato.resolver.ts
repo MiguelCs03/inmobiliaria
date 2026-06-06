@@ -111,4 +111,36 @@ export class ContratoResolver {
       .getPdfUrl(id);
 
   }
+
+  @Mutation(
+    () => ContratoResponse,
+  )
+  async generateSignedPdf(
+
+    @Args(
+      'id',
+      { type: () => Int },
+    )
+    id: number,
+
+  ): Promise<ContratoResponse> {
+
+    const data =
+      await this.contratoService
+        .generateSignedPdf(
+          id,
+        );
+
+    return {
+
+      success: true,
+
+      message:
+        'PDF firmado generado',
+
+      data,
+
+    };
+
+  }
 }

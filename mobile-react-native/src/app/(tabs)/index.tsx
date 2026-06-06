@@ -63,7 +63,7 @@ const QUERY_PROPIEDADES = gql`
 export default function HomeScreen() {
   const insets = useSafeAreaInsets();
   const { usuario, cerrarSesion } = useAuth();
-  
+
   // Estados para búsqueda y filtrado
   const [busqueda, setBusqueda] = useState('');
   const [filtroTipo, setFiltroTipo] = useState<'todos' | 'casa' | 'departamento' | 'terreno' | 'oficina'>('todos');
@@ -84,13 +84,13 @@ export default function HomeScreen() {
       const ubicacionStr = prop.ubicacion || '';
       const tipoStr = MAP_TIPO_PROPIEDAD[prop.tipoPropiedadId] || '';
       const operacionStr = MAP_TIPO_OPERACION[prop.tipoOperacionId] || '';
-      
-      const coincideBusqueda = 
+
+      const coincideBusqueda =
         ubicacionStr.toLowerCase().includes(busqueda.toLowerCase()) ||
         tipoStr.toLowerCase().includes(busqueda.toLowerCase()) ||
         operacionStr.toLowerCase().includes(busqueda.toLowerCase());
-      
-      const coincideTipo = 
+
+      const coincideTipo =
         filtroTipo === 'todos' ? true : tipoStr === filtroTipo;
 
       return coincideBusqueda && coincideTipo;
@@ -113,7 +113,7 @@ export default function HomeScreen() {
     const estadoNombre = MAP_ESTADO_PROPIEDAD[item.estadoPropiedadId] || 'Disponible';
     const tipoNombre = MAP_TIPO_PROPIEDAD[item.tipoPropiedadId] || 'casa';
     const operacionNombre = MAP_TIPO_OPERACION[item.tipoOperacionId] || 'venta';
-    
+
     // Definición de colores según el estado
     const colorEstado = {
       Disponible: 'bg-emerald-500',
@@ -161,7 +161,7 @@ export default function HomeScreen() {
           <Text className="text-2xl font-extrabold text-slate-900">
             {formatearPrecio(item.precioBase, item.tipoOperacionId)}
           </Text>
-          
+
           <Text className="text-base font-bold text-slate-800 mt-1 mb-2" numberOfLines={1}>
             {tituloCompuesto}
           </Text>
@@ -191,7 +191,7 @@ export default function HomeScreen() {
                 </Text>
               </View>
             </View>
-            
+
             {/* BOTÓN EXPLICÍTO DE VER DETALLES */}
             <TouchableOpacity
               onPress={() => router.push(`/propiedad/${item.id}`)}
@@ -212,13 +212,13 @@ export default function HomeScreen() {
   return (
     <View className="flex-1 bg-slate-50">
       <StatusBar barStyle="light-content" />
-      
+
       {/* 1. CABECERA CORPORATIVA CON BANNER AZUL */}
-      <View 
+      <View
         className="bg-corporate-950 rounded-b-[32px] shadow-lg relative overflow-hidden"
         style={{ paddingTop: insets.top + 12, paddingBottom: 36 }}
       >
-        
+
         <View className="flex-row justify-between items-center px-4 relative z-10">
           <View className="flex-1 mr-2">
             {usuario ? (
@@ -293,7 +293,7 @@ export default function HomeScreen() {
 
       {/* Contenedor del Catálogo y Filtros */}
       <View className="flex-1 px-4 pt-6">
-        
+
         {/* FILTROS DINÁMICOS */}
         <View className="mb-4">
           <ScrollView
@@ -304,36 +304,50 @@ export default function HomeScreen() {
             {/* Botón: Todos */}
             <TouchableOpacity
               onPress={() => setFiltroTipo('todos')}
-              className={`flex-row items-center px-4 py-2 rounded-xl mr-2 border ${
-                filtroTipo === 'todos'
-                  ? 'bg-corporate-600 border-corporate-600'
-                  : 'bg-white border-slate-200'
-              }`}
+              className={`flex-row items-center px-4 py-2 rounded-xl mr-2 border ${filtroTipo === 'todos'
+                ? 'bg-corporate-600 border-corporate-600'
+                : 'bg-white border-slate-200'
+                }`}
             >
               <Grid size={15} color={filtroTipo === 'todos' ? '#ffffff' : '#475569'} />
               <Text
-                className={`ml-1.5 text-xs font-bold ${
-                  filtroTipo === 'todos' ? 'text-white' : 'text-slate-600'
-                }`}
+                className={`ml-1.5 text-xs font-bold ${filtroTipo === 'todos' ? 'text-white' : 'text-slate-600'
+                  }`}
               >
                 Todos
               </Text>
             </TouchableOpacity>
 
+            {/* Botón: Contratos */}
+            <TouchableOpacity
+              onPress={() => router.push('/contratos')}
+              className="flex-row items-center px-4 py-2 rounded-xl mr-2 border bg-white border-slate-200"
+            >
+              <Layers
+                size={15}
+                color="#475569"
+              />
+
+              <Text
+                className="ml-1.5 text-xs font-bold text-slate-600"
+              >
+                Contratos
+              </Text>
+
+            </TouchableOpacity>
+
             {/* Botón: Casas */}
             <TouchableOpacity
               onPress={() => setFiltroTipo('casa')}
-              className={`flex-row items-center px-4 py-2 rounded-xl mr-2 border ${
-                filtroTipo === 'casa'
-                  ? 'bg-corporate-600 border-corporate-600'
-                  : 'bg-white border-slate-200'
-              }`}
+              className={`flex-row items-center px-4 py-2 rounded-xl mr-2 border ${filtroTipo === 'casa'
+                ? 'bg-corporate-600 border-corporate-600'
+                : 'bg-white border-slate-200'
+                }`}
             >
               <Home size={15} color={filtroTipo === 'casa' ? '#ffffff' : '#475569'} />
               <Text
-                className={`ml-1.5 text-xs font-bold ${
-                  filtroTipo === 'casa' ? 'text-white' : 'text-slate-600'
-                }`}
+                className={`ml-1.5 text-xs font-bold ${filtroTipo === 'casa' ? 'text-white' : 'text-slate-600'
+                  }`}
               >
                 Casas
               </Text>
@@ -342,17 +356,15 @@ export default function HomeScreen() {
             {/* Botón: Departamentos */}
             <TouchableOpacity
               onPress={() => setFiltroTipo('departamento')}
-              className={`flex-row items-center px-4 py-2 rounded-xl mr-2 border ${
-                filtroTipo === 'departamento'
-                  ? 'bg-corporate-600 border-corporate-600'
-                  : 'bg-white border-slate-200'
-              }`}
+              className={`flex-row items-center px-4 py-2 rounded-xl mr-2 border ${filtroTipo === 'departamento'
+                ? 'bg-corporate-600 border-corporate-600'
+                : 'bg-white border-slate-200'
+                }`}
             >
               <Building2 size={15} color={filtroTipo === 'departamento' ? '#ffffff' : '#475569'} />
               <Text
-                className={`ml-1.5 text-xs font-bold ${
-                  filtroTipo === 'departamento' ? 'text-white' : 'text-slate-600'
-                }`}
+                className={`ml-1.5 text-xs font-bold ${filtroTipo === 'departamento' ? 'text-white' : 'text-slate-600'
+                  }`}
               >
                 Departamentos
               </Text>
@@ -361,17 +373,15 @@ export default function HomeScreen() {
             {/* Botón: Terrenos */}
             <TouchableOpacity
               onPress={() => setFiltroTipo('terreno')}
-              className={`flex-row items-center px-4 py-2 rounded-xl mr-2 border ${
-                filtroTipo === 'terreno'
-                  ? 'bg-corporate-600 border-corporate-600'
-                  : 'bg-white border-slate-200'
-              }`}
+              className={`flex-row items-center px-4 py-2 rounded-xl mr-2 border ${filtroTipo === 'terreno'
+                ? 'bg-corporate-600 border-corporate-600'
+                : 'bg-white border-slate-200'
+                }`}
             >
               <Layers size={15} color={filtroTipo === 'terreno' ? '#ffffff' : '#475569'} />
               <Text
-                className={`ml-1.5 text-xs font-bold ${
-                  filtroTipo === 'terreno' ? 'text-white' : 'text-slate-600'
-                }`}
+                className={`ml-1.5 text-xs font-bold ${filtroTipo === 'terreno' ? 'text-white' : 'text-slate-600'
+                  }`}
               >
                 Terrenos
               </Text>
@@ -380,17 +390,15 @@ export default function HomeScreen() {
             {/* Botón: Oficinas */}
             <TouchableOpacity
               onPress={() => setFiltroTipo('oficina')}
-              className={`flex-row items-center px-4 py-2 rounded-xl border ${
-                filtroTipo === 'oficina'
-                  ? 'bg-corporate-600 border-corporate-600'
-                  : 'bg-white border-slate-200'
-              }`}
+              className={`flex-row items-center px-4 py-2 rounded-xl border ${filtroTipo === 'oficina'
+                ? 'bg-corporate-600 border-corporate-600'
+                : 'bg-white border-slate-200'
+                }`}
             >
               <Building2 size={15} color={filtroTipo === 'oficina' ? '#ffffff' : '#475569'} />
               <Text
-                className={`ml-1.5 text-xs font-bold ${
-                  filtroTipo === 'oficina' ? 'text-white' : 'text-slate-600'
-                }`}
+                className={`ml-1.5 text-xs font-bold ${filtroTipo === 'oficina' ? 'text-white' : 'text-slate-600'
+                  }`}
               >
                 Oficinas
               </Text>

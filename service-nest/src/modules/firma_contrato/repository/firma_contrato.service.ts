@@ -5,6 +5,8 @@ import { FirmaContrato } from '../entities/firma_contraro.entity';
 import { SignContractInput } from '../dto/firma_contrato.input';
 import { Contrato } from '../../contrato/entities/contrato.entity';
 import { StorageService } from 'src/common/storage/storage.service';
+import axios from 'axios';
+import Response from 'express';
 
 @Injectable()
 export class FirmaService {
@@ -76,6 +78,61 @@ export class FirmaService {
         await this.firmaRepository.save(
             firma,
         );
+
+        console.log({
+            blockchainId: contrato.blockchainContractId,
+            signerType: input.signerType,
+            documentHash: contrato.documentHash,
+            signatureUrl,
+        });
+
+        const response = await axios.post(
+
+            `http://host.docker.internal:3030/contracts/${contrato.blockchainContractId}/sign`,
+
+            {
+
+                signer_type:
+                    input.signerType,
+
+                document_hash:
+                    contrato.documentHash,
+
+                signature_url:
+                    signatureUrl,
+
+            },
+
+        );
+        console.log(response.data);
+        const totalFirmas =
+            await this.firmaRepository.count({
+
+                where: {
+
+                    contratoId:
+                        contrato.id,
+
+                },
+
+            });
+
+        if (totalFirmas >= 2) {
+
+            contrato.estadoContrato =
+                'COMPLETED';
+
+        } else {
+
+            contrato.estadoContrato =
+                'PARTIALLY_SIGNED';
+
+        }
+
+        await this.contratoRepository.save(
+            contrato,
+        );
+
 
         return firma;
 

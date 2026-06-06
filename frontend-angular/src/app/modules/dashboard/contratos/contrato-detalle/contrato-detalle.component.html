@@ -2,108 +2,183 @@
 
 <div class="propiedades-wrapper card catalog-full-card">
 
-    <!-- Header del Detalle -->
     <div class="section-header-bar">
+
         <div class="title-text">
-            <h1>Contrato #{{contrato.id}}</h1>
-            <p>Ficha técnica del documento legal registrado</p>
+
+            <h1>
+                Contrato #{{ contrato.id }}
+            </h1>
+
+            <p>
+                Seguimiento y trazabilidad del contrato
+            </p>
+
         </div>
 
-        <!-- Acción Principal -->
-        <button type="button" class="primary-action-btn" (click)="generarPdf()">
-            <svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
-                <polyline points="14 2 14 8 20 8"></polyline>
-                <line x1="16" y1="13" x2="8" y2="13"></line>
-                <line x1="16" y1="17" x2="8" y2="17"></line>
-                <polyline points="10 9 9 9 8 9"></polyline>
-            </svg>
+        <button
+            *ngIf="!contrato.pdfUrl"
+            type="button"
+            class="primary-action-btn"
+            (click)="generarPdf()">
+
             Generar PDF
+
         </button>
+
     </div>
 
-    <!-- Contenido del Detalle -->
     <div class="detail-grid-container">
 
-        <!-- Bloque de Información Principal -->
         <div class="detail-info-block">
 
             <div class="detail-row">
-                <span class="detail-label">Título del Documento</span>
-                <span class="detail-value font-semibold">{{contrato.titulo}}</span>
+
+                <span class="detail-label">
+                    Título
+                </span>
+
+                <span class="detail-value">
+                    {{ contrato.titulo }}
+                </span>
+
             </div>
 
             <div class="detail-row">
-                <span class="detail-label">Monto Operación</span>
-                <span class="detail-value property-price">{{contrato.montoTotal}}</span>
+
+                <span class="detail-label">
+                    Monto
+                </span>
+
+                <span class="detail-value property-price">
+                    {{ contrato.montoTotal }}
+                </span>
+
             </div>
 
             <div class="detail-row">
-                <span class="detail-label">Estado Actual</span>
-                <div>
-                    <!-- El estado cambia dinámicamente según tu lógica de diseño -->
-                    <span class="tag-status" [class.reserved]="contrato.estadoContrato === 'PENDING'">
-                        {{contrato.estadoContrato}}
-                    </span>
-                </div>
+
+                <span class="detail-label">
+                    Estado
+                </span>
+
+                <span
+                    class="tag-status"
+
+                    [ngClass]="{
+
+                    'pending':
+                        contrato.estadoContrato === 'PENDING_SIGNATURE',
+
+                    'partial':
+                        contrato.estadoContrato === 'PARTIALLY_SIGNED',
+
+                    'completed':
+                        contrato.estadoContrato === 'COMPLETED'
+
+                    }">
+
+                    {{ contrato.estadoContrato }}
+
+                </span>
+
             </div>
 
             <div class="detail-row full-width-row">
-                <span class="detail-label">Observaciones y Cláusulas</span>
+
+                <span class="detail-label">
+                    Observaciones
+                </span>
+
                 <div class="detail-textarea-display">
-                    {{contrato.observaciones || 'Sin observaciones registradas.'}}
+
+                    {{ contrato.observaciones || 'Sin observaciones' }}
+
                 </div>
+
             </div>
 
         </div>
 
-        <!-- Barra de Acciones y Procesos Secundarios -->
         <div class="detail-actions-panel">
-            <h4 class="panel-subtitle">Acciones de Verificación y Seguridad</h4>
 
-            <button type="button" class="btn-secondary-action" (click)="registrarBlockchain()">
-                <svg class="action-panel-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <rect x="2" y="2" width="20" height="20" rx="2.18" ry="2.18"></rect>
-                    <line x1="7" y1="2" x2="7" y2="22"></line>
-                    <line x1="17" y1="2" x2="17" y2="22"></line>
-                    <line x1="2" y1="12" x2="22" y2="12"></line>
-                </svg>
-                <span>Registrar Blockchain</span>
+            <h4 class="panel-subtitle">
+
+                Acciones
+
+            </h4>
+
+            <button
+                *ngIf="!contrato.blockchainContractId"
+                type="button"
+                class="btn-secondary-action"
+                (click)="registrarBlockchain()">
+
+                Registrar Blockchain
+
             </button>
 
-            <button type="button" class="btn-secondary-action">
-                <svg class="action-panel-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
-                    <circle cx="12" cy="7" r="4"></circle>
-                </svg>
-                <span>Ver Firmas</span>
+            <button
+                *ngIf="contrato.pdfUrl"
+                type="button"
+                class="btn-secondary-action"
+                (click)="verPdf()">
+
+                Ver PDF
+
             </button>
 
-            <button type="button" class="btn-secondary-action">
-                <svg class="action-panel-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <circle cx="12" cy="12" r="10"></circle>
-                    <polyline points="12 6 12 12 16 14"></polyline>
-                </svg>
-                <span>Ver Auditoría</span>
-            </button>
-            <button type="button" class="btn-secondary-action" (click)="verPdf()">
+            <button
+                *ngIf="contrato.estadoContrato === 'COMPLETED'"
+                type="button"
+                class="btn-secondary-action"
+                (click)="generarPdfFirmado()">
 
-                <span>
-                    Ver PDF
-                </span>
+                Generar PDF Firmado
 
             </button>
 
         </div>
-        <div class="detail-row" *ngIf="contrato.blockchainContractId">
+
+    </div>
+
+    <!-- Blockchain -->
+
+    <div class="detail-info-block">
+
+        <h3>
+
+            Blockchain
+
+        </h3>
+
+        <div class="detail-row">
 
             <span class="detail-label">
+
                 Blockchain ID
+
             </span>
 
             <span class="detail-value font-mono">
 
-                {{ contrato.blockchainContractId }}
+                {{ contrato.blockchainContractId || 'No registrado' }}
+
+            </span>
+
+        </div>
+
+        <div class="detail-row">
+
+            <span class="detail-label">
+
+                Hash Documento
+
+            </span>
+
+            <span class="detail-value font-mono">
+
+                {{ contrato.documentHash || 'No generado' }}
 
             </span>
 
@@ -111,18 +186,108 @@
 
     </div>
 
+    <!-- Estado Proceso -->
 
-    <div class="detail-row" *ngIf="contrato.pdfUrl">
+    <div class="detail-info-block">
 
-        <span class="detail-label">
-            PDF Generado
-        </span>
+        <h3>
 
-        <span class="detail-value">
+            Estado del Proceso
 
-            ✅ Disponible
+        </h3>
 
-        </span>
+        <div class="detail-row">
+
+            <span>
+
+                {{ contrato.pdfUrl ? '✅' : '⏳' }}
+
+                PDF Generado
+
+            </span>
+
+        </div>
+
+        <div class="detail-row">
+
+            <span>
+
+                {{ contrato.blockchainContractId ? '✅' : '⏳' }}
+
+                Blockchain Registrado
+
+            </span>
+
+        </div>
+
+        <div class="detail-row">
+
+            <span>
+
+                {{ contrato.estadoContrato === 'PARTIALLY_SIGNED' ||
+                contrato.estadoContrato === 'COMPLETED'
+                ? '✅' : '⏳' }}
+
+                Primera Firma
+
+            </span>
+
+        </div>
+
+        <div class="detail-row">
+
+            <span>
+
+                {{ contrato.estadoContrato === 'COMPLETED'
+                ? '✅' : '⏳' }}
+
+                Contrato Completado
+
+            </span>
+
+        </div>
+
+    </div>
+
+    <!-- Firmas -->
+
+    <div
+        class="detail-info-block"
+        *ngIf="contrato.firmas?.length">
+
+        <h3>
+
+            Firmas Registradas
+
+        </h3>
+
+        <div
+            *ngFor="let firma of contrato.firmas"
+            class="detail-row">
+
+            <span class="detail-label">
+
+                {{ firma.tipoFirmante }}
+
+            </span>
+
+            <span class="detail-value">
+
+                {{ firma.fechaFirma | date:'dd/MM/yyyy HH:mm' }}
+
+                |
+
+                <a
+                    [href]="firma.signatureUrl"
+                    target="_blank">
+
+                    Ver Firma
+
+                </a>
+
+            </span>
+
+        </div>
 
     </div>
 

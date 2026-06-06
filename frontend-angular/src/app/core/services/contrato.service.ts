@@ -105,15 +105,14 @@ export class ContratoService {
   }
 
   //ahora vamos a pasar a detallar cada contrato, para pasar a firmas y demás
-  private readonly GET_CONTRATO = gql`
-
-query Contrato(
+  GET_CONTRATO_BY_ID = gql`
+query GetContratoById(
   $id: Int!
-){
+) {
 
   contrato(
     id: $id
-  ){
+  ) {
 
     success
 
@@ -131,15 +130,23 @@ query Contrato(
 
       estadoContrato
 
-      fechaInicio
+      pdfUrl
 
-      fechaFin
+      blockchainContractId
 
-      clienteId
+      documentHash
 
-      propiedadId
+      firmas {
 
-      empleadoId
+        id
+
+        tipoFirmante
+
+        fechaFirma
+
+        signatureUrl
+
+      }
 
     }
 
@@ -155,7 +162,7 @@ query Contrato(
 
     return this.apollo.query({
 
-      query: this.GET_CONTRATO,
+      query: this.GET_CONTRATO_BY_ID,
 
       variables: {
         id
@@ -314,6 +321,50 @@ query Contrato(
         )
 
       );
+
+  }
+
+  GENERATE_SIGNED_PDF = gql`
+mutation GenerateSignedPdf(
+  $id: Int!
+) {
+
+  generateSignedPdf(
+    id: $id
+  ) {
+
+    success
+
+    message
+
+    data {
+
+      id
+
+      pdfUrl
+
+    }
+
+  }
+
+}
+`;
+
+  generateSignedPdf(
+    id: number
+  ) {
+
+    return this.apollo
+      .mutate({
+
+        mutation:
+          this.GENERATE_SIGNED_PDF,
+
+        variables: {
+          id,
+        },
+
+      });
 
   }
   // getContratos(){

@@ -124,6 +124,51 @@ export class ContratoService {
     return contrato;
   }
 
+  async generateSignedPdf(
+  id: number,
+): Promise<Contrato> {
+
+  const contrato =
+    await this.contratoRepository.findOne({
+
+      where: {
+        id,
+      },
+
+      relations: [
+        'firmas',
+      ],
+
+    });
+
+  if (!contrato) {
+    throw new NotFoundException(
+      'Contrato no encontrado',
+    );
+  }
+
+  const pdfPath =
+    await this.contractPdfService
+      .generateSignedPdf(
+        contrato,
+      );
+
+  const pdfUrl =
+    await this.storageService
+      .uploadPdf(
+        pdfPath,
+        `contrato_firmado_${contrato.id}.pdf`,
+      );
+
+  contrato.pdfUrl =
+    pdfUrl;
+
+  return await this.contratoRepository.save(
+    contrato,
+  );
+
+}
+
   async registerBlockchain(
     id: number,
   ): Promise<Contrato> {

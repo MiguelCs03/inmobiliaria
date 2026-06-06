@@ -8,10 +8,10 @@ import (
 )
 
 type SignRequest struct {
-	SignerType  string `json:"signer_type"`
-	DocumentHash string `json:"document_hash"`
+    SignerType   string `json:"signer_type"`
+    DocumentHash string `json:"document_hash"`
+    SignatureUrl string `json:"signature_url"`
 }
-
 // FLUJO REAL
 // Contrato
 //    ↓
@@ -40,6 +40,7 @@ func SignContract(c *fiber.Ctx) error {
 		contractID,
 		body.SignerType,
 		body.DocumentHash,
+		body.SignatureUrl,
 	)
 
 	if err != nil {

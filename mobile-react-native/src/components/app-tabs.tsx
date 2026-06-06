@@ -28,6 +28,12 @@ export default function AppTabs() {
           renderingMode="template"
         />
       </NativeTabs.Trigger>
+
+      <NativeTabs.Trigger name="contratos">
+        <NativeTabs.Trigger.Label>
+          Contratos
+        </NativeTabs.Trigger.Label>
+      </NativeTabs.Trigger>
     </NativeTabs>
   );
 }

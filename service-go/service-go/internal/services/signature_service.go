@@ -13,9 +13,10 @@ import (
 )
 
 func SignContract(
-	contractID string,
-	signerType string,
-	documentHash string,
+    contractID string,
+    signerType string,
+    documentHash string,
+    signatureUrl string,
 ) error {
 
 	privateKey, err := crypto.LoadPrivateKey()
@@ -39,6 +40,7 @@ func SignContract(
 		SignerType: signerType,
 		Hash:       documentHash,
 		Signature:  blockchain.EncodeBase64(signatureBytes),
+		SignatureUrl: signatureUrl,
 		Timestamp:  time.Now().Format(time.RFC3339),
 	}
 
@@ -57,7 +59,7 @@ func SignContract(
 	}
 
 	// Actualizar estado
-	if len(signatures) >= 3 {
+	if len(signatures) >= 2 {
 
 		err = repositories.UpdateContractStatus(
 			contractID,

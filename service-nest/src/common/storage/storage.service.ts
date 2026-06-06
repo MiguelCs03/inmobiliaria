@@ -64,7 +64,7 @@ export class StorageService {
     signatureBase64: string,
     fileName: string,
   ): Promise<string> {
-    
+
     const cleanBase64 =
       signatureBase64.replace(
         /^data:image\/\w+;base64,/,
@@ -165,6 +165,46 @@ export class StorageService {
         expiresIn: 3600,
       },
 
+    );
+
+  }
+
+  async downloadFile(
+    fileUrl: string,
+  ): Promise<Buffer> {
+
+    const key =
+      fileUrl.split(
+        '.amazonaws.com/'
+      )[1];
+
+    const response =
+      await this.s3.send(
+
+        new GetObjectCommand({
+
+          Bucket:
+            process.env.AWS_S3_BUCKET,
+
+          Key:
+            key,
+
+        }),
+
+      );
+
+    const chunks: Uint8Array[] = [];
+
+    for await (
+      const chunk of response.Body as any
+    ) {
+
+      chunks.push(chunk);
+
+    }
+
+    return Buffer.concat(
+      chunks
     );
 
   }

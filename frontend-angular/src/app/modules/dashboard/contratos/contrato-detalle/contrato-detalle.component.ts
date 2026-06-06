@@ -135,4 +135,30 @@ export class ContratoDetalleComponent
 
 }
 
+generarPdfFirmado(): void {
+
+  this.contratoService
+    .generateSignedPdf(
+      this.contratoId
+    )
+    .subscribe({
+
+      next: () => {
+
+        this.cargarContrato();
+
+      },
+
+      error: (error) => {
+
+        console.error(
+          error
+        );
+
+      }
+
+    });
+
+}
+
 }
