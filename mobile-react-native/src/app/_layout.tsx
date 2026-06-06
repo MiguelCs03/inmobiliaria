@@ -1,16 +1,29 @@
+import "../global.css";
+
 import { DarkTheme, DefaultTheme, ThemeProvider } from '@react-navigation/native';
 import React from 'react';
 import { useColorScheme } from 'react-native';
+import { ApolloProvider } from '@apollo/client/react';
+import client from '@/apollo/client';
+import { AuthProvider } from '@/context/auth-context';
+import { Stack } from 'expo-router';
 
 import { AnimatedSplashOverlay } from '@/components/animated-icon';
-import AppTabs from '@/components/app-tabs';
 
-export default function TabLayout() {
+export default function RootLayout() {
   const colorScheme = useColorScheme();
   return (
-    <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
-      <AnimatedSplashOverlay />
-      <AppTabs />
-    </ThemeProvider>
+    <ApolloProvider client={client}>
+      <AuthProvider>
+        <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
+          <AnimatedSplashOverlay />
+          <Stack screenOptions={{ headerShown: false }}>
+            <Stack.Screen name="(tabs)" />
+            <Stack.Screen name="login" options={{ presentation: 'modal' }} />
+            <Stack.Screen name="propiedad/[id]" />
+          </Stack>
+        </ThemeProvider>
+      </AuthProvider>
+    </ApolloProvider>
   );
 }
