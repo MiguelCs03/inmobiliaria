@@ -177,6 +177,145 @@ query Contrato(
       );
 
   }
+
+  private readonly GENERATE_PDF = gql`
+
+  mutation GenerateContractPdf(
+    $id:Int!
+  ){
+
+    generateContractPdf(
+      id:$id
+    ){
+
+      success
+
+      message
+
+      data{
+
+        id
+
+        pdfUrl
+
+      }
+
+    }
+
+  }
+  `;
+
+  generatePdf(
+    id: number
+  ) {
+
+    return this.apollo.mutate({
+
+      mutation: this.GENERATE_PDF,
+
+      variables: {
+        id
+      }
+
+    });
+
+  }
+
+  REGISTER_BLOCKCHAIN = gql`
+  mutation RegisterBlockchain($id: Int!) {
+
+    registerBlockchain(
+      id: $id
+    ) {
+
+      success
+
+      message
+
+      data {
+
+        id
+
+        documentHash
+
+        blockchainContractId
+
+        estadoContrato
+
+      }
+
+    }
+
+  }
+`;
+
+  registerBlockchain(
+    id: number
+  ) {
+
+    return this.apollo
+      .mutate({
+
+        mutation:
+          this.REGISTER_BLOCKCHAIN,
+
+        variables: {
+          id
+        }
+
+      })
+      .pipe(
+
+        map((result: any) => {
+
+          return result.data
+            .registerBlockchain;
+
+        })
+
+      );
+
+  }
+
+  GET_PDF_URL = gql`
+  query GetPdfUrl(
+    $id: Int!
+  ) {
+
+    contratoPdfUrl(
+      id: $id
+    )
+
+  }
+  `;
+
+  getPdfUrl(
+    id: number
+  ) {
+
+    return this.apollo
+      .query({
+
+        query:
+          this.GET_PDF_URL,
+
+        variables: {
+          id
+        }
+
+      })
+      .pipe(
+
+        map((result: any) =>
+
+          result.data
+            .contratoPdfUrl
+
+        )
+
+      );
+
+  }
   // getContratos(){
 
   // return this.apollo
