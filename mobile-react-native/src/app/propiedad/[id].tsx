@@ -187,7 +187,7 @@ export default function PropiedadDetalleScreen() {
               <Text className="text-slate-700 font-bold text-sm">Reintentar</Text>
             </TouchableOpacity>
             <TouchableOpacity
-              onPress={() => router.replace('/(tabs)/index')}
+              onPress={() => router.replace('/(tabs)')}
               className="bg-corporate-600 px-5 py-3 rounded-xl shadow-sm active:bg-corporate-700"
             >
               <Text className="text-white font-bold text-sm">Volver al Catálogo</Text>

@@ -78,7 +78,7 @@ export default function LoginScreen() {
         // Guardar en SecureStore y actualizar contexto de sesión
         await guardarSesion(token, usuario);
         // Redirigir de regreso al catálogo
-        router.replace('/(tabs)/index');
+        router.replace('/(tabs)');
       } else {
         setErrorLocal(resultado?.message || 'Credenciales incorrectas.');
       }
@@ -94,7 +94,7 @@ export default function LoginScreen() {
       
       {/* Botón de Retorno Flotante (Para volver al catálogo público) */}
       <TouchableOpacity
-        onPress={() => router.replace('/(tabs)/index')}
+        onPress={() => router.replace('/(tabs)')}
         className="absolute top-12 left-4 z-10 w-10 h-10 rounded-full bg-white justify-center items-center border border-slate-100 shadow-sm active:bg-slate-50"
       >
         <ChevronLeft size={24} color="#1e3a8a" />

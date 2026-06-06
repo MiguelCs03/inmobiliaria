@@ -1,7 +1,7 @@
 import { MigrationInterface, QueryRunner } from "typeorm";
 
-export class SeedBase1779925000000 implements MigrationInterface {
-  name = 'SeedBase1779925000000'
+export class SeedBase1780756000000 implements MigrationInterface {
+  name = 'SeedBase1780756000000'
 
   public async up(queryRunner: QueryRunner): Promise<void> {
     // Rol administrador
@@ -69,7 +69,7 @@ export class SeedBase1779925000000 implements MigrationInterface {
     await queryRunner.query(`
       INSERT INTO "propiedad" ("propietario_id", "tipo_propiedad_id", "tipo_operacion_id", "estado_propiedad_id", "precio_base", "area_m2", "ubicacion", "detalles_json")
       SELECT
-        (SELECT p."id" FROM "propietario" p WHERE p."ci_nit" = v.ci_nit LIMIT 1),
+        (SELECT p."id" FROM "propietario" p  WHERE p."ci_nit" = v.ci_nit LIMIT 1),
         (SELECT tp."id" FROM "tipo_propiedad" tp WHERE tp."nombre" = v.tipo LIMIT 1),
         (SELECT toper."id" FROM "tipo_operacion" toper WHERE toper."nombre" = v.operacion LIMIT 1),
         (SELECT ep."id" FROM "estado_propiedad" ep WHERE ep."nombre" = v.estado LIMIT 1),

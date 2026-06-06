@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "888986888295",
+    "project_id": "inmobiliaria-2060c",
+    "storage_bucket": "inmobiliaria-2060c.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:888986888295:android:3dd0fc6c5525d5af728cc2",
+        "android_client_info": {
+          "package_name": "com.miguelcs03.inmobiliaria"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCNcnF9i0R9GChYMp-Y9-v3Gu6i2kXKKHY"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

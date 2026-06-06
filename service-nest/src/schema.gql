@@ -143,6 +143,20 @@ A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date
 """
 scalar DateTime
 
+type Dispositivo {
+  fechaRegistro: DateTime!
+  id: Int!
+  plataforma: String!
+  tokenFcm: String!
+  usuarioId: Int
+}
+
+type DispositivoResponse {
+  data: Dispositivo
+  message: String!
+  success: Boolean!
+}
+
 type Empleado {
   activo: Boolean!
   apellidos: String!
@@ -210,6 +224,7 @@ type Mutation {
   login(loginInput: LoginInput!): LoginApiResponse!
   register(registerUsuarioInput: RegisterUsuarioInput!): UsuarioAuthResponse!
   registerBlockchain(id: Int!): ContratoResponse!
+  registrarDispositivo(registrarDispositivoInput: RegistrarDispositivoInput!): DispositivoResponse!
   removeCliente(id: Int!): ClienteResponse!
   removeContrato(id: Int!): ContratoResponse!
   removeEmpleado(id: Int!): EmpleadoResponse!
@@ -333,6 +348,12 @@ input RegisterUsuarioInput {
   contrasenia: String!
   correo: String!
   rolId: Int!
+}
+
+input RegistrarDispositivoInput {
+  plataforma: String!
+  tokenFcm: String!
+  usuarioId: Int
 }
 
 type Rol {

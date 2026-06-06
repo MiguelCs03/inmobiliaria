@@ -1,7 +1,7 @@
 import { MigrationInterface, QueryRunner } from "typeorm";
 
-export class Gestion1779921042806 implements MigrationInterface {
-    name = 'Gestion1779921042806'
+export class Gestion1780755635152 implements MigrationInterface {
+    name = 'Gestion1780755635152'
 
     public async up(queryRunner: QueryRunner): Promise<void> {
         await queryRunner.query(`CREATE TABLE "propietario" ("id" BIGSERIAL NOT NULL, "nombres" character varying(100) NOT NULL, "telefono" character varying(20) NOT NULL, "ci_nit" character varying(30) NOT NULL, "activo" boolean NOT NULL DEFAULT true, "foto_url" character varying(255), CONSTRAINT "PK_97b6ca7c3a5c40768ec179ad73b" PRIMARY KEY ("id"))`);
@@ -13,26 +13,29 @@ export class Gestion1779921042806 implements MigrationInterface {
         await queryRunner.query(`CREATE TABLE "empleado" ("id" BIGSERIAL NOT NULL, "usuario_id" bigint NOT NULL, "sucursal_id" integer NOT NULL, "nombres" character varying(100) NOT NULL, "apellidos" character varying(100) NOT NULL, "activo" boolean NOT NULL DEFAULT true, CONSTRAINT "REL_82d9465c3816fcbeded6c374ae" UNIQUE ("usuario_id"), CONSTRAINT "PK_d15e7688d5ed23e9fdb570b2e5d" PRIMARY KEY ("id"))`);
         await queryRunner.query(`CREATE TABLE "rol" ("id" SERIAL NOT NULL, "nombre" character varying(50) NOT NULL, CONSTRAINT "PK_c93a22388638fac311781c7f2dd" PRIMARY KEY ("id"))`);
         await queryRunner.query(`CREATE TABLE "usuario" ("id" BIGSERIAL NOT NULL, "rol_id" integer NOT NULL, "correo" character varying(150) NOT NULL, "contrasenia_hash" character varying(255) NOT NULL, "activo" boolean NOT NULL DEFAULT true, "foto_url" character varying(255), CONSTRAINT "UQ_349ecb64acc4355db443ca17cbd" UNIQUE ("correo"), CONSTRAINT "PK_a56c58e5cabaa04fb2c98d2d7e2" PRIMARY KEY ("id"))`);
-        await queryRunner.query(`CREATE TABLE "segmento" ("id" SERIAL NOT NULL, "nombre" character varying(100) NOT NULL, CONSTRAINT "PK_segmento" PRIMARY KEY ("id"))`);
-        await queryRunner.query(`CREATE TABLE "cliente" ("id" BIGSERIAL NOT NULL, "usuario_id" bigint, "segmento_id" bigint, "nombres" character varying(100) NOT NULL, "telefono" character varying(20) NOT NULL, "ci_nit" character varying(30) NOT NULL, "activo" boolean NOT NULL DEFAULT true, CONSTRAINT "REL_51a4d9370abe0523f208ef3f43" UNIQUE ("usuario_id"), CONSTRAINT "PK_18990e8df6cf7fe71b9dc0f5f39" PRIMARY KEY ("id"))`);
-        await queryRunner.query(`CREATE TABLE "preferencias" ("id" BIGSERIAL NOT NULL, "cliente_id" bigint NOT NULL, "presupuesto_max" numeric(12,2), "tipo_propiedad_buscada" character varying(100), "habitaciones_minimo" integer, "zona_preferida" character varying(150), CONSTRAINT "PK_preferencias" PRIMARY KEY ("id"))`);
+        await queryRunner.query(`CREATE TABLE "segmento" ("id" SERIAL NOT NULL, "nombre" character varying(100) NOT NULL, CONSTRAINT "PK_0f5c538fc22bd6d5194d936f683" PRIMARY KEY ("id"))`);
+        await queryRunner.query(`CREATE TABLE "preferencias" ("id" BIGSERIAL NOT NULL, "cliente_id" bigint NOT NULL, "presupuesto_max" numeric(12,2), "tipo_propiedad_buscada" character varying(100), "habitaciones_minimo" integer, "zona_preferida" character varying(150), CONSTRAINT "PK_741f9011e185292c350407bd2a6" PRIMARY KEY ("id"))`);
+        await queryRunner.query(`CREATE TABLE "cliente" ("id" BIGSERIAL NOT NULL, "usuario_id" bigint, "segmento_id" integer, "nombres" character varying(100) NOT NULL, "telefono" character varying(20) NOT NULL, "ci_nit" character varying(30) NOT NULL, "activo" boolean NOT NULL DEFAULT true, CONSTRAINT "REL_51a4d9370abe0523f208ef3f43" UNIQUE ("usuario_id"), CONSTRAINT "PK_18990e8df6cf7fe71b9dc0f5f39" PRIMARY KEY ("id"))`);
         await queryRunner.query(`CREATE TABLE "pago" ("id" BIGSERIAL NOT NULL, "factura_id" bigint NOT NULL, "monto" numeric(12,2) NOT NULL, "metodo" character varying(50) NOT NULL, CONSTRAINT "PK_6be14be998d5e41f10e58c0e651" PRIMARY KEY ("id"))`);
         await queryRunner.query(`CREATE TABLE "factura" ("id" BIGSERIAL NOT NULL, "plan_pago_id" bigint NOT NULL, "nro_factura" character varying(30) NOT NULL, "monto_total" numeric(12,2) NOT NULL, "fecha_emision" TIMESTAMP NOT NULL, CONSTRAINT "UQ_26babef3ce3453fd7cc4eff9d2b" UNIQUE ("nro_factura"), CONSTRAINT "PK_ca804984009ea42a7b46adb9a86" PRIMARY KEY ("id"))`);
         await queryRunner.query(`CREATE TYPE "public"."plan_pagos_estado_enum" AS ENUM('Pendiente', 'Pagado')`);
         await queryRunner.query(`CREATE TABLE "plan_pagos" ("id" BIGSERIAL NOT NULL, "contrato_id" bigint NOT NULL, "nro_cuota" integer NOT NULL, "monto_cuota" numeric(12,2) NOT NULL, "estado" "public"."plan_pagos_estado_enum" NOT NULL DEFAULT 'Pendiente', CONSTRAINT "PK_6c154769c6036a27db35430f4cc" PRIMARY KEY ("id"))`);
-        await queryRunner.query(`CREATE TABLE "contrato" ("id" BIGSERIAL NOT NULL, "propiedad_id" bigint NOT NULL, "cliente_id" bigint NOT NULL, "empleado_id" bigint NOT NULL, "monto_total" numeric(12,2) NOT NULL, "estado_contrato" character varying(30), "documento_nosql_id" character varying(50), CONSTRAINT "PK_b82cfcedf2037eab18ca2714ef9" PRIMARY KEY ("id"))`);
+        await queryRunner.query(`CREATE TABLE "firma_contrato" ("id" SERIAL NOT NULL, "contrato_id" bigint NOT NULL, "tipo_firmante" character varying(20) NOT NULL, "signature_url" text NOT NULL, "fecha_firma" TIMESTAMP NOT NULL DEFAULT now(), CONSTRAINT "PK_0e506ed31cbfc7a6fb2510baf58" PRIMARY KEY ("id"))`);
+        await queryRunner.query(`CREATE TABLE "contrato" ("id" BIGSERIAL NOT NULL, "propiedad_id" bigint NOT NULL, "cliente_id" bigint NOT NULL, "empleado_id" bigint NOT NULL, "titulo" character varying(500) NOT NULL, "monto_total" numeric(12,2) NOT NULL, "fecha_inicio" TIMESTAMP, "fecha_fin" TIMESTAMP, "observaciones" text, "document_hash" character varying(255), "pdf_url" text, "blockchain_contract_id" character varying(100), "estado_contrato" character varying(30), "documento_nosql_id" character varying(50), CONSTRAINT "PK_b82cfcedf2037eab18ca2714ef9" PRIMARY KEY ("id"))`);
         await queryRunner.query(`CREATE TABLE "propiedad" ("id" BIGSERIAL NOT NULL, "propietario_id" bigint NOT NULL, "tipo_propiedad_id" integer NOT NULL, "tipo_operacion_id" integer NOT NULL, "estado_propiedad_id" integer NOT NULL, "precio_base" numeric(12,2) NOT NULL, "area_m2" numeric(10,2) NOT NULL, "ubicacion" character varying(255), "detalles_json" jsonb, CONSTRAINT "PK_78e6c440a5d7863829c61e23f41" PRIMARY KEY ("id"))`);
         await queryRunner.query(`CREATE TABLE "visita" ("id" BIGSERIAL NOT NULL, "propiedad_id" bigint NOT NULL, "cliente_id" bigint NOT NULL, "empleado_id" bigint NOT NULL, "fecha_visita" TIMESTAMP NOT NULL, "estado" character varying(20) NOT NULL DEFAULT 'Pendiente', CONSTRAINT "PK_8ffe9de9ae8f45fbeaaea4d5552" PRIMARY KEY ("id"))`);
+        await queryRunner.query(`CREATE TABLE "dispositivo" ("id" BIGSERIAL NOT NULL, "usuario_id" bigint, "token_fcm" character varying(255) NOT NULL, "plataforma" character varying(50) NOT NULL, "fecha_registro" TIMESTAMP NOT NULL DEFAULT now(), CONSTRAINT "UQ_4e583d3ef5e3dbafeed6dc1268a" UNIQUE ("token_fcm"), CONSTRAINT "PK_86bfbecafb42ad256f14c64e38c" PRIMARY KEY ("id"))`);
         await queryRunner.query(`ALTER TABLE "propiedad_imagen" ADD CONSTRAINT "FK_133574dace1f80b0418d6a08d69" FOREIGN KEY ("propiedad_id") REFERENCES "propiedad"("id") ON DELETE NO ACTION ON UPDATE NO ACTION`);
         await queryRunner.query(`ALTER TABLE "empleado" ADD CONSTRAINT "FK_82d9465c3816fcbeded6c374ae9" FOREIGN KEY ("usuario_id") REFERENCES "usuario"("id") ON DELETE NO ACTION ON UPDATE NO ACTION`);
         await queryRunner.query(`ALTER TABLE "empleado" ADD CONSTRAINT "FK_49778622b1c20506be43d01066b" FOREIGN KEY ("sucursal_id") REFERENCES "sucursal"("id") ON DELETE NO ACTION ON UPDATE NO ACTION`);
         await queryRunner.query(`ALTER TABLE "usuario" ADD CONSTRAINT "FK_6c336b0a51b5c4d22614cb02533" FOREIGN KEY ("rol_id") REFERENCES "rol"("id") ON DELETE NO ACTION ON UPDATE NO ACTION`);
+        await queryRunner.query(`ALTER TABLE "preferencias" ADD CONSTRAINT "FK_23fcadf1bb0bd13ed62f04cad84" FOREIGN KEY ("cliente_id") REFERENCES "cliente"("id") ON DELETE NO ACTION ON UPDATE NO ACTION`);
         await queryRunner.query(`ALTER TABLE "cliente" ADD CONSTRAINT "FK_51a4d9370abe0523f208ef3f43d" FOREIGN KEY ("usuario_id") REFERENCES "usuario"("id") ON DELETE NO ACTION ON UPDATE NO ACTION`);
-        await queryRunner.query(`ALTER TABLE "cliente" ADD CONSTRAINT "FK_cliente_segmento" FOREIGN KEY ("segmento_id") REFERENCES "segmento"("id") ON DELETE NO ACTION ON UPDATE NO ACTION`);
-        await queryRunner.query(`ALTER TABLE "preferencias" ADD CONSTRAINT "FK_preferencias_cliente" FOREIGN KEY ("cliente_id") REFERENCES "cliente"("id") ON DELETE CASCADE ON UPDATE NO ACTION`);
+        await queryRunner.query(`ALTER TABLE "cliente" ADD CONSTRAINT "FK_4924fbab748ef20744e64a9a537" FOREIGN KEY ("segmento_id") REFERENCES "segmento"("id") ON DELETE NO ACTION ON UPDATE NO ACTION`);
         await queryRunner.query(`ALTER TABLE "pago" ADD CONSTRAINT "FK_a120b7486ee0d2e5c1f21c72669" FOREIGN KEY ("factura_id") REFERENCES "factura"("id") ON DELETE NO ACTION ON UPDATE NO ACTION`);
         await queryRunner.query(`ALTER TABLE "factura" ADD CONSTRAINT "FK_014ce5e76a65d184e019eff73df" FOREIGN KEY ("plan_pago_id") REFERENCES "plan_pagos"("id") ON DELETE NO ACTION ON UPDATE NO ACTION`);
         await queryRunner.query(`ALTER TABLE "plan_pagos" ADD CONSTRAINT "FK_ac7a07bb5260f2d374cc9d6a1da" FOREIGN KEY ("contrato_id") REFERENCES "contrato"("id") ON DELETE NO ACTION ON UPDATE NO ACTION`);
+        await queryRunner.query(`ALTER TABLE "firma_contrato" ADD CONSTRAINT "FK_fa7006536021edf92ca1a1c3370" FOREIGN KEY ("contrato_id") REFERENCES "contrato"("id") ON DELETE NO ACTION ON UPDATE NO ACTION`);
         await queryRunner.query(`ALTER TABLE "contrato" ADD CONSTRAINT "FK_c19efc3075fdc161ab04d7f6912" FOREIGN KEY ("propiedad_id") REFERENCES "propiedad"("id") ON DELETE NO ACTION ON UPDATE NO ACTION`);
         await queryRunner.query(`ALTER TABLE "contrato" ADD CONSTRAINT "FK_1d3656b9a06832b90b22ac0280e" FOREIGN KEY ("cliente_id") REFERENCES "cliente"("id") ON DELETE NO ACTION ON UPDATE NO ACTION`);
         await queryRunner.query(`ALTER TABLE "contrato" ADD CONSTRAINT "FK_e43c6d9f7518fe05facd45c46ef" FOREIGN KEY ("empleado_id") REFERENCES "empleado"("id") ON DELETE NO ACTION ON UPDATE NO ACTION`);
@@ -43,9 +46,11 @@ export class Gestion1779921042806 implements MigrationInterface {
         await queryRunner.query(`ALTER TABLE "visita" ADD CONSTRAINT "FK_d4c549c457c1a92b298bd76dd2d" FOREIGN KEY ("propiedad_id") REFERENCES "propiedad"("id") ON DELETE NO ACTION ON UPDATE NO ACTION`);
         await queryRunner.query(`ALTER TABLE "visita" ADD CONSTRAINT "FK_0ae470ee62d58554d46bc614672" FOREIGN KEY ("cliente_id") REFERENCES "cliente"("id") ON DELETE NO ACTION ON UPDATE NO ACTION`);
         await queryRunner.query(`ALTER TABLE "visita" ADD CONSTRAINT "FK_2a5ffcdef5bab841c40eced9998" FOREIGN KEY ("empleado_id") REFERENCES "empleado"("id") ON DELETE NO ACTION ON UPDATE NO ACTION`);
+        await queryRunner.query(`ALTER TABLE "dispositivo" ADD CONSTRAINT "FK_32720f53238c58acdc139f8dd43" FOREIGN KEY ("usuario_id") REFERENCES "usuario"("id") ON DELETE CASCADE ON UPDATE NO ACTION`);
     }
 
     public async down(queryRunner: QueryRunner): Promise<void> {
+        await queryRunner.query(`ALTER TABLE "dispositivo" DROP CONSTRAINT "FK_32720f53238c58acdc139f8dd43"`);
         await queryRunner.query(`ALTER TABLE "visita" DROP CONSTRAINT "FK_2a5ffcdef5bab841c40eced9998"`);
         await queryRunner.query(`ALTER TABLE "visita" DROP CONSTRAINT "FK_0ae470ee62d58554d46bc614672"`);
         await queryRunner.query(`ALTER TABLE "visita" DROP CONSTRAINT "FK_d4c549c457c1a92b298bd76dd2d"`);
@@ -56,25 +61,28 @@ export class Gestion1779921042806 implements MigrationInterface {
         await queryRunner.query(`ALTER TABLE "contrato" DROP CONSTRAINT "FK_e43c6d9f7518fe05facd45c46ef"`);
         await queryRunner.query(`ALTER TABLE "contrato" DROP CONSTRAINT "FK_1d3656b9a06832b90b22ac0280e"`);
         await queryRunner.query(`ALTER TABLE "contrato" DROP CONSTRAINT "FK_c19efc3075fdc161ab04d7f6912"`);
+        await queryRunner.query(`ALTER TABLE "firma_contrato" DROP CONSTRAINT "FK_fa7006536021edf92ca1a1c3370"`);
         await queryRunner.query(`ALTER TABLE "plan_pagos" DROP CONSTRAINT "FK_ac7a07bb5260f2d374cc9d6a1da"`);
         await queryRunner.query(`ALTER TABLE "factura" DROP CONSTRAINT "FK_014ce5e76a65d184e019eff73df"`);
         await queryRunner.query(`ALTER TABLE "pago" DROP CONSTRAINT "FK_a120b7486ee0d2e5c1f21c72669"`);
+        await queryRunner.query(`ALTER TABLE "cliente" DROP CONSTRAINT "FK_4924fbab748ef20744e64a9a537"`);
         await queryRunner.query(`ALTER TABLE "cliente" DROP CONSTRAINT "FK_51a4d9370abe0523f208ef3f43d"`);
-        await queryRunner.query(`ALTER TABLE "preferencias" DROP CONSTRAINT "FK_preferencias_cliente"`);
-        await queryRunner.query(`ALTER TABLE "cliente" DROP CONSTRAINT "FK_cliente_segmento"`);
+        await queryRunner.query(`ALTER TABLE "preferencias" DROP CONSTRAINT "FK_23fcadf1bb0bd13ed62f04cad84"`);
         await queryRunner.query(`ALTER TABLE "usuario" DROP CONSTRAINT "FK_6c336b0a51b5c4d22614cb02533"`);
         await queryRunner.query(`ALTER TABLE "empleado" DROP CONSTRAINT "FK_49778622b1c20506be43d01066b"`);
         await queryRunner.query(`ALTER TABLE "empleado" DROP CONSTRAINT "FK_82d9465c3816fcbeded6c374ae9"`);
         await queryRunner.query(`ALTER TABLE "propiedad_imagen" DROP CONSTRAINT "FK_133574dace1f80b0418d6a08d69"`);
+        await queryRunner.query(`DROP TABLE "dispositivo"`);
         await queryRunner.query(`DROP TABLE "visita"`);
         await queryRunner.query(`DROP TABLE "propiedad"`);
         await queryRunner.query(`DROP TABLE "contrato"`);
+        await queryRunner.query(`DROP TABLE "firma_contrato"`);
         await queryRunner.query(`DROP TABLE "plan_pagos"`);
         await queryRunner.query(`DROP TYPE "public"."plan_pagos_estado_enum"`);
         await queryRunner.query(`DROP TABLE "factura"`);
         await queryRunner.query(`DROP TABLE "pago"`);
-        await queryRunner.query(`DROP TABLE "preferencias"`);
         await queryRunner.query(`DROP TABLE "cliente"`);
+        await queryRunner.query(`DROP TABLE "preferencias"`);
         await queryRunner.query(`DROP TABLE "segmento"`);
         await queryRunner.query(`DROP TABLE "usuario"`);
         await queryRunner.query(`DROP TABLE "rol"`);
