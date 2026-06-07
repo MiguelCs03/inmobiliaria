@@ -1,0 +1,296 @@
+@if (contrato$ | async; as contrato) {
+
+<div class="propiedades-wrapper card catalog-full-card">
+
+    <div class="section-header-bar">
+
+        <div class="title-text">
+
+            <h1>
+                Contrato #{{ contrato.id }}
+            </h1>
+
+            <p>
+                Seguimiento y trazabilidad del contrato
+            </p>
+
+        </div>
+
+        <button
+            *ngIf="!contrato.pdfUrl"
+            type="button"
+            class="primary-action-btn"
+            (click)="generarPdf()">
+
+            Generar PDF
+
+        </button>
+
+    </div>
+
+    <div class="detail-grid-container">
+
+        <div class="detail-info-block">
+
+            <div class="detail-row">
+
+                <span class="detail-label">
+                    Título
+                </span>
+
+                <span class="detail-value">
+                    {{ contrato.titulo }}
+                </span>
+
+            </div>
+
+            <div class="detail-row">
+
+                <span class="detail-label">
+                    Monto
+                </span>
+
+                <span class="detail-value property-price">
+                    {{ contrato.montoTotal }}
+                </span>
+
+            </div>
+
+            <div class="detail-row">
+
+                <span class="detail-label">
+                    Estado
+                </span>
+
+                <span
+                    class="tag-status"
+
+                    [ngClass]="{
+
+                    'pending':
+                        contrato.estadoContrato === 'PENDING_SIGNATURE',
+
+                    'partial':
+                        contrato.estadoContrato === 'PARTIALLY_SIGNED',
+
+                    'completed':
+                        contrato.estadoContrato === 'COMPLETED'
+
+                    }">
+
+                    {{ contrato.estadoContrato }}
+
+                </span>
+
+            </div>
+
+            <div class="detail-row full-width-row">
+
+                <span class="detail-label">
+                    Observaciones
+                </span>
+
+                <div class="detail-textarea-display">
+
+                    {{ contrato.observaciones || 'Sin observaciones' }}
+
+                </div>
+
+            </div>
+
+        </div>
+
+        <div class="detail-actions-panel">
+
+            <h4 class="panel-subtitle">
+
+                Acciones
+
+            </h4>
+
+            <button
+                *ngIf="!contrato.blockchainContractId"
+                type="button"
+                class="btn-secondary-action"
+                (click)="registrarBlockchain()">
+
+                Registrar Blockchain
+
+            </button>
+
+            <button
+                *ngIf="contrato.pdfUrl"
+                type="button"
+                class="btn-secondary-action"
+                (click)="verPdf()">
+
+                Ver PDF
+
+            </button>
+
+            <button
+                *ngIf="contrato.estadoContrato === 'COMPLETED'"
+                type="button"
+                class="btn-secondary-action"
+                (click)="generarPdfFirmado()">
+
+                Generar PDF Firmado
+
+            </button>
+
+        </div>
+
+    </div>
+
+    <!-- Blockchain -->
+
+    <div class="detail-info-block">
+
+        <h3>
+
+            Blockchain
+
+        </h3>
+
+        <div class="detail-row">
+
+            <span class="detail-label">
+
+                Blockchain ID
+
+            </span>
+
+            <span class="detail-value font-mono">
+
+                {{ contrato.blockchainContractId || 'No registrado' }}
+
+            </span>
+
+        </div>
+
+        <div class="detail-row">
+
+            <span class="detail-label">
+
+                Hash Documento
+
+            </span>
+
+            <span class="detail-value font-mono">
+
+                {{ contrato.documentHash || 'No generado' }}
+
+            </span>
+
+        </div>
+
+    </div>
+
+    <!-- Estado Proceso -->
+
+    <div class="detail-info-block">
+
+        <h3>
+
+            Estado del Proceso
+
+        </h3>
+
+        <div class="detail-row">
+
+            <span>
+
+                {{ contrato.pdfUrl ? '✅' : '⏳' }}
+
+                PDF Generado
+
+            </span>
+
+        </div>
+
+        <div class="detail-row">
+
+            <span>
+
+                {{ contrato.blockchainContractId ? '✅' : '⏳' }}
+
+                Blockchain Registrado
+
+            </span>
+
+        </div>
+
+        <div class="detail-row">
+
+            <span>
+
+                {{ contrato.estadoContrato === 'PARTIALLY_SIGNED' ||
+                contrato.estadoContrato === 'COMPLETED'
+                ? '✅' : '⏳' }}
+
+                Primera Firma
+
+            </span>
+
+        </div>
+
+        <div class="detail-row">
+
+            <span>
+
+                {{ contrato.estadoContrato === 'COMPLETED'
+                ? '✅' : '⏳' }}
+
+                Contrato Completado
+
+            </span>
+
+        </div>
+
+    </div>
+
+    <!-- Firmas -->
+
+    <div
+        class="detail-info-block"
+        *ngIf="contrato.firmas?.length">
+
+        <h3>
+
+            Firmas Registradas
+
+        </h3>
+
+        <div
+            *ngFor="let firma of contrato.firmas"
+            class="detail-row">
+
+            <span class="detail-label">
+
+                {{ firma.tipoFirmante }}
+
+            </span>
+
+            <span class="detail-value">
+
+                {{ firma.fechaFirma | date:'dd/MM/yyyy HH:mm' }}
+
+                |
+
+                <a
+                    [href]="firma.signatureUrl"
+                    target="_blank">
+
+                    Ver Firma
+
+                </a>
+
+            </span>
+
+        </div>
+
+    </div>
+
+</div>
+
+}

@@ -17,35 +17,42 @@
 
     <!-- List Body Area -->
     <div class="list-body table-responsive">
-        <table class="custom-table-catalog">
-            <thead>
-                <tr>
-                    <th>ID</th>
-                    <th>Título</th>
-                    <th>Estado</th>
-                    <th class="text-right">Acciones</th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr>
-                    <td class="font-mono">1</td>
-                    <td class="font-semibold">Contrato Casa Centro</td>
-                    <td>
-                        <!-- Clases de estado dinámicas basadas en tu lógica de tags -->
-                        <span class="tag-status reserved">PENDING</span>
-                    </td>
-                    <td class="text-right">
-                        <button type="button" class="btn-action-view">
-                            <svg class="view-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
-                                <circle cx="12" cy="12" r="3"></circle>
-                            </svg>
-                            Ver
-                        </button>
-                    </td>
-                </tr>
-            </tbody>
-        </table>
+        @if (contratos$ | async; as contratos) {
+            <table class="custom-table-catalog">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Título</th>
+                        <th>Estado</th>
+                        <th class="text-right">Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @for (contrato of contratos; track contrato.id) {
+                        <tr>
+                            <td class="font-mono">{{ contrato.id }}</td>
+                            <td class="font-semibold">{{ contrato.titulo }}</td>
+                            <td class="font-semibold">{{ contrato.montoTotal }}</td>
+                            <td>
+                                <span class="tag-status reserved">{{ contrato.estadoContrato }}</span>
+                            </td>
+                            <td class="text-right">
+                                <button type="button" class="btn-action-view" (click) = "verContrato(contrato.id)">
+                                    <svg class="view-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                        stroke-width="2">
+                                        <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                                        <circle cx="12" cy="12" r="3"></circle>
+                                    </svg>
+                                    Ver
+                                </button>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        } @else {
+            <p>Cargando contratos...</p>
+        }
     </div>
 
 </div>
