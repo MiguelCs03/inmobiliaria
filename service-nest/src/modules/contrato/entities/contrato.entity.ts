@@ -11,6 +11,7 @@ import { Propiedad } from '../../propiedad/entities/propiedad.entity';
 import { Cliente } from '../../cliente/entities/cliente.entity';
 import { Empleado } from '../../empleado/entities/empleado.entity';
 import { PlanPago } from './plan-pago.entity';
+import { FirmaContrato } from '../../firma_contrato/entities/firma_contraro.entity';
 
 @ObjectType()
 @Entity('contrato')
@@ -114,6 +115,8 @@ export class Contrato {
   @Column({ name: 'documento_nosql_id', type: 'varchar', length: 50, nullable: true })
   documentoNosqlId?: string | null;
 
+
+
   //aqui las relaciones con otras tablas
   @ManyToOne(() => Propiedad, (propiedad) => propiedad.contratos)
   @JoinColumn({ name: 'propiedad_id' })
@@ -129,4 +132,15 @@ export class Contrato {
 
   @OneToMany(() => PlanPago, (planPago) => planPago.contrato)
   planPagos!: PlanPago[];
+  @OneToMany(
+    () => FirmaContrato,
+    (firma) => firma.contrato,
+  )
+  @Field(
+    () => [FirmaContrato],
+    {
+      nullable: true,
+    },
+  )
+  firmas?: FirmaContrato[];
 }

@@ -30,13 +30,21 @@ type ClienteResponse {
 }
 
 type Contrato {
+  blockchainContractId: String
   clienteId: Int!
+  documentHash: String
   documentoNosqlId: String
   empleadoId: Int!
   estadoContrato: String
+  fechaFin: DateTime
+  fechaInicio: DateTime
+  firmas: [FirmaContrato!]
   id: Int!
   montoTotal: Float!
+  observaciones: String
+  pdfUrl: String
   propiedadId: Int!
+  titulo: String!
 }
 
 type ContratoListResponse {
@@ -65,8 +73,12 @@ input CreateContratoInput {
   documentoNosqlId: String
   empleadoId: Int!
   estadoContrato: String
+  fechaFin: DateTime
+  fechaInicio: DateTime
   montoTotal: Float!
+  observaciones: String
   propiedadId: Int!
+  titulo: String!
 }
 
 input CreateEmpleadoInput {
@@ -131,6 +143,20 @@ A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date
 """
 scalar DateTime
 
+type Dispositivo {
+  fechaRegistro: DateTime!
+  id: Int!
+  plataforma: String!
+  tokenFcm: String!
+  usuarioId: Int
+}
+
+type DispositivoResponse {
+  data: Dispositivo
+  message: String!
+  success: Boolean!
+}
+
 type Empleado {
   activo: Boolean!
   apellidos: String!
@@ -148,6 +174,20 @@ type EmpleadoListResponse {
 
 type EmpleadoResponse {
   data: Empleado
+  message: String!
+  success: Boolean!
+}
+
+type FirmaContrato {
+  contratoId: Int!
+  fechaFirma: DateTime!
+  id: Int!
+  signatureUrl: String!
+  tipoFirmante: String!
+}
+
+type FirmaContratoResponse {
+  data: FirmaContrato
   message: String!
   success: Boolean!
 }
@@ -180,8 +220,12 @@ type Mutation {
   createSegmento(createSegmentoInput: CreateSegmentoInput!): Segmento!
   createSucursal(createSucursalInput: CreateSucursalInput!): SucursalResponse!
   createVisita(createVisitaInput: CreateVisitaInput!): VisitaResponse!
+  generateContractPdf(id: Int!): ContratoResponse!
+  generateSignedPdf(id: Int!): ContratoResponse!
   login(loginInput: LoginInput!): LoginApiResponse!
   register(registerUsuarioInput: RegisterUsuarioInput!): UsuarioAuthResponse!
+  registerBlockchain(id: Int!): ContratoResponse!
+  registrarDispositivo(registrarDispositivoInput: RegistrarDispositivoInput!): DispositivoResponse!
   removeCliente(id: Int!): ClienteResponse!
   removeContrato(id: Int!): ContratoResponse!
   removeEmpleado(id: Int!): EmpleadoResponse!
@@ -191,6 +235,7 @@ type Mutation {
   removeSegmento(id: Int!): Segmento!
   removeSucursal(id: Int!): SucursalResponse!
   removeVisita(id: Int!): VisitaResponse!
+  signContract(signContractInput: SignContractInput!): FirmaContratoResponse!
   toggleActivoUsuario(id: Int!): UsuarioAuthResponse!
   updateCliente(updateClienteInput: UpdateClienteInput!): ClienteResponse!
   updateContrato(updateContratoInput: UpdateContratoInput!): ContratoResponse!
@@ -276,6 +321,7 @@ type Query {
   cliente(id: Int!): ClienteResponse!
   clientes(pagination: PaginationInput): ClienteListResponse!
   contrato(id: Int!): ContratoResponse!
+  contratoPdfUrl(id: Int!): String!
   contratos(pagination: PaginationInput): ContratoListResponse!
   empleado(id: Int!): EmpleadoResponse!
   empleados(pagination: PaginationInput): EmpleadoListResponse!
@@ -305,6 +351,12 @@ input RegisterUsuarioInput {
   rolId: Int!
 }
 
+input RegistrarDispositivoInput {
+  plataforma: String!
+  tokenFcm: String!
+  usuarioId: Int
+}
+
 type Rol {
   id: Int!
   nombre: String!
@@ -325,6 +377,12 @@ type RolResponse {
 type Segmento {
   id: Int!
   nombre: String!
+}
+
+input SignContractInput {
+  contractId: Int!
+  signatureBase64: String!
+  signerType: String!
 }
 
 type Sucursal {
@@ -361,9 +419,13 @@ input UpdateContratoInput {
   documentoNosqlId: String
   empleadoId: Int
   estadoContrato: String
+  fechaFin: DateTime
+  fechaInicio: DateTime
   id: Int!
   montoTotal: Float
+  observaciones: String
   propiedadId: Int
+  titulo: String
 }
 
 input UpdateEmpleadoInput {
