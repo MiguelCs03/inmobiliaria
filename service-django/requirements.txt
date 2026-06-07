@@ -8,9 +8,9 @@ python-decouple>=3.8
 scikit-learn>=1.4.2
 
 # Deep Learning
-tensorflow>=2.17.0
+tflite-runtime
 pandas>=2.2.2
-numpy>=1.26.4
+numpy>=1.26.4,<2.0.0
 joblib>=1.4.2
 
 # Images
