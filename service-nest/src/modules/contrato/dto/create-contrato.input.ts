@@ -47,14 +47,12 @@ export class CreateContratoInput {
     nullable: true
   })
   @IsOptional()
-  @IsDateString()
   fechaInicio?: Date;
 
   @Field(() => Date, {
     nullable: true
   })
   @IsOptional()
-  @IsDateString()
   fechaFin?: Date;
 
   @Field(() => String, {

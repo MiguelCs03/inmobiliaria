@@ -40,6 +40,7 @@ export class ContratoService {
 
   createContrato(input: any) {
 
+    console.log(input)
     return this.apollo
       .mutate({
         mutation: this.CREATE_CONTRACT,
@@ -49,9 +50,12 @@ export class ContratoService {
         }
       })
       .pipe(
-        map((result: any) =>
-          result.data.createContrato
-        )
+        map((result: any) => {
+
+          console.log('GRAPHQL RESPONSE', result);
+
+          result.data.createContrato;
+        })
       );
   }
 

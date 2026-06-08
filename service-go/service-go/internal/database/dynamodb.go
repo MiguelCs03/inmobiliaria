@@ -6,7 +6,6 @@ import (
 	"os"
 	"time"
 
-	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/config"
 	"github.com/aws/aws-sdk-go-v2/service/dynamodb"
 )
@@ -14,42 +13,32 @@ import (
 var DynamoClient *dynamodb.Client
 
 func ConnectDynamoDB() {
-
 	region := os.Getenv("AWS_REGION")
-	endpoint := os.Getenv("DYNAMODB_ENDPOINT")
-
-	cfg, err := config.LoadDefaultConfig(
-		context.TODO(),
-		config.WithRegion(region),
-	)
-
-	if err != nil {
-		log.Fatal(err)
+	if region == "" {
+		log.Fatal("AWS_REGION está vacío. Ej: us-east-2")
 	}
 
-	DynamoClient = dynamodb.NewFromConfig(
-		cfg,
-		func(o *dynamodb.Options) {
-			o.BaseEndpoint = aws.String(endpoint)
-		},
-	)
+	cfg, err := config.LoadDefaultConfig(context.Background(), config.WithRegion(region))
+	if err != nil {
+		log.Fatalf("Error cargando config de AWS: %v", err)
+	}
 
-	for i := 0; i < 10; i++ {
+	DynamoClient = dynamodb.NewFromConfig(cfg)
+	log.Printf("Intentando conectar a DynamoDB en región: %s", region)
 
-		_, err := DynamoClient.ListTables(
-			context.TODO(),
-			&dynamodb.ListTablesInput{},
-		)
+	for i := 0; i < 5; i++ {
+		ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+		_, err := DynamoClient.ListTables(ctx, &dynamodb.ListTablesInput{})
+		cancel()
 
 		if err == nil {
-			log.Println("DynamoDB Connected")
+			log.Println("✅ CONECTADO EXITOSAMENTE A AWS DYNAMODB")
 			return
 		}
 
-		log.Println("Waiting for DynamoDB...")
-
+		log.Printf("⚠️ Intento %d: error DynamoDB ListTables: %T: %v", i+1, err, err)
 		time.Sleep(3 * time.Second)
 	}
 
-	log.Fatal("Could not connect to DynamoDB")
+	log.Fatal("❌ Error fatal: no se pudo conectar/listar tablas en DynamoDB (ver error arriba).")
 }

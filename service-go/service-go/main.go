@@ -40,6 +40,8 @@ func main() {
 
 	database.ConnectDynamoDB()
 
+	/*
+	//Todo eso local
 	database.CreateContractsTable()
 
 	database.CreateAuditTable()
@@ -47,6 +49,8 @@ func main() {
 	database.CreateSignaturesTable()
 
 	database.CreateBiometricTable()
+
+	
 
 	app := fiber.New()
 
