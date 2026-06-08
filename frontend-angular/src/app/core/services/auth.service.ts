@@ -65,7 +65,6 @@ export class AuthService {
       })
       .pipe(
         map((result: any) => {
-          console.log('[AuthService] Respuesta completa del servidor:', JSON.stringify(result));
           if (result.errors?.length > 0) {
             const msg = result.errors[0]?.message || 'Credenciales inválidas';
             throw new Error(msg);
@@ -91,9 +90,8 @@ export class AuthService {
           }
         }),
         catchError((error) => {
-          console.error('[AuthService] Error de autenticación:', error);
-          console.error('[AuthService] Error completo:', JSON.stringify(error, Object.getOwnPropertyNames(error)));
-          const message = error.message || (error as any)?.networkError?.message || 'Error en el servidor. Intente más tarde.';
+          console.error('Error de autenticación:', error);
+          const message = error.message || 'Error en el servidor. Intente más tarde.';
           return throwError(() => new Error(message));
         })
       );

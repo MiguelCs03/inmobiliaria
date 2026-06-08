@@ -1,129 +1,481 @@
-/* ==========================================================================
-   ESTILOS DE DETALLE DE CONTRATO (VISTA INDIVIDUAL)
-   ========================================================================== */
+/* =====================================================
+   CONTRATO DETALLE
+===================================================== */
 
-/* Layout de dos columnas: Datos a la izquierda, Acciones secundarias a la derecha */
-.detail-grid-container {
-  display: grid;
-  grid-template-columns: 2fr 1fr;
-  gap: 1.5rem;
-  margin-top: 0.5rem;
+:host {
+    display: block;
+    background: #f5f7fa;
+    min-height: 100vh;
 }
 
-@media (max-width: 768px) {
-  .detail-grid-container {
-    grid-template-columns: 1fr;
-  }
+.contract-page {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 24px;
 }
 
-/* Bloque contenedor de Metadatos */
-.detail-info-block {
-  background: #ffffff;
-  border: 1px solid var(--border-color);
-  border-radius: 0.75rem;
-  padding: 1.5rem;
-  display: flex;
-  flex-direction: column;
-  gap: 1.25rem;
+/* =====================================================
+   HEADER
+===================================================== */
+
+.contract-header {
+
+    background: #ffffff;
+
+    border: 1px solid #e5e7eb;
+
+    border-radius: 8px;
+
+    padding: 24px;
+
+    display: flex;
+
+    justify-content: space-between;
+
+    align-items: center;
+
+    margin-bottom: 20px;
 }
 
-/* Filas individuales de datos */
-.detail-row {
-  display: flex;
-  flex-direction: column;
-  gap: 0.25rem;
-  border-bottom: 1px solid rgba(226, 232, 240, 0.6);
-  padding-bottom: 0.75rem;
+.contract-header h1 {
+
+    margin: 0;
+
+    font-size: 1.5rem;
+
+    font-weight: 600;
+
+    color: #111827;
 }
 
-.detail-row:last-child {
-  border-bottom: none;
-  padding-bottom: 0;
+.contract-header p {
+
+    margin: 4px 0 0 0;
+
+    color: #6b7280;
+
+    font-size: 0.9rem;
 }
 
-.detail-row.full-width-row {
-  border-bottom: none;
+/* =====================================================
+   STATUS
+===================================================== */
+
+.status-badge {
+
+    padding: 6px 12px;
+
+    border-radius: 6px;
+
+    font-size: 0.75rem;
+
+    font-weight: 600;
+
+    text-transform: uppercase;
+
+    letter-spacing: .03em;
 }
 
-/* Etiquetas y Valores */
-.detail-label {
-  font-size: 0.75rem;
-  font-weight: 700;
-  text-transform: uppercase;
-  color: var(--text-secondary);
-  letter-spacing: 0.05em;
+.pending {
+
+    background: #fff7ed;
+
+    color: #c2410c;
 }
 
-.detail-value {
-  font-size: 1rem;
-  color: var(--text-primary);
+.partial {
+
+    background: #eff6ff;
+
+    color: #1d4ed8;
 }
 
-/* Visualizador de Observaciones con estilo similar a tus cajas de lectura */
-.detail-textarea-display {
-  background: #f8fafc;
-  border: 1px solid var(--border-color);
-  border-radius: 0.5rem;
-  padding: 0.85rem 1rem;
-  font-size: 0.875rem;
-  color: var(--text-primary);
-  line-height: 1.5;
-  white-space: pre-wrap; /* Respeta los saltos de línea guardados */
-  min-height: 80px;
+.completed {
+
+    background: #ecfdf5;
+
+    color: #047857;
 }
 
-/* Panel de Acciones Laterales Secundarias */
-.detail-actions-panel {
-  background: #f8fafc;
-  border: 1px solid var(--border-color);
-  border-radius: 0.75rem;
-  padding: 1.25rem;
-  display: flex;
-  flex-direction: column;
-  gap: 0.75rem;
-  height: fit-content;
+/* =====================================================
+   TIMELINE
+===================================================== */
+
+.progress-card {
+
+    background: #fff;
+
+    border: 1px solid #e5e7eb;
+
+    border-radius: 8px;
+
+    padding: 20px;
+
+    margin-bottom: 20px;
 }
 
-.panel-subtitle {
-  font-size: 0.75rem;
-  font-weight: 700;
-  color: var(--text-secondary);
-  text-transform: uppercase;
-  letter-spacing: 0.02em;
-  margin: 0 0 0.25rem 0;
+.progress-steps {
+
+    display: flex;
+
+    justify-content: space-between;
+
+    align-items: center;
 }
 
-/* Botones Interactivos del Panel Secundario */
-.btn-secondary-action {
-  background: var(--bg-white);
-  border: 1px solid var(--border-color);
-  color: var(--text-primary);
-  padding: 0.65rem 1rem;
-  border-radius: 0.5rem;
-  font-size: 0.85rem;
-  font-weight: 600;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  gap: 0.6rem;
-  transition: all 0.15s ease-in-out;
-  box-shadow: var(--shadow-sm);
+.step {
+
+    display: flex;
+
+    align-items: center;
+
+    gap: 10px;
+
+    color: #9ca3af;
+
+    font-size: 0.9rem;
+
+    font-weight: 500;
 }
 
-.btn-secondary-action:hover {
-  background: #f1f5f9;
-  border-color: #cbd5e1;
-  color: var(--blue-primary);
-  transform: translateX(2px);
+.step.completed {
+
+    color: #111827;
 }
 
-.action-panel-icon {
-  width: 1.1rem;
-  height: 1.1rem;
-  color: var(--text-muted);
-  transition: color 0.15s ease;
+.circle {
+
+    width: 24px;
+
+    height: 24px;
+
+    border-radius: 50%;
+
+    border: 1px solid #d1d5db;
+
+    background: #ffffff;
+
+    display: flex;
+
+    justify-content: center;
+
+    align-items: center;
+
+    font-size: 12px;
+
+    font-weight: 600;
 }
 
-.btn-secondary-action:hover .action-panel-icon {
-  color: var(--blue-primary);
+.step.completed .circle {
+
+    background: #111827;
+
+    color: white;
+
+    border-color: #111827;
+}
+
+.line {
+
+    flex: 1;
+
+    height: 1px;
+
+    background: #d1d5db;
+
+    margin: 0 12px;
+}
+
+/* =====================================================
+   GRID
+===================================================== */
+
+.content-grid {
+
+    display: grid;
+
+    grid-template-columns: 2fr 1fr;
+
+    gap: 20px;
+
+    margin-bottom: 20px;
+}
+
+@media(max-width:900px) {
+
+    .content-grid {
+
+        grid-template-columns: 1fr;
+    }
+}
+
+/* =====================================================
+   CARD BASE
+===================================================== */
+
+.card {
+
+    background: white;
+
+    border: 1px solid #e5e7eb;
+
+    border-radius: 8px;
+
+    padding: 20px;
+}
+
+.card h2 {
+
+    margin: 0 0 20px 0;
+
+    font-size: 1rem;
+
+    font-weight: 600;
+
+    color: #111827;
+
+    padding-bottom: 12px;
+
+    border-bottom: 1px solid #e5e7eb;
+}
+
+/* =====================================================
+   DATOS
+===================================================== */
+
+.info-grid {
+
+    display: grid;
+
+    grid-template-columns: repeat(2, 1fr);
+
+    gap: 16px;
+}
+
+.info-item {
+
+    display: flex;
+
+    flex-direction: column;
+
+    gap: 4px;
+}
+
+.info-item.full {
+
+    grid-column: 1 / -1;
+}
+
+.info-item label {
+
+    font-size: 0.75rem;
+
+    font-weight: 600;
+
+    color: #6b7280;
+
+    text-transform: uppercase;
+}
+
+.info-item span {
+
+    font-size: 0.95rem;
+
+    color: #111827;
+}
+
+/* =====================================================
+   MONTO
+===================================================== */
+
+.price {
+
+    font-size: 1.1rem;
+
+    font-weight: 600;
+
+    color: #111827;
+}
+
+/* =====================================================
+   OBSERVACIONES
+===================================================== */
+
+.observaciones {
+
+    background: #f9fafb;
+
+    border: 1px solid #e5e7eb;
+
+    border-radius: 6px;
+
+    padding: 12px;
+
+    line-height: 1.6;
+
+    color: #374151;
+
+    white-space: pre-wrap;
+}
+
+/* =====================================================
+   PANEL ACCIONES
+===================================================== */
+
+.actions-card {
+
+    display: flex;
+
+    flex-direction: column;
+
+    gap: 10px;
+}
+
+/* =====================================================
+   BOTONES
+===================================================== */
+
+.btn-primary {
+
+    width: 100%;
+
+    border: none;
+
+    background: #111827;
+
+    color: white;
+
+    padding: 12px;
+
+    border-radius: 6px;
+
+    font-size: .9rem;
+
+    font-weight: 500;
+
+    cursor: pointer;
+}
+
+.btn-primary:hover {
+
+    background: #1f2937;
+}
+
+.btn-secondary {
+
+    width: 100%;
+
+    border: 1px solid #d1d5db;
+
+    background: white;
+
+    color: #111827;
+
+    padding: 12px;
+
+    border-radius: 6px;
+
+    font-size: .9rem;
+
+    font-weight: 500;
+
+    cursor: pointer;
+}
+
+.btn-secondary:hover {
+
+    background: #f9fafb;
+}
+
+/* =====================================================
+   MENSAJE ESPERA
+===================================================== */
+
+.waiting {
+
+    padding: 12px;
+
+    background: #f9fafb;
+
+    border: 1px solid #e5e7eb;
+
+    border-radius: 6px;
+
+    font-size: .9rem;
+
+    color: #6b7280;
+
+    text-align: center;
+}
+
+/* =====================================================
+   HASHES
+===================================================== */
+
+.mono {
+
+    font-family:
+        Consolas,
+        Monaco,
+        monospace;
+
+    font-size: .85rem;
+
+    word-break: break-all;
+
+    color: #374151;
+}
+
+/* =====================================================
+   FIRMAS
+===================================================== */
+
+.firma-item {
+
+    display: flex;
+
+    justify-content: space-between;
+
+    align-items: center;
+
+    padding: 14px 0;
+
+    border-bottom: 1px solid #e5e7eb;
+}
+
+.firma-item:last-child {
+
+    border-bottom: none;
+}
+
+.firma-item strong {
+
+    font-size: .9rem;
+
+    color: #111827;
+}
+
+.firma-item div {
+
+    margin-top: 4px;
+
+    font-size: .85rem;
+
+    color: #6b7280;
+}
+
+.firma-item a {
+
+    color: #2563eb;
+
+    text-decoration: none;
+
+    font-size: .9rem;
+
+    font-weight: 500;
+}
+
+.firma-item a:hover {
+
+    text-decoration: underline;
 }

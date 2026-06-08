@@ -1,6 +1,5 @@
 <div class="modal-container scrollable-modal-container">
 
-    <!-- Header del Formulario -->
     <div class="modal-header">
         <div class="modal-header-text">
             <h3>Crear Nuevo Contrato</h3>
@@ -8,56 +7,160 @@
         </div>
     </div>
 
-    <!-- Cuerpo del Formulario -->
     <form [formGroup]="contratoFormulario" (ngSubmit)="guardar()" class="form-body">
 
-        <!-- Campo: Título -->
         <div class="form-group">
             <label>Título del Contrato</label>
             <div class="input-wrapper"
                 [class.invalid]="contratoFormulario.get('titulo')?.invalid && contratoFormulario.get('titulo')?.touched">
-                <input type="text" formControlName="titulo"
-                    placeholder="Ej. Contrato de Arrendamiento - Departamento 2B">
+                <input type="text" formControlName="titulo" placeholder="Ej. Contrato de Arrendamiento - Departamento 2B">
             </div>
-            <!-- <div *ngIf="contratoFormulario.get('titulo')?.invalid && contratoFormulario.get('titulo')?.touched" class="error-text">
-                El título es requerido.
-            </div> -->
+            @if (contratoFormulario.get('titulo')?.invalid && contratoFormulario.get('titulo')?.touched) {
+                <div class="error-text">El título es requerido.</div>
+            }
         </div>
 
-        <!-- Campo: Cliente / Usuario -->
-        <div class="form-group">
-            <label>Cliente / Propietario</label>
-            <!-- <div class="input-wrapper"
-                [class.invalid]="contratoFormulario.get('usuario')?.invalid && contratoFormulario.get('usuario')?.touched">
-                <input type="text" formControlName="usuario" placeholder="Nombre completo del cliente">
-            </div> -->
-            <!-- <div *ngIf="contratoFormulario.get('usuario')?.invalid && contratoFormulario.get('usuario')?.touched" class="error-text">
-                Debe asignar un cliente válido.
-            </div> -->
+        <div class="form-group current-autocomplete-target">
+            <label>Cliente (Buscar por NIT / CI)</label>
+            <div class="input-wrapper"
+                [class.invalid]="contratoFormulario.get('clienteId')?.invalid && contratoFormulario.get('clienteId')?.touched"
+                [class.valid-selected]="contratoFormulario.get('clienteId')?.valid">
+                
+                <input 
+                    type="text" 
+                    [value]="busquedaCliente"
+                    (input)="filtrarClientes($event)"
+                    (focus)="mostrarSugerencias = true"
+                    (blur)="ocultarSugerencias()"
+                    placeholder="Escriba el número de NIT o CI del cliente...">
+                
+                <div class="selection-indicator">
+                    @if (contratoFormulario.get('clienteId')?.valid) {
+                        <span class="check-icon">✓</span>
+                    } @else {
+                        <span class="search-icon">*</span>
+                    }
+                </div>
+            </div>
+
+            @if (mostrarSugerencias && clientesFiltrados.length > 0) {
+                <ul class="autocomplete-dropdown">
+                    @for (cliente of clientesFiltrados; track cliente.id) {
+                        <li (click)="seleccionarCliente(cliente)">
+                            <span class="client-name">NIT/CI: {{ cliente.ciNit }}</span>
+                            <span class="client-id">ID: {{ cliente.id }}</span>
+                        </li>
+                    }
+                </ul>
+            } @else if (mostrarSugerencias && busquedaCliente.trim()) {
+                <ul class="autocomplete-dropdown">
+                    <li class="no-results">No se encontraron clientes con ese NIT/CI</li>
+                </ul>
+            }
+
+            @if (contratoFormulario.get('clienteId')?.invalid && contratoFormulario.get('clienteId')?.touched) {
+                <div class="error-text">Debe buscar y seleccionar un cliente válido de la lista.</div>
+            }
         </div>
 
-        <!-- Campo: Observaciones (Textarea Premium) -->
+        <div class="form-group current-autocomplete-target">
+            <label>Propiedad (Buscar por ID)</label>
+            <div class="input-wrapper"
+                [class.invalid]="contratoFormulario.get('propiedadId')?.invalid && contratoFormulario.get('propiedadId')?.touched"
+                [class.valid-selected]="contratoFormulario.get('propiedadId')?.valid">
+                
+                <input 
+                    type="text" 
+                    [value]="busquedaPropiedad"
+                    (input)="filtrarPropiedades($event)"
+                    (focus)="mostrarPropiedades = true"
+                    (blur)="ocultarPropiedades()"
+                    placeholder="Escriba el ID de la propiedad...">
+                
+                <div class="selection-indicator">
+                    @if (contratoFormulario.get('propiedadId')?.valid) {
+                        <span class="check-icon">✓</span>
+                    } @else {
+                        <span class="search-icon">*</span>
+                    }
+                </div>
+            </div>
+
+            @if (mostrarPropiedades && propiedadesFiltradas.length > 0) {
+                <ul class="autocomplete-dropdown">
+                    @for (propiedad of propiedadesFiltradas; track propiedad.id) {
+                        <li (click)="seleccionarPropiedad(propiedad)">
+                            <span class="client-name">Propiedad Código / Ref</span>
+                            <span class="client-id">ID: {{ propiedad.id }}</span>
+                        </li>
+                    }
+                </ul>
+            } @else if (mostrarPropiedades && busquedaPropiedad.trim()) {
+                <ul class="autocomplete-dropdown">
+                    <li class="no-results">No se encontraron propiedades con ese ID</li>
+                </ul>
+            }
+
+            @if (contratoFormulario.get('propiedadId')?.invalid && contratoFormulario.get('propiedadId')?.touched) {
+                <div class="error-text">Debe buscar y seleccionar una propiedad válida.</div>
+            }
+        </div>
+
         <div class="form-group">
-            <label>Observaciones o Cláusulas Especiales</label>
+            <label>Monto Total del Contrato</label>
+            <div class="input-wrapper"
+                [class.invalid]="contratoFormulario.get('montoTotal')?.invalid && contratoFormulario.get('montoTotal')?.touched">
+                <input type="number" formControlName="montoTotal" placeholder="0.00" min="0">
+            </div>
+            @if (contratoFormulario.get('montoTotal')?.invalid && contratoFormulario.get('montoTotal')?.touched) {
+                <div class="error-text">El monto total es requerido y debe ser mayor a cero.</div>
+            }
+        </div>
+
+        <div style="display: flex; gap: 1rem; width: 100%;">
+            <div class="form-group" style="flex: 1;">
+                <label>Fecha de Inicio</label>
+                <div class="input-wrapper"
+                    [class.invalid]="contratoFormulario.get('fechaInicio')?.invalid && contratoFormulario.get('fechaInicio')?.touched">
+                    <input type="date" formControlName="fechaInicio">
+                </div>
+                @if (contratoFormulario.get('fechaInicio')?.invalid && contratoFormulario.get('fechaInicio')?.touched) {
+                    <div class="error-text">Fecha requerida.</div>
+                }
+            </div>
+
+            <div class="form-group" style="flex: 1;">
+                <label>Fecha de Finalización</label>
+                <div class="input-wrapper"
+                    [class.invalid]="contratoFormulario.get('fechaFin')?.invalid && contratoFormulario.get('fechaFin')?.touched">
+                    <input type="date" formControlName="fechaFin">
+                </div>
+                @if (contratoFormulario.get('fechaFin')?.invalid && contratoFormulario.get('fechaFin')?.touched) {
+                    <div class="error-text">Fecha requerida.</div>
+                }
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label>Descripción del Contrato</label>
             <div class="textarea-wrapper"
                 [class.invalid]="contratoFormulario.get('observaciones')?.invalid && contratoFormulario.get('observaciones')?.touched">
                 <textarea formControlName="observaciones"
                     placeholder="Detalles adicionales, penalizaciones o acuerdos específicos..."></textarea>
             </div>
+            @if (contratoFormulario.get('observaciones')?.invalid && contratoFormulario.get('observaciones')?.touched) {
+                <div class="error-text">Las observaciones son requeridas.</div>
+            }
         </div>
 
-        <!-- Acciones del Formulario -->
         <div class="modal-footer-actions">
-            <button type="button" class="cancel-btn">
+            <button type="button" class="cancel-btn" (click)="volver()">
                 Cancelar
             </button>
-            <button type="submit" class="submit-btn">
+            <button type="submit" class="submit-btn" [disabled]="contratoFormulario.invalid">
                 <span>Crear Contrato</span>
             </button>
         </div>
     </form>
-
-    <app-contrato-previa-vista [contrato]="previewData">
-    </app-contrato-previa-vista>
 
 </div>

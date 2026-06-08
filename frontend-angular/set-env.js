@@ -39,9 +39,9 @@ envFileContent.split(/\r?\n/).forEach((line) => {
   }
 });
 
-// Dar prioridad a variable de entorno del sistema (Netlify), luego .env, luego default
-const graphqlUri = process.env.GATEWAY_GRAPHQL_URL || envVars['GATEWAY_GRAPHQL_URL'] || 'http://localhost:3001/graphql';
-const apiRestUri = process.env.GATEWAY_REST_URL || envVars['GATEWAY_REST_URL'] || 'http://localhost:3001/ia';
+// Determinar el valor de las URLs (por defecto http://localhost:3001)
+const graphqlUri = envVars['GATEWAY_GRAPHQL_URL'] || 'http://localhost:3001/graphql';
+const apiRestUri = envVars['GATEWAY_REST_URL'] || 'http://localhost:3001/ia';
 
 // Asegurar que el directorio de salida exista
 const targetDir = path.join(__dirname, 'src', 'environments');

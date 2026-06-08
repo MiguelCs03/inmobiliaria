@@ -6,7 +6,6 @@ import { provideHttpClient,withFetch } from '@angular/common/http';
 import { environment } from '../../environments/environment';
 
 export function apolloOptionsFactory(httpLink: HttpLink): any {
-  console.log('[GraphQL] URI configurada:', environment.graphqlUri);
   return {
     // Se castea como any para resolver TS2352 y evitar conflicto con HttpLinkHandler
     link: httpLink.create({ uri: environment.graphqlUri }) as any,
