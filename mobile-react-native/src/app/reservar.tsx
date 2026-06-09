@@ -8,12 +8,13 @@ import {
   TextInput,
   ActivityIndicator,
   StatusBar,
-  Alert
+  Alert,
+  Modal
 } from 'react-native';
 import { router, useLocalSearchParams } from 'expo-router';
 import { useQuery, useMutation } from '@apollo/client/react';
 import { gql } from '@apollo/client';
-import { ArrowLeft, Calendar, User, Home, ArrowRight, ShieldAlert, CheckCircle2 } from 'lucide-react-native';
+import { ArrowLeft, Calendar, User, Home, ArrowRight, ShieldAlert, CheckCircle2, ChevronLeft, ChevronRight } from 'lucide-react-native';
 import { useAuth } from '@/context/auth-context';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { MAP_TIPO_PROPIEDAD, MAP_TIPO_OPERACION } from '@/constants/properties';
@@ -76,6 +77,66 @@ export default function ReservarScreen() {
   const [errorLocal, setErrorLocal] = useState<string | null>(null);
   const [exito, setExito] = useState(false);
   const [visitaCreadaId, setVisitaCreadaId] = useState<number | null>(null);
+
+  // Estados para el calendario interactivo y horas
+  const [mostrarCalendario, setMostrarCalendario] = useState(false);
+  const [anioActual, setAnioActual] = useState(new Date().getFullYear());
+  const [mesActual, setMesActual] = useState(new Date().getMonth()); // 0 = Enero, 11 = Diciembre
+
+  const nombresMeses = [
+    'Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio',
+    'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'
+  ];
+
+  const diasSemana = ['Dom', 'Lun', 'Mar', 'Mie', 'Jue', 'Vie', 'Sab'];
+
+  const slotsHora = [
+    '08:00', '08:30', '09:00', '09:30', '10:00', '10:30',
+    '11:00', '11:30', '12:00', '12:30', '13:00', '13:30',
+    '14:00', '14:30', '15:00', '15:30', '16:00', '16:30',
+    '17:00', '17:30', '18:00'
+  ];
+
+  const navegarMesAnterior = () => {
+    if (mesActual === 0) {
+      setMesActual(11);
+      setAnioActual(prev => prev - 1);
+    } else {
+      setMesActual(prev => prev - 1);
+    }
+  };
+
+  const navegarMesSiguiente = () => {
+    if (mesActual === 11) {
+      setMesActual(0);
+      setAnioActual(prev => prev + 1);
+    } else {
+      setMesActual(prev => prev + 1);
+    }
+  };
+
+  const diasCalendario = useMemo(() => {
+    const totalDias = new Date(anioActual, mesActual + 1, 0).getDate();
+    const primerDiaSemana = new Date(anioActual, mesActual, 1).getDay(); // 0 = Domingo, 6 = Sábado
+    
+    const dias = [];
+    // Espacios vacíos antes del día 1
+    for (let i = 0; i < primerDiaSemana; i++) {
+      dias.push(null);
+    }
+    // Días del mes
+    for (let d = 1; d <= totalDias; d++) {
+      dias.push(d);
+    }
+    return dias;
+  }, [anioActual, mesActual]);
+
+  const seleccionarDia = (dia: number) => {
+    const mesStr = String(mesActual + 1).padStart(2, '0');
+    const diaStr = String(dia).padStart(2, '0');
+    setFecha(`${anioActual}-${mesStr}-${diaStr}`);
+    setMostrarCalendario(false);
+  };
 
   // Queries de GraphQL
   const { data: dataProp, loading: loadProp, error: errorProp } = useQuery<any>(QUERY_PROPIEDADES);
@@ -362,39 +423,55 @@ export default function ReservarScreen() {
                   })}
                 </ScrollView>
               </View>
-            </View>
-
-            {/* Campo 3: Fecha (Texto) */}
+                {/* Campo 3: Fecha (Interactive Calendar Modal Trigger) */}
             <View className="mb-4">
               <View className="flex-row items-center mb-2">
                 <Calendar size={14} color="#64748b" className="mr-1.5" />
                 <Text className="text-slate-500 text-xs font-bold uppercase tracking-wider">Fecha de la Visita</Text>
               </View>
-              <TextInput
-                value={fecha}
-                onChangeText={setFecha}
-                placeholder="AAAA-MM-DD (Ej: 2026-06-15)"
-                placeholderTextColor="#94a3b8"
-                className="bg-slate-50 border border-slate-100 rounded-xl px-4 py-3 text-slate-800 text-xs font-semibold"
-                keyboardType="numeric"
-              />
+              <TouchableOpacity
+                onPress={() => setMostrarCalendario(true)}
+                className="bg-slate-50 border border-slate-100 rounded-xl px-4 py-3 flex-row justify-between items-center active:bg-slate-100"
+              >
+                <Text className={`text-xs font-semibold ${fecha ? 'text-slate-800' : 'text-slate-400'}`}>
+                  {fecha ? fecha : 'Seleccionar fecha...'}
+                </Text>
+                <Calendar size={16} color="#2563eb" />
+              </TouchableOpacity>
             </View>
 
-            {/* Campo 4: Hora (Texto) */}
+            {/* Campo 4: Hora (Pills Horizontal List Selection) */}
             <View className="mb-6">
               <View className="flex-row items-center mb-2">
                 <Calendar size={14} color="#64748b" className="mr-1.5" />
                 <Text className="text-slate-500 text-xs font-bold uppercase tracking-wider">Hora de la Visita</Text>
               </View>
-              <TextInput
-                value={hora}
-                onChangeText={setHora}
-                placeholder="HH:MM (Ej: 15:30)"
-                placeholderTextColor="#94a3b8"
-                className="bg-slate-50 border border-slate-100 rounded-xl px-4 py-3 text-slate-800 text-xs font-semibold"
-                keyboardType="numeric"
-              />
-            </View>
+              <ScrollView 
+                horizontal 
+                showsHorizontalScrollIndicator={false} 
+                className="py-1"
+                nestedScrollEnabled={true}
+              >
+                {slotsHora.map((sh) => {
+                  const seleccionado = hora === sh;
+                  return (
+                    <TouchableOpacity
+                      key={sh}
+                      onPress={() => setHora(sh)}
+                      className={`px-4 py-2.5 rounded-xl mr-2 border ${
+                        seleccionado 
+                          ? 'bg-corporate-600 border-corporate-600' 
+                          : 'bg-slate-50 border-slate-100'
+                      }`}
+                    >
+                      <Text className={`text-xs font-bold ${seleccionado ? 'text-white' : 'text-slate-600'}`}>
+                        {sh} Hrs
+                      </Text>
+                    </TouchableOpacity>
+                  );
+                })}
+              </ScrollView>
+            </View>           </View>
 
             {/* Botón de Submit */}
             <TouchableOpacity
@@ -415,6 +492,88 @@ export default function ReservarScreen() {
           </View>
         </ScrollView>
       )}
+
+      {/* MODAL DE CALENDARIO INTERACTIVO */}
+      <Modal
+        visible={mostrarCalendario}
+        transparent={true}
+        animationType="fade"
+        onRequestClose={() => setMostrarCalendario(false)}
+      >
+        <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: 'rgba(15, 23, 42, 0.6)', paddingHorizontal: 16 }}>
+          <View style={{ backgroundColor: '#ffffff', borderRadius: 24, padding: 20, width: '100%', maxWidth: 384, borderWidth: 1, borderColor: '#f1f5f9' }}>
+            {/* Header del Calendario */}
+            <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
+              <TouchableOpacity onPress={navegarMesAnterior} style={{ padding: 8, backgroundColor: '#f8fafc', borderRadius: 12 }}>
+                <ChevronLeft size={20} color="#334155" />
+              </TouchableOpacity>
+              <Text style={{ color: '#0f172a', fontWeight: '800', fontSize: 16 }}>
+                {nombresMeses[mesActual]} {anioActual}
+              </Text>
+              <TouchableOpacity onPress={navegarMesSiguiente} style={{ padding: 8, backgroundColor: '#f8fafc', borderRadius: 12 }}>
+                <ChevronRight size={20} color="#334155" />
+              </TouchableOpacity>
+            </View>
+
+            {/* Cabecera de Días de la Semana */}
+            <View style={{ flexDirection: 'row', marginBottom: 8 }}>
+              {diasSemana.map((d, index) => (
+                <View key={index} style={{ width: '14.28%', alignItems: 'center' }}>
+                  <Text style={{ color: '#94a3b8', fontWeight: '800', fontSize: 10, textTransform: 'uppercase' }}>{d}</Text>
+                </View>
+              ))}
+            </View>
+
+            {/* Cuadrícula de Días */}
+            <View style={{ flexDirection: 'row', flexWrap: 'wrap' }}>
+              {diasCalendario.map((dia, index) => {
+                if (dia === null) {
+                  return <View key={index} style={{ width: '14.28%', aspectRatio: 1 }} />;
+                }
+
+                // Resaltar día seleccionado
+                const mesStr = String(mesActual + 1).padStart(2, '0');
+                const diaStr = String(dia).padStart(2, '0');
+                const formatoFechaDia = `${anioActual}-${mesStr}-${diaStr}`;
+                const seleccionado = fecha === formatoFechaDia;
+
+                return (
+                  <TouchableOpacity
+                    key={index}
+                    onPress={() => seleccionarDia(dia)}
+                    style={{
+                      width: '14.28%',
+                      aspectRatio: 1,
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      borderRadius: 12,
+                      marginVertical: 2,
+                      backgroundColor: seleccionado ? '#2563eb' : 'transparent'
+                    }}
+                  >
+                    <Text style={{
+                      fontSize: 12,
+                      fontWeight: '700',
+                      color: seleccionado ? '#ffffff' : '#1e293b'
+                    }}>
+                      {dia}
+                    </Text>
+                  </TouchableOpacity>
+                );
+              })}
+            </View>
+
+            {/* Botón Cerrar */}
+            <TouchableOpacity
+              onPress={() => setMostrarCalendario(false)}
+              style={{ marginTop: 20, backgroundColor: '#f1f5f9', paddingVertical: 14, borderRadius: 12 }}
+            >
+              <Text style={{ textAlign: 'center', color: '#334155', fontWeight: '800', fontSize: 12 }}>CERRAR</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
+
     </SafeAreaView>
   );
 }
