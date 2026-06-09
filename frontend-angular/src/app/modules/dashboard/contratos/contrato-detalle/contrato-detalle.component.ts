@@ -1,7 +1,7 @@
 import { Component, OnInit, inject } from "@angular/core";
 import { ActivatedRoute } from "@angular/router";
 import { CommonModule } from "@angular/common";
-import { Observable } from "rxjs";
+import { Observable, BehaviorSubject, switchMap } from "rxjs";
 import { ContratoService } from "../../../../core/services/contrato.service";
 
 @Component({
@@ -15,22 +15,36 @@ export class ContratoDetalleComponent implements OnInit {
   private route = inject(ActivatedRoute);
   private contratoService = inject(ContratoService);
 
-  contrato$!: Observable<any>;
   contratoId!: number;
+  
+  // 1. Creamos un disparador reactivo
+  private refreshContrato$ = new BehaviorSubject<void>(undefined);
+  contrato$!: Observable<any>;
 
   ngOnInit(): void {
     this.contratoId = Number(this.route.snapshot.paramMap.get('id'));
-    this.cargarContrato();
+
+    // 2. Cada vez que refreshContrato emita un valor, se pedirán los datos actualizados
+    this.contrato$ = this.refreshContrato$.pipe(
+      switchMap(() => this.contratoService.getContratoById(this.contratoId))
+    );
   }
 
-  cargarContrato(): void {
-    this.contrato$ = this.contratoService.getContratoById(this.contratoId);
+  // 3. Para recargar, solo ordenamos al disparador que emita un nuevo evento
+  refrescarDatos(): void {
+    this.refreshContrato$.next();
   }
 
   generarPdf(): void {
     this.contratoService.generatePdf(this.contratoId).subscribe({
-      next: () => this.cargarContrato(),
-      error: (err) => console.error(err)
+      next: () => {
+        alert('¡PDF generado con éxito!');
+        this.refrescarDatos(); // <--- Recarga reactiva
+      },
+      error: (err) => {
+        console.error(err);
+        alert('Error al generar el PDF.');
+      }
     });
   }
 
@@ -38,9 +52,13 @@ export class ContratoDetalleComponent implements OnInit {
     this.contratoService.registerBlockchain(this.contratoId).subscribe({
       next: (response) => {
         console.log('Blockchain registrada', response);
-        this.cargarContrato();
+        alert('¡Contrato registrado en la Blockchain exitosamente!');
+        this.refrescarDatos();
       },
-      error: (err) => console.error(err)
+      error: (err) => {
+        console.error(err);
+        alert('Error al registrar en Blockchain.');
+      }
     });
   }
 
@@ -53,8 +71,14 @@ export class ContratoDetalleComponent implements OnInit {
 
   generarPdfFirmado(): void {
     this.contratoService.generateSignedPdf(this.contratoId).subscribe({
-      next: () => this.cargarContrato(),
-      error: (err) => console.error(err)
+      next: () => {
+        alert('¡PDF firmado generado con éxito!');
+        this.refrescarDatos();
+      },
+      error: (err) => {
+        console.error(err);
+        alert('Error al generar el PDF firmado.');
+      }
     });
   }
 }
