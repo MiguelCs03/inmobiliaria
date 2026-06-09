@@ -18,16 +18,18 @@
 
         </div>
 
-        <span
-            class="status-badge"
+        <span class="status-badge" [ngClass]="{
+        'pending': contrato.estadoContrato === 'PENDING_SIGNATURE',
+        'partial': contrato.estadoContrato === 'PARTIALLY_SIGNED',
+        'completed': contrato.estadoContrato === 'COMPLETED'
+    }">
 
-            [ngClass]="{
-                'pending': contrato.estadoContrato === 'PENDING_SIGNATURE',
-                'partial': contrato.estadoContrato === 'PARTIALLY_SIGNED',
-                'completed': contrato.estadoContrato === 'COMPLETED'
-            }">
-
-            {{ contrato.estadoContrato }}
+            @switch (contrato.estadoContrato) {
+            @case ('PENDING_SIGNATURE') { Pendiente de Firma }
+            @case ('PARTIALLY_SIGNED') { Parcialmente Firmado }
+            @case ('COMPLETED') { Completado }
+            @default { {{ contrato.estadoContrato }} }
+            }
 
         </span>
 
@@ -39,9 +41,7 @@
 
         <div class="progress-steps">
 
-            <div
-                class="step"
-                [class.completed]="contrato.pdfUrl">
+            <div class="step" [class.completed]="contrato.pdfUrl">
 
                 <div class="circle">
                     {{ contrato.pdfUrl ? '✓' : '1' }}
@@ -53,9 +53,7 @@
 
             <div class="line"></div>
 
-            <div
-                class="step"
-                [class.completed]="contrato.blockchainContractId">
+            <div class="step" [class.completed]="contrato.blockchainContractId">
 
                 <div class="circle">
                     {{ contrato.blockchainContractId ? '✓' : '2' }}
@@ -67,9 +65,7 @@
 
             <div class="line"></div>
 
-            <div
-                class="step"
-                [class.completed]="
+            <div class="step" [class.completed]="
                     contrato.estadoContrato === 'PARTIALLY_SIGNED' ||
                     contrato.estadoContrato === 'COMPLETED'
                 ">
@@ -91,9 +87,7 @@
 
             <div class="line"></div>
 
-            <div
-                class="step"
-                [class.completed]="
+            <div class="step" [class.completed]="
                     contrato.estadoContrato === 'COMPLETED'
                 ">
 
@@ -183,9 +177,7 @@
 
             <ng-container *ngIf="!contrato.pdfUrl">
 
-                <button
-                    class="btn-primary"
-                    (click)="generarPdf()">
+                <button class="btn-primary" (click)="generarPdf()">
 
                     Generar PDF
 
@@ -195,23 +187,18 @@
 
             <!-- PASO 2 -->
 
-            <ng-container
-                *ngIf="
+            <ng-container *ngIf="
                     contrato.pdfUrl &&
                     !contrato.blockchainContractId
                 ">
 
-                <button
-                    class="btn-secondary"
-                    (click)="verPdf()">
+                <button class="btn-secondary" (click)="verPdf()">
 
                     Ver PDF
 
                 </button>
 
-                <button
-                    class="btn-primary"
-                    (click)="registrarBlockchain()">
+                <button class="btn-primary" (click)="registrarBlockchain()">
 
                     Registrar Blockchain
 
@@ -221,16 +208,13 @@
 
             <!-- PASO 3 -->
 
-            <ng-container
-                *ngIf="
+            <ng-container *ngIf="
                     contrato.pdfUrl &&
                     contrato.blockchainContractId &&
                     contrato.estadoContrato !== 'COMPLETED'
                 ">
 
-                <button
-                    class="btn-secondary"
-                    (click)="verPdf()">
+                <button class="btn-secondary" (click)="verPdf()">
 
                     Ver PDF
 
@@ -246,22 +230,17 @@
 
             <!-- PASO 4 -->
 
-            <ng-container
-                *ngIf="
+            <ng-container *ngIf="
                     contrato.estadoContrato === 'COMPLETED'
                 ">
 
-                <button
-                    class="btn-secondary"
-                    (click)="verPdf()">
+                <button class="btn-secondary" (click)="verPdf()">
 
                     Ver PDF
 
                 </button>
 
-                <button
-                    class="btn-primary"
-                    (click)="generarPdfFirmado()">
+                <button class="btn-primary" (click)="generarPdfFirmado()">
 
                     Generar PDF Firmado
 
@@ -319,17 +298,13 @@
 
     <!-- FIRMAS -->
 
-    <div
-        class="card"
-        *ngIf="contrato.firmas?.length">
+    <div class="card" *ngIf="contrato.firmas?.length">
 
         <h2>
             Firmas Registradas
         </h2>
 
-        <div
-            *ngFor="let firma of contrato.firmas"
-            class="firma-item">
+        <div *ngFor="let firma of contrato.firmas" class="firma-item">
 
             <div>
 
@@ -348,9 +323,7 @@
 
             </div>
 
-            <a
-                [href]="firma.signatureUrl"
-                target="_blank">
+            <a [href]="firma.signatureUrl" target="_blank">
 
                 Ver Firma
 
