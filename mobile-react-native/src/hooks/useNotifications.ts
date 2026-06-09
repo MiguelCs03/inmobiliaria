@@ -9,7 +9,7 @@ import { useAuth } from '@/context/auth-context';
 
 // Mutacion de GraphQL para registrar el token FCM en el API Gateway y base de datos
 const MUTATION_VINCULAR_DISPOSITIVO = gql`
-  mutation RegistrarDispositivo($usuarioId: Int!, $tokenFcm: String!, $plataforma: String!) {
+  mutation RegistrarDispositivo($usuarioId: Int, $tokenFcm: String!, $plataforma: String!) {
     registrarDispositivo(
       registrarDispositivoInput: {
         usuarioId: $usuarioId
@@ -35,16 +35,28 @@ export function useNotifications() {
   // Hook de Apollo para registrar el token FCM en el servidor
   const [vincularToken] = useMutation<any, any>(MUTATION_VINCULAR_DISPOSITIVO, {
     onCompleted: (data: any) => {
-      console.log('Token FCM vinculado exitosamente en el backend:', data?.registrarDispositivo?.message);
+      console.log('[useNotifications - Apollo onCompleted] Vinculación exitosa:', data?.registrarDispositivo?.message);
+      console.log('[useNotifications - Apollo onCompleted] Success flag:', data?.registrarDispositivo?.success);
     },
     onError: (error: any) => {
-      console.error('Error al vincular token FCM en el backend:', error.message);
+      console.error('[useNotifications - Apollo onError] Error al vincular token FCM:', error.message);
+      if (error.graphQLErrors) {
+        console.error('[useNotifications - Apollo onError] GraphQL Errors:', error.graphQLErrors);
+      }
+      if (error.networkError) {
+        console.error('[useNotifications - Apollo onError] Network Error:', error.networkError);
+      }
     },
   });
 
+  // Log de estado interno cada vez que cambien usuario o tokenFcm
+  useEffect(() => {
+    console.log('[useNotifications - Estado Actual] tokenFcm:', tokenFcm ? `${tokenFcm.substring(0, 15)}...` : 'null', 'usuarioId:', usuario?.id || 'No logueado');
+  }, [usuario, tokenFcm]);
+
   // Configuracion de notificaciones en primer plano y canales de Android
   useEffect(() => {
-    // Configura como se comportaran las notificaciones cuando la app esta abierta
+    console.log('[useNotifications] Configurando manejadores de notificaciones y canal de Android...');
     Notifications.setNotificationHandler({
       handleNotification: async () => ({
         shouldShowAlert: true,
@@ -55,18 +67,22 @@ export function useNotifications() {
       }),
     });
 
-    // Configura canal de notificaciones exclusivo para Android con alta prioridad
     const configurarCanalAndroid = async () => {
       if (Platform.OS === 'android') {
-        await Notifications.setNotificationChannelAsync('canal-inmobiliaria', {
-          name: 'Alertas Inmobiliarias',
-          importance: Notifications.AndroidImportance.MAX,
-          vibrationPattern: [0, 250, 250, 250],
-          lightColor: '#208AEF',
-          enableLights: true,
-          enableVibrate: true,
-          showBadge: true,
-        });
+        try {
+          await Notifications.setNotificationChannelAsync('canal-inmobiliaria', {
+            name: 'Alertas Inmobiliarias',
+            importance: Notifications.AndroidImportance.MAX,
+            vibrationPattern: [0, 250, 250, 250],
+            lightColor: '#208AEF',
+            enableLights: true,
+            enableVibrate: true,
+            showBadge: true,
+          });
+          console.log('[useNotifications] Canal de Android configurado correctamente');
+        } catch (err) {
+          console.error('[useNotifications] Error al configurar canal de Android:', err);
+        }
       }
     };
 
@@ -77,109 +93,138 @@ export function useNotifications() {
   useEffect(() => {
     const inicializarPushNotifications = async () => {
       try {
-        // Validacion de hardware: Las notificaciones push requieren un dispositivo fisico
+        console.log('[useNotifications] Iniciando inicializarPushNotifications...');
+        console.log('[useNotifications] Hardware - ¿Es dispositivo físico?:', Device.isDevice);
+        
         if (!Device.isDevice) {
-          console.warn('Debe utilizar un dispositivo fisico para recibir notificaciones push.');
-          return;
+          console.warn('[useNotifications] Cuidado: No es dispositivo físico. Las notificaciones push podrían fallar en iOS, pero en emulador Android con Google Play Services podría funcionar.');
         }
 
         // Verificar permisos actuales
         const estadoExistenteRes = await Notifications.getPermissionsAsync() as any;
         const estadoExistente = estadoExistenteRes.status;
+        console.log('[useNotifications] Permiso existente:', estadoExistente);
         let estadoFinal = estadoExistente;
 
         // Si no se han solicitado permisos, se solicitan de forma nativa
         if (estadoExistente !== 'granted') {
+          console.log('[useNotifications] Solicitando permisos nativos...');
           const nuevoEstadoRes = await Notifications.requestPermissionsAsync() as any;
           estadoFinal = nuevoEstadoRes.status;
+          console.log('[useNotifications] Nuevo estado de permiso concedido:', estadoFinal);
         }
 
-        // Validacion de respuesta del usuario
         if (estadoFinal !== 'granted') {
-          console.warn('Permisos de notificacion denegados por el usuario.');
+          console.warn('[useNotifications] Permisos de notificación DENEGADOS.');
           setPermisoConcedido(false);
           return;
         }
 
         setPermisoConcedido(true);
+        console.log('[useNotifications] Permisos de notificación CONCEDIDOS.');
 
         // Obtener el token FCM nativo del dispositivo
         let fcmTokenStr = '';
-        if (Platform.OS === 'android') {
-          // En Android, obtenemos el token de forma directa desde Firebase Messaging
-          fcmTokenStr = await messaging().getToken();
-        } else {
-          // En iOS, solicitamos primero el token APNs y luego el token FCM para compatibilidad
-          await messaging().registerDeviceForRemoteMessages();
-          fcmTokenStr = await messaging().getToken();
+        try {
+          if (Platform.OS === 'android') {
+            console.log('[useNotifications] Obteniendo token FCM de Firebase en Android...');
+            fcmTokenStr = await messaging().getToken();
+          } else {
+            console.log('[useNotifications] Registrando dispositivo para control remoto en iOS...');
+            await messaging().registerDeviceForRemoteMessages();
+            console.log('[useNotifications] Obteniendo token FCM de Firebase en iOS...');
+            fcmTokenStr = await messaging().getToken();
+          }
+          console.log('[useNotifications] Token FCM obtenido exitosamente:', fcmTokenStr);
+        } catch (tokenError: any) {
+          console.error('[useNotifications] Error crítico al obtener token FCM de Firebase:', tokenError);
         }
 
         if (fcmTokenStr) {
           setTokenFcm(fcmTokenStr);
-          console.log('Token FCM obtenido correctamente:', fcmTokenStr);
 
           // FLUJO A: Suscripcion automatica a temas globales para clientes sin login
-          // Permite enviar alertas masivas sobre nuevos inmuebles sin necesidad de un usuario_id
-          await messaging().subscribeToTopic('nuevas-propiedades');
-          console.log('Dispositivo suscrito exitosamente al tema: nuevas-propiedades');
+          try {
+            console.log('[useNotifications] Suscribiendo a tema: nuevas-propiedades...');
+            await messaging().subscribeToTopic('nuevas-propiedades');
+            console.log('[useNotifications] Suscripción exitosa a tema: nuevas-propiedades');
+          } catch (topicError) {
+            console.error('[useNotifications] Falló la suscripción al tema de Firebase:', topicError);
+          }
+        } else {
+          console.error('[useNotifications] No se pudo obtener el token de Firebase (retornó vacío).');
         }
       } catch (error) {
-        console.error('Error al inicializar el sistema de notificaciones push:', error);
+        console.error('[useNotifications] Error en inicializarPushNotifications:', error);
       }
     };
 
     inicializarPushNotifications();
   }, []);
 
-  // Flujo B: Vinculacion automatica del dispositivo al iniciar sesion
+  // Flujo B: Vinculacion automatica del dispositivo (soporta registro anonimo y logueado)
   useEffect(() => {
-    // Si el usuario esta logueado, tenemos un token FCM valido y no ha sido registrado
-    if (usuario && usuario.id && tokenFcm && tokenRegistradoRef.current !== tokenFcm) {
+    console.log('[useNotifications] Evaluando registro en Backend. tokenFcm:', tokenFcm ? `${tokenFcm.substring(0, 15)}...` : 'null');
+    if (!tokenFcm) {
+      console.log('[useNotifications] Cancelando registro: tokenFcm no está disponible aún.');
+      return;
+    }
+
+    const usuarioId = usuario?.id || null;
+    const cacheKey = `${tokenFcm}_${usuarioId}`;
+    console.log('[useNotifications] cacheKey para backend:', cacheKey, 'tokenRegistradoRef actual:', tokenRegistradoRef.current);
+
+    if (tokenRegistradoRef.current !== cacheKey) {
       const registrarTokenEnBackend = async () => {
         try {
-          await vincularToken({
+          console.log('[useNotifications] Ejecutando mutación vincularToken con variables:', {
+            usuarioId,
+            tokenFcm,
+            plataforma: Platform.OS
+          });
+          const result = await vincularToken({
             variables: {
-              usuarioId: usuario.id,
+              usuarioId: usuarioId,
               tokenFcm: tokenFcm,
               plataforma: Platform.OS,
             },
           });
-          // Marcamos el token como registrado para evitar bucles de peticiones
-          tokenRegistradoRef.current = tokenFcm;
-        } catch (err) {
-          console.error('Fallo el intento de vinculacion de dispositivo en el backend:', err);
+          console.log('[useNotifications] Mutación enviada. Resultado devuelto:', result);
+          tokenRegistradoRef.current = cacheKey;
+        } catch (err: any) {
+          console.error('[useNotifications] Excepción atrapada al enviar mutación al backend:', err);
+          console.error('[useNotifications] Detalles error:', JSON.stringify(err));
         }
       };
 
       registrarTokenEnBackend();
-    }
-
-    // Si el usuario cierra sesion, limpiamos la referencia de registro
-    if (!usuario) {
-      tokenRegistradoRef.current = null;
+    } else {
+      console.log('[useNotifications] Omitiendo registro en backend: Ya está registrado para este token y usuario en esta ejecución.');
     }
   }, [usuario, tokenFcm, vincularToken]);
 
   // Manejo de listeners para recibir y presionar notificaciones
   useEffect(() => {
+    console.log('[useNotifications] Configurando listeners de eventos de notificaciones...');
+    
     // Escucha de notificaciones recibidas en primer plano (Foreground)
     const listenerRecibido = Notifications.addNotificationReceivedListener((notification) => {
-      console.log('Notificacion recibida en primer plano:', notification);
+      console.log('[useNotifications] Evento Recibido en Primer Plano:', notification);
       setUltimoMensaje(notification);
     });
 
     // Escucha de interaccion del usuario con la notificacion (Click)
     const listenerRespuesta = Notifications.addNotificationResponseReceivedListener((response) => {
-      console.log('El usuario interactuo con la notificacion:', response);
-      // Aqui se puede procesar la ruta interna recibida en el payload para navegacion
+      console.log('[useNotifications] Evento Click/Interacción de Notificación:', response);
       const datosExtra = response.notification.request.content.data;
       if (datosExtra && typeof datosExtra === 'object' && 'ruta' in datosExtra) {
-        console.log('Redirigiendo a la ruta especificada:', datosExtra.ruta);
+        console.log('[useNotifications] Redirigiendo a ruta en payload:', datosExtra.ruta);
       }
     });
 
     // Limpieza de listeners nativos al desmontar el hook
     return () => {
+      console.log('[useNotifications] Removiendo listeners de eventos de notificaciones...');
       listenerRecibido.remove();
       listenerRespuesta.remove();
     };
