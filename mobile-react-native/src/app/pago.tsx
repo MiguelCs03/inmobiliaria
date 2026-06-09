@@ -27,7 +27,8 @@ import {
   Lock,
   BadgeDollarSign
 } from 'lucide-react-native';
-import { UPDATE_VISITA } from '@/graphql/mutations';
+import { UPDATE_VISITA, CREAR_STRIPE_PAYMENT_INTENT } from '@/graphql/mutations';
+import { usePlatformStripe } from '@/hooks/useStripeHook';
 
 export default function PagoScreen() {
   const insets = useSafeAreaInsets();
@@ -51,6 +52,7 @@ export default function PagoScreen() {
   const [metodo, setMetodo] = useState<'tarjeta' | 'qr' | 'paypal'>('tarjeta');
   const [errorLocal, setErrorLocal] = useState<string | null>(null);
   const [mostrarExito, setMostrarExito] = useState(false);
+  const [procesandoInterno, setProcesandoInterno] = useState(false);
 
   // Campos Tarjeta
   const [nroTarjeta, setNroTarjeta] = useState('');
@@ -62,6 +64,12 @@ export default function PagoScreen() {
   const [paypalEmail, setPaypalEmail] = useState('');
   const [paypalPass, setPaypalPass] = useState('');
 
+  // Hook personalizado de Stripe (maneja nativo y fallback de web)
+  const { isWeb, initPaymentSheet, presentPaymentSheet } = usePlatformStripe();
+
+  // Mutation para crear el Payment Intent en Stripe
+  const [crearPaymentIntent, { loading: creandoIntent }] = useMutation<any, any>(CREAR_STRIPE_PAYMENT_INTENT);
+
   // Mutation para actualizar la visita en el backend de NestJS
   const [actualizarVisita, { loading: procesandoPago }] = useMutation<any, any>(UPDATE_VISITA, {
     onError: (err) => {
@@ -72,27 +80,31 @@ export default function PagoScreen() {
     }
   });
 
+  const cargandoPago = procesandoPago || creandoIntent || procesandoInterno;
+
   const handleConfirmarPago = async () => {
     setErrorLocal(null);
 
-    // Validaciones Locales
+    // Validaciones Locales para Tarjeta en Web, o PayPal
     if (metodo === 'tarjeta') {
-      const cleanCard = nroTarjeta.replace(/\s/g, '');
-      if (cleanCard.length < 16 || !/^\d+$/.test(cleanCard)) {
-        setErrorLocal('Por favor, ingresa un número de tarjeta válido de 16 dígitos.');
-        return;
-      }
-      if (!nombreTitular.trim()) {
-        setErrorLocal('Por favor, ingresa el nombre del titular.');
-        return;
-      }
-      if (!fechaExp.match(/^\d{2}\/\d{2}$/)) {
-        setErrorLocal('Formato de vencimiento inválido. Usa MM/AA (Ej: 12/28).');
-        return;
-      }
-      if (cvv.length < 3 || !/^\d+$/.test(cvv)) {
-        setErrorLocal('Por favor, ingresa un código CVV válido de 3 o 4 dígitos.');
-        return;
+      if (isWeb) {
+        const cleanCard = nroTarjeta.replace(/\s/g, '');
+        if (cleanCard.length < 16 || !/^\d+$/.test(cleanCard)) {
+          setErrorLocal('Por favor, ingresa un número de tarjeta válido de 16 dígitos.');
+          return;
+        }
+        if (!nombreTitular.trim()) {
+          setErrorLocal('Por favor, ingresa el nombre del titular.');
+          return;
+        }
+        if (!fechaExp.match(/^\d{2}\/\d{2}$/)) {
+          setErrorLocal('Formato de vencimiento inválido. Usa MM/AA (Ej: 12/28).');
+          return;
+        }
+        if (cvv.length < 3 || !/^\d+$/.test(cvv)) {
+          setErrorLocal('Por favor, ingresa un código CVV válido de 3 o 4 dígitos.');
+          return;
+        }
       }
     } else if (metodo === 'paypal') {
       if (!paypalEmail.includes('@') || paypalEmail.length < 5) {
@@ -105,32 +117,123 @@ export default function PagoScreen() {
       }
     }
 
-    // Si tenemos visitaId válida de GraphQL, actualizamos su estado a 'Pagada'
-    if (visitaId) {
+    if (metodo === 'tarjeta') {
+      setProcesandoInterno(true);
       try {
-        const res = await actualizarVisita({
+        // 1. Crear el Payment Intent en el backend (NestJS)
+        const response = await crearPaymentIntent({
           variables: {
-            input: {
-              id: visitaId,
-              estado: 'Pagada'
-            }
+            monto: 50.0
           }
         });
-        
-        if (res.data?.updateVisita?.success) {
-          setMostrarExito(true);
-        } else {
-          // Si falló del lado lógico pero no de red
-          setErrorLocal(res.data?.updateVisita?.message || 'Error al procesar el estado del pago.');
+
+        const data = response.data?.crearStripePaymentIntent;
+        if (!data || !data.success) {
+          throw new Error(data?.message || 'No se pudo iniciar el proceso de pago con Stripe.');
         }
-      } catch (e) {
-        console.error('Error capturado en mutación:', e);
-        // Fallback a éxito estático
-        setMostrarExito(true);
+
+        const clientSecret = data.clientSecret;
+        if (!clientSecret) {
+          throw new Error('No se recibió el clientSecret de la pasarela de pagos.');
+        }
+
+        if (isWeb) {
+          // 2a. Flujo de Simulación en Web
+          await new Promise(resolve => setTimeout(resolve, 2000));
+          
+          if (visitaId) {
+            const res = await actualizarVisita({
+              variables: {
+                input: {
+                  id: visitaId,
+                  estado: 'Pagada'
+                }
+              }
+            });
+            if (res.data?.updateVisita?.success) {
+              setMostrarExito(true);
+            } else {
+              setErrorLocal(res.data?.updateVisita?.message || 'Error al registrar el pago de la visita.');
+            }
+          } else {
+            setMostrarExito(true);
+          }
+        } else {
+          // 2b. Flujo Real de Stripe en Móvil Nativo
+          const { error: initError } = await initPaymentSheet({
+            paymentIntentClientSecret: clientSecret,
+            merchantDisplayName: 'Inmobiliaria EstateCore',
+            defaultBillingDetails: {
+              name: nombreTitular || 'Cliente Cita',
+            },
+          });
+
+          if (initError) {
+            throw new Error(`Error al inicializar pasarela: ${initError.message}`);
+          }
+
+          const { error: paymentError } = await presentPaymentSheet();
+
+          if (paymentError) {
+            if (paymentError.code === 'Canceled') {
+              setErrorLocal('Pago cancelado por el usuario.');
+              return;
+            }
+            throw new Error(`Error en el pago: ${paymentError.message}`);
+          }
+
+          // Pago exitoso en Stripe native
+          if (visitaId) {
+            const res = await actualizarVisita({
+              variables: {
+                input: {
+                  id: visitaId,
+                  estado: 'Pagada'
+                }
+              }
+            });
+            if (res.data?.updateVisita?.success) {
+              setMostrarExito(true);
+            } else {
+              setErrorLocal(res.data?.updateVisita?.message || 'Pago completado pero no registrado en la base de datos.');
+            }
+          } else {
+            setMostrarExito(true);
+          }
+        }
+      } catch (err: any) {
+        console.error('Error durante el pago con Stripe:', err);
+        setErrorLocal(err.message || 'Ocurrió un error inesperado al procesar el pago.');
+      } finally {
+        setProcesandoInterno(false);
       }
     } else {
-      // Mock de éxito estático si no hay visitaId
-      setMostrarExito(true);
+      // Flujo de pago no-tarjeta (Simulado)
+      setProcesandoInterno(true);
+      try {
+        if (visitaId) {
+          const res = await actualizarVisita({
+            variables: {
+              input: {
+                id: visitaId,
+                estado: 'Pagada'
+              }
+            }
+          });
+          if (res.data?.updateVisita?.success) {
+            setMostrarExito(true);
+          } else {
+            setErrorLocal(res.data?.updateVisita?.message || 'Error al procesar el estado del pago.');
+          }
+        } else {
+          setMostrarExito(true);
+        }
+      } catch (e: any) {
+        console.error('Error en pago no-tarjeta:', e);
+        setErrorLocal(e.message || 'Error al procesar el pago.');
+      } finally {
+        setProcesandoInterno(false);
+      }
     }
   };
 
@@ -252,67 +355,78 @@ export default function PagoScreen() {
               <View className="space-y-4">
                 <Text className="text-slate-900 font-extrabold text-sm mb-3">Tarjeta de Crédito / Débito</Text>
                 
-                <View>
-                  <Text className="text-slate-400 text-[10px] font-bold uppercase mb-1.5">Número de Tarjeta</Text>
-                  <TextInput
-                    value={nroTarjeta}
-                    onChangeText={(text) => {
-                      // Formatear nro de tarjeta con espacios cada 4 digitos
-                      const clean = text.replace(/\D/g, '').slice(0, 16);
-                      const parts = clean.match(/.{1,4}/g);
-                      setNroTarjeta(parts ? parts.join(' ') : clean);
-                    }}
-                    placeholder="4000 1234 5678 9010"
-                    placeholderTextColor="#94a3b8"
-                    keyboardType="numeric"
-                    className="bg-slate-50 border border-slate-100 rounded-xl px-3.5 py-2.5 text-slate-800 text-xs font-semibold"
-                  />
-                </View>
+                {isWeb ? (
+                  <>
+                    <View>
+                      <Text className="text-slate-400 text-[10px] font-bold uppercase mb-1.5">Número de Tarjeta</Text>
+                      <TextInput
+                        value={nroTarjeta}
+                        onChangeText={(text) => {
+                          const clean = text.replace(/\D/g, '').slice(0, 16);
+                          const parts = clean.match(/.{1,4}/g);
+                          setNroTarjeta(parts ? parts.join(' ') : clean);
+                        }}
+                        placeholder="4000 1234 5678 9010"
+                        placeholderTextColor="#94a3b8"
+                        keyboardType="numeric"
+                        className="bg-slate-50 border border-slate-100 rounded-xl px-3.5 py-2.5 text-slate-800 text-xs font-semibold"
+                      />
+                    </View>
 
-                <View>
-                  <Text className="text-slate-400 text-[10px] font-bold uppercase mb-1.5">Nombre del Titular</Text>
-                  <TextInput
-                    value={nombreTitular}
-                    onChangeText={setNombreTitular}
-                    placeholder="JUAN PEREZ"
-                    placeholderTextColor="#94a3b8"
-                    autoCapitalize="characters"
-                    className="bg-slate-50 border border-slate-100 rounded-xl px-3.5 py-2.5 text-slate-800 text-xs font-semibold"
-                  />
-                </View>
+                    <View>
+                      <Text className="text-slate-400 text-[10px] font-bold uppercase mb-1.5">Nombre del Titular</Text>
+                      <TextInput
+                        value={nombreTitular}
+                        onChangeText={setNombreTitular}
+                        placeholder="JUAN PEREZ"
+                        placeholderTextColor="#94a3b8"
+                        autoCapitalize="characters"
+                        className="bg-slate-50 border border-slate-100 rounded-xl px-3.5 py-2.5 text-slate-800 text-xs font-semibold"
+                      />
+                    </View>
 
-                <View className="flex-row space-x-3">
-                  <View className="flex-1">
-                    <Text className="text-slate-400 text-[10px] font-bold uppercase mb-1.5">Vencimiento</Text>
-                    <TextInput
-                      value={fechaExp}
-                      onChangeText={(text) => {
-                        const clean = text.replace(/\D/g, '').slice(0, 4);
-                        if (clean.length >= 2) {
-                          setFechaExp(`${clean.slice(0, 2)}/${clean.slice(2, 4)}`);
-                        } else {
-                          setFechaExp(clean);
-                        }
-                      }}
-                      placeholder="MM/AA (Ej: 09/28)"
-                      placeholderTextColor="#94a3b8"
-                      keyboardType="numeric"
-                      className="bg-slate-50 border border-slate-100 rounded-xl px-3.5 py-2.5 text-slate-800 text-xs font-semibold"
-                    />
+                    <View className="flex-row space-x-3">
+                      <View className="flex-1">
+                        <Text className="text-slate-400 text-[10px] font-bold uppercase mb-1.5">Vencimiento</Text>
+                        <TextInput
+                          value={fechaExp}
+                          onChangeText={(text) => {
+                            const clean = text.replace(/\D/g, '').slice(0, 4);
+                            if (clean.length >= 2) {
+                              setFechaExp(`${clean.slice(0, 2)}/${clean.slice(2, 4)}`);
+                            } else {
+                              setFechaExp(clean);
+                            }
+                          }}
+                          placeholder="MM/AA (Ej: 09/28)"
+                          placeholderTextColor="#94a3b8"
+                          keyboardType="numeric"
+                          className="bg-slate-50 border border-slate-100 rounded-xl px-3.5 py-2.5 text-slate-800 text-xs font-semibold"
+                        />
+                      </View>
+                      <View className="flex-1">
+                        <Text className="text-slate-400 text-[10px] font-bold uppercase mb-1.5">Código CVV</Text>
+                        <TextInput
+                          value={cvv}
+                          onChangeText={(text) => setCvv(text.replace(/\D/g, '').slice(0, 4))}
+                          placeholder="123"
+                          placeholderTextColor="#94a3b8"
+                          keyboardType="numeric"
+                          secureTextEntry
+                          className="bg-slate-50 border border-slate-100 rounded-xl px-3.5 py-2.5 text-slate-800 text-xs font-semibold"
+                        />
+                      </View>
+                    </View>
+                  </>
+                ) : (
+                  <View className="bg-slate-50 p-6 rounded-2xl border border-slate-100 items-center justify-center py-6">
+                    <ShieldCheck size={36} color="#2563eb" className="mb-2" />
+                    <Text className="text-slate-800 font-extrabold text-xs text-center mb-1">Pago seguro con Stripe</Text>
+                    <Text className="text-slate-400 text-[10px] text-center px-4 leading-relaxed">
+                      Al presionar el botón de abajo, se abrirá de manera segura la ventana de pago integrada de Stripe en tu dispositivo.
+                    </Text>
                   </View>
-                  <View className="flex-1">
-                    <Text className="text-slate-400 text-[10px] font-bold uppercase mb-1.5">Código CVV</Text>
-                    <TextInput
-                      value={cvv}
-                      onChangeText={(text) => setCvv(text.replace(/\D/g, '').slice(0, 4))}
-                      placeholder="123"
-                      placeholderTextColor="#94a3b8"
-                      keyboardType="numeric"
-                      secureTextEntry
-                      className="bg-slate-50 border border-slate-100 rounded-xl px-3.5 py-2.5 text-slate-800 text-xs font-semibold"
-                    />
-                  </View>
-                </View>
+                )}
 
                 <View className="flex-row items-center mt-3 pt-2">
                   <ShieldCheck size={14} color="#10b981" />
@@ -381,15 +495,17 @@ export default function PagoScreen() {
           {/* BOTÓN DE PAGAR */}
           <TouchableOpacity
             onPress={handleConfirmarPago}
-            disabled={procesandoPago}
+            disabled={cargandoPago}
             className="bg-corporate-600 py-4 rounded-xl flex-row justify-center items-center active:bg-corporate-700 shadow-sm"
           >
-            {procesandoPago ? (
+            {cargandoPago ? (
               <ActivityIndicator size="small" color="#ffffff" />
             ) : (
               <>
                 <Lock size={15} color="#ffffff" className="mr-1.5" />
-                <Text className="text-white text-sm font-bold">CONFIRMAR Y PAGAR $50.00 USD</Text>
+                <Text className="text-white text-sm font-bold">
+                  {metodo === 'tarjeta' && !isWeb ? 'ABRIR PASARELA STRIPE' : 'CONFIRMAR Y PAGAR $50.00 USD'}
+                </Text>
               </>
             )}
           </TouchableOpacity>

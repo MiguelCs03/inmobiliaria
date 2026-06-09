@@ -5,6 +5,7 @@ import { CreateVisitaInput } from './dto/create-visita.input';
 import { UpdateVisitaInput } from './dto/update-visita.input';
 import { VisitaListResponse, VisitaResponse } from './dto/visita-response.dto';
 import { PaginationInput } from '../../common/dto/pagination.input';
+import { StripePaymentIntentResponse } from './dto/stripe-payment-intent.dto';
 
 @Resolver(() => Visita)
 export class VisitaResolver {
@@ -45,5 +46,12 @@ export class VisitaResolver {
   async removeVisita(@Args('id', { type: () => Int }) id: number): Promise<VisitaResponse> {
     const data = await this.visitaService.remove(id);
     return { success: true, data, message: 'Operacion exitosa' };
+  }
+
+  @Mutation(() => StripePaymentIntentResponse)
+  async crearStripePaymentIntent(
+    @Args('monto') monto: number,
+  ): Promise<StripePaymentIntentResponse> {
+    return this.visitaService.crearStripePaymentIntent(monto);
   }
 }

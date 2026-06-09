@@ -55,3 +55,13 @@ export const UPDATE_VISITA = gql`
     }
   }
 `;
+
+export const CREAR_STRIPE_PAYMENT_INTENT = gql`
+  mutation CrearStripePaymentIntent($monto: Float!) {
+    crearStripePaymentIntent(monto: $monto) {
+      success
+      message
+      clientSecret
+    }
+  }
+`;

@@ -37,14 +37,17 @@ export class Visita {
   @Column({ type: 'varchar', length: 20, default: 'Pendiente' })
   estado!: string;
 
+  @Field(() => Propiedad, { nullable: true })
   @ManyToOne(() => Propiedad, (propiedad) => propiedad.visitas)
   @JoinColumn({ name: 'propiedad_id' })
   propiedad!: Propiedad;
 
+  @Field(() => Cliente, { nullable: true })
   @ManyToOne(() => Cliente, (cliente) => cliente.visitas)
   @JoinColumn({ name: 'cliente_id' })
   cliente!: Cliente;
 
+  @Field(() => Empleado, { nullable: true })
   @ManyToOne(() => Empleado, (empleado) => empleado.visitas)
   @JoinColumn({ name: 'empleado_id' })
   empleado!: Empleado;
