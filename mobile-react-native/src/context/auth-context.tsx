@@ -1,7 +1,7 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import * as SecureStore from 'expo-secure-store';
+import { storage } from '@/utils/storage';
 
-// Claves de persistencia para SecureStore
+// Claves de persistencia para el almacenamiento
 const TOKEN_KEY = 'estatecore_auth_token';
 const USER_KEY = 'estatecore_auth_user';
 
@@ -34,12 +34,18 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   useEffect(() => {
     const cargarSesion = async () => {
       try {
-        const tokenGuardado = await SecureStore.getItemAsync(TOKEN_KEY);
-        const usuarioGuardado = await SecureStore.getItemAsync(USER_KEY);
+        const tokenGuardado = await storage.getItem(TOKEN_KEY);
+        const usuarioGuardado = await storage.getItem(USER_KEY);
 
         if (tokenGuardado && usuarioGuardado) {
-          setToken(tokenGuardado);
-          setUsuario(JSON.parse(usuarioGuardado));
+          // Validamos que el JSON no sea 'undefined' o corrupto
+          if (usuarioGuardado !== 'undefined') {
+            const parsed = JSON.parse(usuarioGuardado);
+            if (parsed && parsed.id) {
+              setToken(tokenGuardado);
+              setUsuario(parsed);
+            }
+          }
         }
       } catch (error) {
         console.error('Error al restaurar sesión guardada:', error);
@@ -54,27 +60,27 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   // Función para guardar sesión al iniciar sesión exitosamente
   const guardarSesion = async (nuevoToken: string, nuevoUsuario: Usuario) => {
     try {
-      await SecureStore.setItemAsync(TOKEN_KEY, nuevoToken);
-      await SecureStore.setItemAsync(USER_KEY, JSON.stringify(nuevoUsuario));
+      await storage.setItem(TOKEN_KEY, nuevoToken);
+      await storage.setItem(USER_KEY, JSON.stringify(nuevoUsuario));
       
       setToken(nuevoToken);
       setUsuario(nuevoUsuario);
     } catch (error) {
-      console.error('Error al guardar credenciales en SecureStore:', error);
+      console.error('Error al guardar credenciales en el almacenamiento:', error);
       throw error;
     }
   };
 
-  // Función para cerrar sesión y limpiar SecureStore
+  // Función para cerrar sesión y limpiar el almacenamiento
   const cerrarSesion = async () => {
     try {
-      await SecureStore.deleteItemAsync(TOKEN_KEY);
-      await SecureStore.deleteItemAsync(USER_KEY);
+      await storage.deleteItem(TOKEN_KEY);
+      await storage.deleteItem(USER_KEY);
       
       setToken(null);
       setUsuario(null);
     } catch (error) {
-      console.error('Error al eliminar credenciales en SecureStore:', error);
+      console.error('Error al eliminar credenciales del almacenamiento:', error);
     }
   };
 

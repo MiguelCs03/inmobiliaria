@@ -272,9 +272,9 @@ export default function HomeScreen() {
         </View>
       </View>
 
-      {/* 2. BARRA DE BÚSQUEDA FLOTANTE */}
-      <View className="mt-[-24px] mx-4 z-20 shadow-md">
-        <View className="flex-row items-center bg-white rounded-2xl px-4 py-3 border border-slate-100">
+      {/* 2. BARRA DE BÚSQUEDA FLOTANTE Y BOTÓN DE MAPA */}
+      <View className="mt-[-24px] mx-4 z-20 flex-row gap-2 shadow-sm">
+        <View className="flex-1 flex-row items-center bg-white rounded-2xl px-4 py-3 border border-slate-100">
           <Search size={18} color="#94a3b8" />
           <TextInput
             className="flex-1 ml-2.5 text-slate-800 text-sm font-medium"
@@ -289,6 +289,14 @@ export default function HomeScreen() {
             <RefreshCw size={16} color="#64748b" />
           </TouchableOpacity>
         </View>
+        
+        {/* Botón Mapa */}
+        <TouchableOpacity
+          onPress={() => router.push('/mapa')}
+          className="bg-corporate-600 px-4 rounded-2xl justify-center items-center active:bg-corporate-700"
+        >
+          <MapPin size={20} color="#ffffff" />
+        </TouchableOpacity>
       </View>
 
       {/* Contenedor del Catálogo y Filtros */}
@@ -334,6 +342,22 @@ export default function HomeScreen() {
                 Contratos
               </Text>
 
+            </TouchableOpacity>
+
+            {/* Botón: Reservar Cita */}
+            <TouchableOpacity
+              onPress={() => router.push('/reservar' as any)}
+              className="flex-row items-center px-4 py-2 rounded-xl mr-2 border bg-white border-slate-200"
+            >
+              <Grid
+                size={15}
+                color="#475569"
+              />
+              <Text
+                className="ml-1.5 text-xs font-bold text-slate-600"
+              >
+                Reservar Cita
+              </Text>
             </TouchableOpacity>
 
             {/* Botón: Casas */}

@@ -116,47 +116,38 @@ export default function ContratoDetalleScreen() {
         </Text>
 
         <View className="bg-white p-4 rounded-2xl border border-slate-100 shadow-sm mb-5 gap-y-4">
-          {/* SECCIÓN: Auditoría Blockchain */}
-          <Text className="text-slate-900 text-sm font-bold uppercase tracking-wider ml-1 mb-2">
-            Auditoría Digital & Blockchain
-          </Text>
-
-          <View className="bg-white p-4 rounded-2xl border border-slate-100 shadow-sm mb-5 gap-y-4">
-            {/* Blockchain ID */}
-            <View>
-              <View className="flex-row items-center mb-1">
-                <Cpu size={14} color="#64748b" className="mr-1.5" />
-                {/* CAMBIADO AQUÍ: text -> Text */}
-                <Text className="text-slate-400 text-xs font-bold uppercase tracking-wider">Blockchain Contract ID</Text>
-              </View>
-              <TouchableOpacity
-                onPress={() => copiarAlPortapapeles(contrato.blockchainContractId, 'Blockchain ID')}
-                className="flex-row justify-between items-center bg-slate-50 p-3 rounded-xl border border-slate-100"
-              >
-                <Text numberOfLines={1} className="text-slate-700 font-mono text-xs flex-1 pr-2">
-                  {contrato.blockchainContractId || 'No emitido aún'}
-                </Text>
-                {contrato.blockchainContractId && <Copy size={14} color="#94a3b8" />}
-              </TouchableOpacity>
+          {/* Blockchain ID */}
+          <View>
+            <View className="flex-row items-center mb-1">
+              <Cpu size={14} color="#64748b" className="mr-1.5" />
+              <Text className="text-slate-400 text-xs font-bold uppercase tracking-wider">Blockchain Contract ID</Text>
             </View>
+            <TouchableOpacity
+              onPress={() => copiarAlPortapapeles(contrato.blockchainContractId, 'Blockchain ID')}
+              className="flex-row justify-between items-center bg-slate-50 p-3 rounded-xl border border-slate-100"
+            >
+              <Text numberOfLines={1} className="text-slate-700 font-mono text-xs flex-1 pr-2">
+                {contrato.blockchainContractId || 'No emitido aún'}
+              </Text>
+              {contrato.blockchainContractId && <Copy size={14} color="#94a3b8" />}
+            </TouchableOpacity>
+          </View>
 
-            {/* Document Hash */}
-            <View>
-              <View className="flex-row items-center mb-1">
-                <ShieldCheck size={14} color="#64748b" className="mr-1.5" />
-                {/* CAMBIADO AQUÍ: text -> Text */}
-                <Text className="text-slate-400 text-xs font-bold uppercase tracking-wider">Hash de Documento (SHA-256)</Text>
-              </View>
-              <TouchableOpacity
-                onPress={() => copiarAlPortapapeles(contrato.documentHash, 'Hash')}
-                className="flex-row justify-between items-center bg-slate-50 p-3 rounded-xl border border-slate-100"
-              >
-                <Text numberOfLines={1} className="text-slate-700 font-mono text-xs flex-1 pr-2">
-                  {contrato.documentHash || 'Pendiente de firma original'}
-                </Text>
-                {contrato.documentHash && <Copy size={14} color="#94a3b8" />}
-              </TouchableOpacity>
+          {/* Document Hash */}
+          <View>
+            <View className="flex-row items-center mb-1">
+              <ShieldCheck size={14} color="#64748b" className="mr-1.5" />
+              <Text className="text-slate-400 text-xs font-bold uppercase tracking-wider">Hash de Documento (SHA-256)</Text>
             </View>
+            <TouchableOpacity
+              onPress={() => copiarAlPortapapeles(contrato.documentHash, 'Hash')}
+              className="flex-row justify-between items-center bg-slate-50 p-3 rounded-xl border border-slate-100"
+            >
+              <Text numberOfLines={1} className="text-slate-700 font-mono text-xs flex-1 pr-2">
+                {contrato.documentHash || 'Pendiente de firma original'}
+              </Text>
+              {contrato.documentHash && <Copy size={14} color="#94a3b8" />}
+            </TouchableOpacity>
           </View>
         </View>
 

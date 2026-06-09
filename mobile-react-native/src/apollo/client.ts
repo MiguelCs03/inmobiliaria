@@ -1,6 +1,6 @@
 import { ApolloClient, InMemoryCache, createHttpLink } from '@apollo/client';
 import { setContext } from '@apollo/client/link/context';
-import * as SecureStore from 'expo-secure-store';
+import { storage } from '@/utils/storage';
 
 // Clave para guardar el token JWT en el SecureStore
 const TOKEN_KEY = 'estatecore_auth_token';
@@ -14,7 +14,7 @@ const httpLink = createHttpLink({
 const authLink = setContext(async (_, { headers }) => {
   try {
     // Obtener el token almacenado de forma segura en el dispositivo
-    const token = await SecureStore.getItemAsync(TOKEN_KEY);
+    const token = await storage.getItem(TOKEN_KEY);
     
     return {
       headers: {

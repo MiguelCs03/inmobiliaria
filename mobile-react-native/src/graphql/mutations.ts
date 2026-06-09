@@ -25,3 +25,33 @@ mutation SignContract(
 }
 
 `;
+
+export const CREATE_VISITA = gql`
+  mutation CreateVisita($input: CreateVisitaInput!) {
+    createVisita(createVisitaInput: $input) {
+      success
+      message
+      data {
+        id
+        fechaVisita
+        estado
+        clienteId
+        empleadoId
+        propiedadId
+      }
+    }
+  }
+`;
+
+export const UPDATE_VISITA = gql`
+  mutation UpdateVisita($input: UpdateVisitaInput!) {
+    updateVisita(updateVisitaInput: $input) {
+      success
+      message
+      data {
+        id
+        estado
+      }
+    }
+  }
+`;

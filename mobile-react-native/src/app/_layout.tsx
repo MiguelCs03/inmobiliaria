@@ -21,6 +21,9 @@ export default function RootLayout() {
             <Stack.Screen name="(tabs)" />
             <Stack.Screen name="login" options={{ presentation: 'modal' }} />
             <Stack.Screen name="propiedad/[id]" />
+            <Stack.Screen name="mapa" />
+            <Stack.Screen name="reservar" />
+            <Stack.Screen name="pago" />
           </Stack>
         </ThemeProvider>
       </AuthProvider>
