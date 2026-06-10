@@ -7,7 +7,7 @@ import { ApolloProvider } from '@apollo/client/react';
 import client from '@/apollo/client';
 import { AuthProvider } from '@/context/auth-context';
 import { Stack } from 'expo-router';
-import { StripeProvider } from '@stripe/stripe-react-native';
+import { PlatformStripeProvider } from '@/components/PlatformStripeProvider';
 
 import { AnimatedSplashOverlay } from '@/components/animated-icon';
 import { useNotifications } from '@/hooks/useNotifications';
@@ -33,15 +33,15 @@ export default function RootLayout() {
   return (
     <ApolloProvider client={client}>
       <AuthProvider>
-        <StripeProvider
+        <PlatformStripeProvider
           publishableKey={process.env.EXPO_PUBLIC_STRIPE_PUBLISHABLE_KEY || ''}
-          merchantIdentifier="merchant.com.inmobiliaria.estatecore"
+          merchantIdentifier="merchant.com.miguelcs03.inmobiliaria"
         >
           <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
             <AnimatedSplashOverlay />
             <AppContent />
           </ThemeProvider>
-        </StripeProvider>
+        </PlatformStripeProvider>
       </AuthProvider>
     </ApolloProvider>
   );
