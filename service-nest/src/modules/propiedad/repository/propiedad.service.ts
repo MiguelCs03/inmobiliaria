@@ -6,6 +6,7 @@ import { UpdatePropiedadInput } from '../dto/update-propiedad.input';
 import { Propiedad } from '../entities/propiedad.entity';
 import { PropiedadImagen } from '../entities/propiedad-imgen.entity';
 import { PaginationInput } from '../../../common/dto/pagination.input';
+import { NotificacionesService } from '../../notificaciones/notificaciones.service';
 
 @Injectable()
 export class PropiedadService {
@@ -14,6 +15,7 @@ export class PropiedadService {
     private readonly propiedadRepository: Repository<Propiedad>,
     @InjectRepository(PropiedadImagen)
     private readonly propiedadImagenRepository: Repository<PropiedadImagen>,
+    private readonly notificacionesService: NotificacionesService,
   ) {}
 
   async create(createPropiedadInput: CreatePropiedadInput): Promise<Propiedad> {
@@ -31,7 +33,15 @@ export class PropiedadService {
       await this.propiedadImagenRepository.save(imagenes);
     }
 
-    return this.findOne(guardada.id);
+    const result = await this.findOne(guardada.id);
+    const operacion = result.tipoOperacion?.nombre || 'Nueva propiedad';
+    this.notificacionesService.sendToTopic(
+      'nuevas-propiedades',
+      `¡Nueva propiedad en ${operacion}!`,
+      `${result.areaM2}m2 - $${result.precioBase} - ${result.ubicacion || ''}`,
+      { propiedadId: String(result.id) },
+    );
+    return result;
   }
 
   async findAll(pagination?: PaginationInput): Promise<Propiedad[]> {
@@ -52,7 +62,7 @@ export class PropiedadService {
   async findOne(id: number): Promise<Propiedad> {
     const propiedad = await this.propiedadRepository.findOne({
       where: { id },
-      relations: ['imagenes'],
+      relations: ['imagenes', 'tipoOperacion'],
     });
     if (!propiedad) {
       throw new NotFoundException('Propiedad no encontrada');

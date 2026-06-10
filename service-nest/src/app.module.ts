@@ -22,6 +22,7 @@ import { UploadModule } from './modules/upload/upload.module';
 import { FirmaModule } from './modules/firma_contrato/firma_contrato.module';
 import { DispositivoModule } from './modules/dispositivo/dispositivo.module';
 import { SwipeModule } from './modules/swipe/swipe.module';
+import { NotificacionesModule } from './modules/notificaciones/notificaciones.module';
 
 @Module({
   imports: [
@@ -52,6 +53,7 @@ import { SwipeModule } from './modules/swipe/swipe.module';
     FirmaModule,
     DispositivoModule,
     SwipeModule,
+    NotificacionesModule,
   ],
   controllers: [AppController],
   providers: [AppService],

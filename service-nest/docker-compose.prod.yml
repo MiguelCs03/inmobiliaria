@@ -26,5 +26,9 @@ services:
       - CLOUDINARY_API_SECRET=${CLOUDINARY_API_SECRET}
       # CORS
       - ALLOWED_ORIGINS=${ALLOWED_ORIGINS:-http://localhost:4200}
+      # Firebase Admin SDK (base64 del JSON de service account)
+      - FIREBASE_SERVICE_ACCOUNT_B64=${FIREBASE_SERVICE_ACCOUNT_B64}
+      # Go (blockchain)
+      - GO_SERVICE_URL=${GO_SERVICE_URL:-http://host.docker.internal:3030}
     env_file:
       - .env
