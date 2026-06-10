@@ -382,13 +382,14 @@
                             </ng-template>
                         </td>
                         <td style="padding: 12px 8px; text-align: center;">
-                            <button *ngIf="cuota.estado !== 'Pagado'" 
-                                    (click)="abrirPagoModal(cuota, contrato.cliente)"
-                                    style="background-color: #3182ce; color: white; border: none; padding: 6px 12px; border-radius: 6px; cursor: pointer; font-size: 12px; font-weight: 600; display: inline-flex; align-items: center; gap: 4px; transition: background-color 0.2s;">
-                                💳 Pagar y Facturar
+                            <button *ngIf="cuota.estado === 'Pagado' && cuota.facturas && cuota.facturas.length > 0" 
+                                    (click)="abrirInvoiceModal(cuota)"
+                                    style="background-color: #2f855a; color: white; border: none; padding: 6px 12px; border-radius: 6px; cursor: pointer; font-size: 12px; font-weight: 600; transition: background-color 0.2s;">
+                                Ver Factura
                             </button>
-                            <span *ngIf="cuota.estado === 'Pagado'" style="color: #48bb78; font-weight: bold; font-size: 12px;">
-                                ✔ Completado
+                            <span *ngIf="cuota.estado !== 'Pagado'" 
+                                  style="color: #718096; font-size: 12px; font-weight: 500; font-style: italic;">
+                                Pago disponible en aplicación móvil
                             </span>
                         </td>
                     </tr>
@@ -402,80 +403,167 @@
         </div>
     </div>
 
-    <!-- MODAL DE PAGO Y FACTURACION SIAT -->
-    <div *ngIf="showPaymentModal" 
-         style="position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background-color: rgba(0, 0, 0, 0.5); display: flex; align-items: center; justify-content: center; z-index: 1000;">
+    <!-- MODAL DE DETALLE DE FACTURA SIAT (VISTA FACTURA DIGITAL) -->
+    <div *ngIf="showInvoiceModal" 
+         style="position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background-color: rgba(0, 0, 0, 0.6); display: flex; align-items: center; justify-content: center; z-index: 1000; overflow-y: auto;">
         
-        <div style="background-color: white; border-radius: 12px; width: 90%; max-width: 500px; padding: 24px; box-shadow: 0 10px 25px rgba(0,0,0,0.15); display: flex; flex-direction: column; gap: 16px;">
+        <div style="background-color: white; border-radius: 12px; width: 95%; max-width: 650px; padding: 24px; box-shadow: 0 15px 35px rgba(0,0,0,0.2); display: flex; flex-direction: column; gap: 16px; margin: 20px auto; border-top: 8px solid #3182ce; max-height: 90vh; overflow-y: auto;">
             
+            <!-- Encabezado del Modal con botón cerrar -->
             <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #e2e8f0; padding-bottom: 12px;">
                 <h3 style="margin: 0; font-size: 18px; font-weight: 700; color: #2d3748;">
-                    Procesar Pago y Facturación
+                    Factura Electrónica
                 </h3>
-                <button (click)="cerrarPagoModal()" 
-                        style="background: none; border: none; font-size: 20px; cursor: pointer; color: #a0aec0;">
+                <button (click)="cerrarInvoiceModal()" 
+                        style="background: none; border: none; font-size: 24px; cursor: pointer; color: #a0aec0; transition: color 0.2s;"
+                        onmouseover="this.style.color='#e53e3e'"
+                        onmouseout="this.style.color='#a0aec0'">
                     &times;
                 </button>
             </div>
 
-            <div style="background-color: #ebf8ff; border: 1px solid #bee3f8; padding: 12px; border-radius: 8px; color: #2b6cb0; font-size: 14px;">
-                <strong>Detalles del Pago:</strong>
-                <div style="margin-top: 4px;">Cuota Seleccionada: Cuota #{{ selectedCuota?.nroCuota }}</div>
-                <div>Monto a Pagar: <strong>Bs. {{ selectedCuota?.montoCuota | number:'1.2-2' }}</strong></div>
+            <!-- Cuerpo de la Factura (Estilo Factura Boliviana Impuestos Nacionales) -->
+            <div *ngIf="selectedCuota && selectedCuota.facturas && selectedCuota.facturas.length > 0" 
+                 style="border: 1px solid #cbd5e0; padding: 20px; border-radius: 8px; font-family: 'Courier New', Courier, monospace; color: #2d3748; background-color: #fafafa; font-size: 12px; line-height: 1.4;">
+                
+                <div *ngFor="let fact of selectedCuota.facturas">
+                    
+                    <!-- Datos de Cabecera (Dos Columnas) -->
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 15px;">
+                        
+                        <!-- Datos de la Inmobiliaria (Emisor) -->
+                        <div style="flex: 1; padding-right: 15px;">
+                            <h4 style="margin: 0 0 5px 0; font-size: 14px; font-weight: 700; color: #1a365d; font-family: sans-serif;">
+                                INMOBILIARIA ESTATECORE S.A.
+                            </h4>
+                            <div><strong>Casa Matriz</strong></div>
+                            <div>Av. San Martín, Calle 5 Oeste, Equipetrol</div>
+                            <div>Telf: +591 (3) 345-6789</div>
+                            <div>Santa Cruz - Bolivia</div>
+                        </div>
+
+                        <!-- Datos Tributarios e Identificación de Factura -->
+                        <div style="flex: 0 0 240px; border: 1px dashed #718096; padding: 10px; background-color: #edf2f7; border-radius: 4px;">
+                            <div><strong>NIT:</strong> 1020345028</div>
+                            <div><strong>FACTURA NRO:</strong> {{ fact.nroFactura }}</div>
+                            <div><strong>NRO. AUTORIZACIÓN (CUF):</strong></div>
+                            <div style="font-size: 9px; word-break: break-all; font-family: monospace; font-weight: 600; color: #4a5568; margin-top: 2px;">
+                                {{ fact.cuf }}
+                            </div>
+                            <div style="margin-top: 6px; font-size: 10px;">
+                                <strong>ACTIVIDAD:</strong> SERVICIOS DE INTERMEDIACIÓN INMOBILIARIA Y CONSTRUCCIÓN
+                            </div>
+                        </div>
+
+                    </div>
+
+                    <div style="text-align: center; margin: 15px 0; border-top: 1px solid #cbd5e0; border-bottom: 1px solid #cbd5e0; padding: 8px 0;">
+                        <h2 style="margin: 0; font-size: 18px; font-weight: 800; tracking-spacing: 2px; font-family: sans-serif; color: #2d3748;">
+                            FACTURA
+                        </h2>
+                        <div style="font-size: 10px; font-weight: 600;">(Con Derecho a Crédito Fiscal)</div>
+                    </div>
+
+                    <!-- Datos del Cliente / Transacción -->
+                    <div style="margin-bottom: 15px; background-color: #f7fafc; padding: 8px; border-radius: 4px; display: grid; grid-template-columns: 1fr 1fr; gap: 6px;">
+                        <div><strong>Fecha Emisión:</strong> {{ fact.fechaEmision | date:'dd/MM/yyyy HH:mm' }}</div>
+                        <div><strong>NIT/CI/CEX:</strong> {{ fact.nitCliente }}</div>
+                        <div style="grid-column: span 2;"><strong>Nombre / Razón Social:</strong> {{ fact.razonSocial }}</div>
+                    </div>
+
+                    <!-- Detalle de Factura (Tabla) -->
+                    <table style="width: 100%; border-collapse: collapse; margin-bottom: 15px; font-size: 11px;">
+                        <thead>
+                            <tr style="border-top: 1px solid #2d3748; border-bottom: 1px solid #2d3748; background-color: #edf2f7;">
+                                <th style="text-align: left; padding: 6px 4px; width: 60px;">CÓDIGO</th>
+                                <th style="text-align: left; padding: 6px 4px; width: 50px;">CANT.</th>
+                                <th style="text-align: left; padding: 6px 4px;">DESCRIPCIÓN</th>
+                                <th style="text-align: right; padding: 6px 4px; width: 100px;">P. UNITARIO</th>
+                                <th style="text-align: right; padding: 6px 4px; width: 100px;">SUBTOTAL</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr style="border-bottom: 1px dashed #cbd5e0;">
+                                <td style="padding: 6px 4px;">CON-CUO</td>
+                                <td style="padding: 6px 4px;">1.00</td>
+                                <td style="padding: 6px 4px; font-family: sans-serif;">
+                                    Pago de Cuota #{{ selectedCuota.nroCuota }} del contrato #{{ contratoId }} - {{ contrato.titulo }}
+                                </td>
+                                <td style="padding: 6px 4px; text-align: right;">Bs. {{ fact.montoTotal | number:'1.2-2' }}</td>
+                                <td style="padding: 6px 4px; text-align: right;">Bs. {{ fact.montoTotal | number:'1.2-2' }}</td>
+                            </tr>
+                            <!-- Totales -->
+                            <tr style="font-weight: 700; border-top: 1px solid #2d3748;">
+                                <td colspan="3" style="text-align: right; padding: 6px 4px;">MONTO TOTAL A PAGAR:</td>
+                                <td colspan="2" style="text-align: right; padding: 6px 4px; font-size: 12px; color: #1a365d;">
+                                    Bs. {{ fact.montoTotal | number:'1.2-2' }}
+                                </td>
+                            </tr>
+                            <tr style="font-weight: 700;">
+                                <td colspan="3" style="text-align: right; padding: 6px 4px;">MONTO BASE CRÉDITO FISCAL:</td>
+                                <td colspan="2" style="text-align: right; padding: 6px 4px;">
+                                    Bs. {{ fact.montoTotal | number:'1.2-2' }}
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+
+                    <!-- Importe en Literal -->
+                    <div style="font-weight: 600; margin-bottom: 15px; border-bottom: 1px solid #e2e8f0; padding-bottom: 8px; font-style: italic;">
+                        {{ obtenerMontoEnLiteral(fact.montoTotal) }}
+                    </div>
+
+                    <!-- Pie de Factura / SIAT / QR -->
+                    <div style="display: flex; gap: 15px; align-items: center; margin-top: 15px;">
+                        
+                        <!-- QR Code -->
+                        <div style="flex: 0 0 120px; text-align: center; border: 1px solid #e2e8f0; padding: 6px; background-color: white; border-radius: 4px;">
+                            <img [src]="'https://api.qrserver.com/v1/create-qr-code/?size=100x100&data=https://siat.impuestos.gob.bo/consulta/QR?nit=1020345028%26cuf=' + fact.cuf + '%26numero=' + fact.nroFactura + '%26monto=' + fact.montoTotal" 
+                                 alt="QR de Factura SIAT"
+                                 style="width: 100px; height: 100px; display: block; margin: 0 auto;" />
+                        </div>
+
+                        <!-- Leyendas y Autorizaciones -->
+                        <div style="flex: 1; font-size: 9px; line-height: 1.3; color: #4a5568; display: flex; flex-direction: column; gap: 4px; font-family: sans-serif;">
+                            <div>
+                                <strong>ESTADO SIAT:</strong> <span style="color: #2f855a; font-weight: 700;">{{ fact.estadoSiat || 'VALIDA' }}</span>
+                            </div>
+                            <div>
+                                <strong>CÓD. RECEPCIÓN:</strong> {{ fact.codigoRecepcion }}
+                            </div>
+                            <div>
+                                <em>"ESTA FACTURA CONTRIBUYE AL DESARROLLO DEL PAÍS, EL USO ILÍCITO DE ÉSTA SERÁ SANCIONADO DE ACUERDO A LEY."</em>
+                            </div>
+                            <div style="border-top: 1px dashed #cbd5e0; padding-top: 4px; font-weight: 600;">
+                                Ley N° 453: El proveedor deberá suministrar el servicio en las condiciones acordadas.
+                            </div>
+                            <div style="font-size: 8px; color: #a0aec0;">
+                                Este documento es un Documento Digital emitido en la modalidad de facturación en línea de Impuestos Nacionales de Bolivia.
+                            </div>
+                        </div>
+
+                    </div>
+
+                </div>
+
             </div>
 
-            <form (ngSubmit)="confirmarPago()" style="display: flex; flex-direction: column; gap: 12px;">
-                <div style="display: flex; flex-direction: column; gap: 4px;">
-                    <label style="font-size: 12px; font-weight: 600; color: #4a5568; text-transform: uppercase;">
-                        NIT / CI del Cliente
-                    </label>
-                    <input type="text" 
-                           [(ngModel)]="nitCliente" 
-                           name="nitCliente"
-                           required
-                           placeholder="Ej: 123456789"
-                           style="width: 100%; padding: 10px; border: 1px solid #cbd5e0; border-radius: 6px; font-size: 14px; box-sizing: border-box;" />
-                </div>
-
-                <div style="display: flex; flex-direction: column; gap: 4px;">
-                    <label style="font-size: 12px; font-weight: 600; color: #4a5568; text-transform: uppercase;">
-                        Nombre / Razón Social
-                    </label>
-                    <input type="text" 
-                           [(ngModel)]="razonSocial" 
-                           name="razonSocial"
-                           required
-                           placeholder="Ej: Juan Perez / Perez S.R.L."
-                           style="width: 100%; padding: 10px; border: 1px solid #cbd5e0; border-radius: 6px; font-size: 14px; box-sizing: border-box;" />
-                </div>
-
-                <div style="display: flex; flex-direction: column; gap: 4px;">
-                    <label style="font-size: 12px; font-weight: 600; color: #4a5568; text-transform: uppercase;">
-                        Método de Pago
-                    </label>
-                    <select [(ngModel)]="metodoPago" 
-                            name="metodoPago"
-                            style="width: 100%; padding: 10px; border: 1px solid #cbd5e0; border-radius: 6px; font-size: 14px; box-sizing: border-box;">
-                        <option value="QR">Pago Simple (QR)</option>
-                        <option value="Banco">Transferencia Bancaria</option>
-                        <option value="Tarjeta">Tarjeta de Crédito / Débito</option>
-                    </select>
-                </div>
-
-                <div style="display: flex; gap: 12px; justify-content: flex-end; margin-top: 12px; border-top: 1px solid #e2e8f0; padding-top: 16px;">
-                    <button type="button" 
-                            (click)="cerrarPagoModal()" 
-                            style="background-color: #e2e8f0; color: #4a5568; border: none; padding: 10px 16px; border-radius: 6px; cursor: pointer; font-size: 14px; font-weight: 600;">
-                        Cancelar
-                    </button>
-                    <button type="submit" 
-                            [disabled]="procesandoPago"
-                            style="background-color: #48bb78; color: white; border: none; padding: 10px 16px; border-radius: 6px; cursor: pointer; font-size: 14px; font-weight: 600; display: inline-flex; align-items: center; gap: 8px;">
-                        <span *ngIf="procesandoPago" style="border: 2px solid white; border-top: 2px solid transparent; border-radius: 50%; width: 12px; height: 12px; display: inline-block; animation: spin 1s linear infinite;"></span>
-                        {{ procesandoPago ? 'Procesando en SIAT...' : 'Emitir Factura y Pagar' }}
-                    </button>
-                </div>
-            </form>
+            <!-- Botones de Acción del Modal -->
+            <div style="display: flex; justify-content: flex-end; gap: 12px; margin-top: 8px; border-top: 1px solid #e2e8f0; padding-top: 16px;">
+                <button (click)="cerrarInvoiceModal()" 
+                        style="background-color: #cbd5e0; color: #4a5568; border: none; padding: 10px 18px; border-radius: 6px; cursor: pointer; font-size: 14px; font-weight: 600; transition: background-color 0.2s;"
+                        onmouseover="this.style.backgroundColor='#e2e8f0'"
+                        onmouseout="this.style.backgroundColor='#cbd5e0'">
+                    Cerrar
+                </button>
+                <button onclick="window.print()" 
+                        style="background-color: #3182ce; color: white; border: none; padding: 10px 18px; border-radius: 6px; cursor: pointer; font-size: 14px; font-weight: 600; transition: background-color 0.2s;"
+                        onmouseover="this.style.backgroundColor='#2b6cb0'"
+                        onmouseout="this.style.backgroundColor='#3182ce'">
+                    Imprimir Factura
+                </button>
+            </div>
+            
         </div>
     </div>
 

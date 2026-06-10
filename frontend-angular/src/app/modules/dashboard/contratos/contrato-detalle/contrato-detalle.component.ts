@@ -18,13 +18,9 @@ export class ContratoDetalleComponent implements OnInit {
 
   contratoId!: number;
   
-  // Variables para la gestión del modal de facturación y pagos
-  showPaymentModal = false;
+  // Variables para la gestión del modal de factura SIAT
+  showInvoiceModal = false;
   selectedCuota: any = null;
-  nitCliente = '';
-  razonSocial = '';
-  metodoPago = 'QR';
-  procesandoPago = false;
 
   // 1. Creamos un disparador reactivo
   private refreshContrato$ = new BehaviorSubject<void>(undefined);
@@ -91,56 +87,89 @@ export class ContratoDetalleComponent implements OnInit {
     });
   }
 
-  // Abre el modal para proceder con el pago y precarga los datos del cliente
-  abrirPagoModal(cuota: any, cliente: any): void {
+  // Abre el modal para ver la factura SIAT
+  abrirInvoiceModal(cuota: any): void {
     this.selectedCuota = cuota;
-    this.nitCliente = cliente?.ciNit || '';
-    this.razonSocial = cliente?.nombres || '';
-    this.metodoPago = 'QR';
-    this.showPaymentModal = true;
+    this.showInvoiceModal = true;
   }
 
-  // Cierra el modal y limpia el estado del pago
-  cerrarPagoModal(): void {
-    this.showPaymentModal = false;
+  // Cierra el modal de la factura SIAT
+  cerrarInvoiceModal(): void {
+    this.showInvoiceModal = false;
     this.selectedCuota = null;
-    this.nitCliente = '';
-    this.razonSocial = '';
-    this.procesandoPago = false;
   }
 
-  // Confirma el pago de la cuota llamando al servicio GraphQL
-  confirmarPago(): void {
-    if (!this.nitCliente.trim() || !this.razonSocial.trim()) {
-      alert('Por favor complete el NIT/CI y la Razón Social.');
-      return;
+  // Convierte un monto numérico a formato literal en bolivianos
+  obtenerMontoEnLiteral(monto: number): string {
+    const dec = Math.round((monto % 1) * 100);
+    const entero = Math.floor(monto);
+    const letras = this.convertirEnteroALetras(entero);
+    const centavos = dec < 10 ? '0' + dec : dec;
+    return `SON: ${letras} ${centavos}/100 BOLIVIANOS`;
+  }
+
+  private convertirEnteroALetras(n: number): string {
+    if (n === 0) return 'CERO';
+    
+    const unidades = ['', 'UN', 'DOS', 'TRES', 'CUATRO', 'CINCO', 'SEIS', 'SIETE', 'OCHO', 'NUEVE'];
+    const decenas = ['', 'DIEZ', 'VEINTE', 'TREINTA', 'CUARENTA', 'CINCUENTA', 'SESENTA', 'SETENTA', 'OCHENTA', 'NOVENTA'];
+    const especiales = {
+      11: 'ONCE', 12: 'DOCE', 13: 'TRECE', 14: 'CATORCE', 15: 'QUINCE',
+      16: 'DIECISEIS', 17: 'DIECISIETE', 18: 'DIECIOCHO', 19: 'DIECINUEVE',
+      21: 'VEINTIUNO', 22: 'VEINTIDOS', 23: 'VEINTITRES', 24: 'VEINTICUATRO', 25: 'VEINTICINCO',
+      26: 'VEINTISEIS', 27: 'VEINTISIETE', 28: 'VEINTIOCHO', 29: 'VEINTINUEVE'
+    };
+    const centenas = ['', 'CIENTO', 'DOSCIENTOS', 'TRESCIENTOS', 'CUATROCIENTOS', 'QUINIENTOS', 'SEISCIENTOS', 'SETECIENTOS', 'OCHOCIENTOS', 'NOVECIENTOS'];
+
+    let words = '';
+
+    if (n >= 1000000) {
+      const millones = Math.floor(n / 1000000);
+      if (millones === 1) {
+        words += 'UN MILLON ';
+      } else {
+        words += this.convertirEnteroALetras(millones) + ' MILLONES ';
+      }
+      n %= 1000000;
     }
 
-    this.procesandoPago = true;
-
-    const input = {
-      planPagoId: Number(this.selectedCuota.id),
-      nitCliente: this.nitCliente.trim(),
-      razonSocial: this.razonSocial.trim(),
-      metodoPago: this.metodoPago
-    };
-
-    this.contratoService.pagarCuota(input).subscribe({
-      next: (response) => {
-        this.procesandoPago = false;
-        if (response.success) {
-          alert(`¡Pago procesado con éxito!\nFactura Nro: ${response.data.nroFactura}\nCUF: ${response.data.cuf}`);
-          this.cerrarPagoModal();
-          this.refrescarDatos(); // Recargar datos reactivamente
-        } else {
-          alert(`Error al procesar el pago: ${response.message}`);
-        }
-      },
-      error: (err) => {
-        this.procesandoPago = false;
-        console.error(err);
-        alert('Ocurrió un error inesperado al procesar el pago.');
+    if (n >= 1000) {
+      const miles = Math.floor(n / 1000);
+      if (miles === 1) {
+        words += 'MIL ';
+      } else {
+        words += this.convertirEnteroALetras(miles) + ' MIL ';
       }
-    });
+      n %= 1000;
+    }
+
+    if (n >= 100) {
+      if (n === 100) {
+        words += 'CIEN ';
+      } else {
+        words += centenas[Math.floor(n / 100)] + ' ';
+      }
+      n %= 100;
+    }
+
+    if (n > 0) {
+      if (n in especiales) {
+        words += (especiales as any)[n] + ' ';
+      } else {
+        const dec = Math.floor(n / 10);
+        const uni = n % 10;
+        if (dec > 0) {
+          words += decenas[dec];
+          if (uni > 0) {
+            words += ' Y ' + unidades[uni];
+          }
+        } else {
+          words += unidades[uni];
+        }
+        words += ' ';
+      }
+    }
+
+    return words.trim();
   }
 }
