@@ -4,6 +4,7 @@ import { Repository } from 'typeorm';
 import { CreateContratoInput } from '../dto/create-contrato.input';
 import { UpdateContratoInput } from '../dto/update-contrato.input';
 import { Contrato } from '../entities/contrato.entity';
+import { PlanPago, PlanPagoEstado } from '../entities/plan-pago.entity';
 import { PaginationInput } from '../../../common/dto/pagination.input';
 import { ContractPdfService } from '../pdf/contract-pdf.service';
 import { StorageService } from 'src/common/storage/storage.service';
@@ -15,68 +16,102 @@ export class ContratoService {
   constructor(
     @InjectRepository(Contrato)
     private readonly contratoRepository: Repository<Contrato>,
+    @InjectRepository(PlanPago)
+    private readonly planPagoRepository: Repository<PlanPago>,
     private readonly contractPdfService: ContractPdfService,
     private readonly storageService: StorageService,
   ) { }
 
+
   async create(
-    createContratoInput:
-      CreateContratoInput
+    createContratoInput: CreateContratoInput
   ): Promise<Contrato> {
+    const contrato = this.contratoRepository.create({
+      ...createContratoInput,
+      estadoContrato: createContratoInput.estadoContrato ?? 'DRAFT'
+    });
 
-    const contrato =
-      this.contratoRepository.create({
-        ...createContratoInput,
+    const savedContrato = await this.contratoRepository.save(contrato);
 
-        estadoContrato:
-          createContratoInput
-            .estadoContrato ??
-          'DRAFT'
+    // Generación de plan de pagos por defecto: se divide el monto total del contrato en 3 cuotas
+    const totalMonto = Number(savedContrato.montoTotal);
+    const numCuotas = 3;
+    const montoCuota = Number((totalMonto / numCuotas).toFixed(2));
+    
+    for (let i = 1; i <= numCuotas; i++) {
+      // Se ajusta la última cuota para evitar problemas de centavos por redondeos
+      const montoFinal = i === numCuotas 
+        ? Number((totalMonto - (montoCuota * (numCuotas - 1))).toFixed(2))
+        : montoCuota;
+
+      const cuota = this.planPagoRepository.create({
+        contratoId: savedContrato.id,
+        nroCuota: i,
+        montoCuota: montoFinal,
+        estado: PlanPagoEstado.Pendiente
       });
+      await this.planPagoRepository.save(cuota);
+    }
 
-    return this.contratoRepository.save(
-      contrato
-    );
-
+    return savedContrato;
   }
 
   async findAll(pagination?: PaginationInput): Promise<Contrato[]> {
     if (!pagination) {
-      return this.contratoRepository.find();
+      return this.contratoRepository.find({
+        relations: ['planPagos', 'planPagos.facturas', 'cliente']
+      });
     }
 
-    // Aplicar paginacion simple cuando se envia
     const page = pagination.page ?? 1;
     const limit = pagination.limit ?? 10;
     const skip = (page - 1) * limit;
-    return this.contratoRepository.find({ skip, take: limit });
+    return this.contratoRepository.find({ 
+      skip, 
+      take: limit,
+      relations: ['planPagos', 'planPagos.facturas', 'cliente']
+    });
   }
 
   async findOne(id: number): Promise<Contrato> {
-
-    const contrato =
-      await this.contratoRepository.findOne({
-
-        where: {
-          id,
-        },
-
-        relations: [
-          'firmas',
-        ],
-
-      });
+    let contrato = await this.contratoRepository.findOne({
+      where: { id },
+      relations: ['firmas', 'planPagos', 'planPagos.facturas', 'cliente'],
+    });
 
     if (!contrato) {
-
-      throw new NotFoundException(
-        'Contrato no encontrado',
-      );
-
+      throw new NotFoundException('Contrato no encontrado');
     }
 
-    return contrato;
+    // Si el contrato no tiene cuotas (como los creados anteriormente), las generamos al vuelo
+    if (!contrato.planPagos || contrato.planPagos.length === 0) {
+      const totalMonto = Number(contrato.montoTotal);
+      const numCuotas = 3;
+      const montoCuota = Number((totalMonto / numCuotas).toFixed(2));
+      
+      for (let i = 1; i <= numCuotas; i++) {
+        // Se ajusta la última cuota para evitar problemas de centavos por redondeos
+        const montoFinal = i === numCuotas 
+          ? Number((totalMonto - (montoCuota * (numCuotas - 1))).toFixed(2))
+          : montoCuota;
 
+        const cuota = this.planPagoRepository.create({
+          contratoId: contrato.id,
+          nroCuota: i,
+          montoCuota: montoFinal,
+          estado: PlanPagoEstado.Pendiente,
+        });
+        await this.planPagoRepository.save(cuota);
+      }
+
+      // Volvemos a consultar el contrato para retornar el objeto con las cuotas recién generadas
+      contrato = await this.contratoRepository.findOne({
+        where: { id },
+        relations: ['firmas', 'planPagos', 'planPagos.facturas', 'cliente'],
+      });
+    }
+
+    return contrato!;
   }
 
   async update(id: number, updateContratoInput: UpdateContratoInput): Promise<Contrato> {

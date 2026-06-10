@@ -31,6 +31,7 @@ type ClienteResponse {
 
 type Contrato {
   blockchainContractId: String
+  cliente: Cliente
   clienteId: Int!
   documentHash: String
   documentoNosqlId: String
@@ -43,6 +44,7 @@ type Contrato {
   montoTotal: Float!
   observaciones: String
   pdfUrl: String
+  planPagos: [PlanPago!]
   propiedadId: Int!
   titulo: String!
 }
@@ -178,6 +180,33 @@ type EmpleadoResponse {
   success: Boolean!
 }
 
+type Factura {
+  codigoRecepcion: String
+  cuf: String
+  cufdUsado: String
+  estadoSiat: String
+  fechaEmision: DateTime!
+  id: Int!
+  montoTotal: Float!
+  nitCliente: String
+  nroFactura: String!
+  pagos: [Pago!]
+  planPagoId: Int!
+  razonSocial: String
+}
+
+type FacturaListResponse {
+  data: [Factura!]
+  message: String!
+  success: Boolean!
+}
+
+type FacturaResponse {
+  data: Factura
+  message: String!
+  success: Boolean!
+}
+
 type FirmaContrato {
   contratoId: Int!
   fechaFirma: DateTime!
@@ -210,6 +239,7 @@ type LoginResponse {
 
 type Mutation {
   cambiarContrasenia(cambiarContraseniaInput: CambiarContraseniaInput!): UsuarioAuthResponse!
+  crearStripePaymentIntent(monto: Float!): StripePaymentIntentResponse!
   createCliente(createClienteInput: CreateClienteInput!): ClienteResponse!
   createContrato(createContratoInput: CreateContratoInput!): ContratoResponse!
   createEmpleado(createEmpleadoInput: CreateEmpleadoInput!): EmpleadoResponse!
@@ -223,6 +253,7 @@ type Mutation {
   generateContractPdf(id: Int!): ContratoResponse!
   generateSignedPdf(id: Int!): ContratoResponse!
   login(loginInput: LoginInput!): LoginApiResponse!
+  pagarCuota(pagarCuotaInput: PagarCuotaInput!): FacturaResponse!
   register(registerUsuarioInput: RegisterUsuarioInput!): UsuarioAuthResponse!
   registerBlockchain(id: Int!): ContratoResponse!
   registrarDispositivo(registrarDispositivoInput: RegistrarDispositivoInput!): DispositivoResponse!
@@ -248,12 +279,35 @@ type Mutation {
   updateVisita(updateVisitaInput: UpdateVisitaInput!): VisitaResponse!
 }
 
+input PagarCuotaInput {
+  metodoPago: String!
+  nitCliente: String!
+  planPagoId: Int!
+  razonSocial: String!
+}
+
 input PaginationInput {
   endDate: String
   limit: Int
   page: Int
   search: String
   startDate: String
+}
+
+type Pago {
+  facturaId: Int!
+  id: Int!
+  metodo: String!
+  monto: Float!
+}
+
+type PlanPago {
+  contratoId: Int!
+  estado: String!
+  facturas: [Factura!]
+  id: Int!
+  montoCuota: Float!
+  nroCuota: Int!
 }
 
 type Preferencias {
@@ -325,6 +379,8 @@ type Query {
   contratos(pagination: PaginationInput): ContratoListResponse!
   empleado(id: Int!): EmpleadoResponse!
   empleados(pagination: PaginationInput): EmpleadoListResponse!
+  facturas: FacturaListResponse!
+  pagos: [Pago!]!
   preferencia(id: Int!): Preferencias!
   preferencias: [Preferencias!]!
   preferenciasByCliente(clienteId: Int!): [Preferencias!]!
@@ -383,6 +439,12 @@ input SignContractInput {
   contractId: Int!
   signatureBase64: String!
   signerType: String!
+}
+
+type StripePaymentIntentResponse {
+  clientSecret: String
+  message: String!
+  success: Boolean!
 }
 
 type Sucursal {
@@ -509,11 +571,14 @@ type UsuarioAuthResponse {
 }
 
 type Visita {
+  cliente: Cliente
   clienteId: Int!
+  empleado: Empleado
   empleadoId: Int!
   estado: String!
   fechaVisita: DateTime!
   id: Int!
+  propiedad: Propiedad
   propiedadId: Int!
 }
 

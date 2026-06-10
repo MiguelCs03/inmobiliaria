@@ -39,6 +39,7 @@ services:
       - DB_SLAVE_USER=${DB_USER}
       - DB_SLAVE_PASS=${DB_PASS}
       - DB_SLAVE_NAME=${DB_NAME}
+      - SIAT_URL=${SIAT_URL:-http://host.docker.internal:8081}
     extra_hosts:
       - "host.docker.internal:host-gateway"
     depends_on:

@@ -333,6 +333,160 @@
 
     </div>
 
+    <!-- PLAN DE PAGOS Y FACTURACION SIAT -->
+    <div class="card" style="margin-top: 24px;">
+        <h2>
+            Plan de Pagos y Facturación Electrónica (SIAT)
+        </h2>
+
+        <div class="table-responsive" style="margin-top: 16px; overflow-x: auto;">
+            <table style="width: 100%; border-collapse: collapse; text-align: left; font-size: 14px;">
+                <thead>
+                    <tr style="border-bottom: 2px solid #e2e8f0; color: #4a5568; font-weight: 600;">
+                        <th style="padding: 12px 8px;">Cuota</th>
+                        <th style="padding: 12px 8px;">Monto</th>
+                        <th style="padding: 12px 8px;">Estado</th>
+                        <th style="padding: 12px 8px;">Factura SIAT</th>
+                        <th style="padding: 12px 8px; text-align: center;">Acción</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr *ngFor="let cuota of contrato.planPagos" style="border-bottom: 1px solid #edf2f7;">
+                        <td style="padding: 12px 8px; font-weight: 600;">
+                            Cuota #{{ cuota.nroCuota }}
+                        </td>
+                        <td style="padding: 12px 8px; color: #2b6cb0; font-weight: 600;">
+                            Bs. {{ cuota.montoCuota | number:'1.2-2' }}
+                        </td>
+                        <td style="padding: 12px 8px;">
+                            <span [style.background-color]="cuota.estado === 'Pagado' ? '#c6f6d5' : '#feebc8'"
+                                  [style.color]="cuota.estado === 'Pagado' ? '#22543d' : '#744210'"
+                                  style="padding: 4px 8px; border-radius: 9999px; font-size: 12px; font-weight: 600;">
+                                {{ cuota.estado }}
+                            </span>
+                        </td>
+                        <td style="padding: 12px 8px;">
+                            <div *ngIf="cuota.facturas && cuota.facturas.length > 0; else noFactura">
+                                <div *ngFor="let fact of cuota.facturas">
+                                    <div style="font-weight: 600; color: #2d3748;">Factura Nro: {{ fact.nroFactura }}</div>
+                                    <div style="font-size: 11px; color: #718096; max-width: 250px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" [title]="fact.cuf">
+                                        CUF: {{ fact.cuf }}
+                                    </div>
+                                    <div style="font-size: 11px; color: #48bb78; font-weight: 600;">
+                                        ✔ Validada en SIAT (Rec: {{ fact.codigoRecepcion }})
+                                    </div>
+                                </div>
+                            </div>
+                            <ng-template #noFactura>
+                                <span style="color: #a0aec0; font-style: italic;">Sin factura emitida</span>
+                            </ng-template>
+                        </td>
+                        <td style="padding: 12px 8px; text-align: center;">
+                            <button *ngIf="cuota.estado !== 'Pagado'" 
+                                    (click)="abrirPagoModal(cuota, contrato.cliente)"
+                                    style="background-color: #3182ce; color: white; border: none; padding: 6px 12px; border-radius: 6px; cursor: pointer; font-size: 12px; font-weight: 600; display: inline-flex; align-items: center; gap: 4px; transition: background-color 0.2s;">
+                                💳 Pagar y Facturar
+                            </button>
+                            <span *ngIf="cuota.estado === 'Pagado'" style="color: #48bb78; font-weight: bold; font-size: 12px;">
+                                ✔ Completado
+                            </span>
+                        </td>
+                    </tr>
+                    <tr *ngIf="!contrato.planPagos || contrato.planPagos.length === 0">
+                        <td colspan="5" style="padding: 16px 8px; text-align: center; color: #a0aec0; font-style: italic;">
+                            No se ha generado ningún plan de pagos para este contrato.
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- MODAL DE PAGO Y FACTURACION SIAT -->
+    <div *ngIf="showPaymentModal" 
+         style="position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background-color: rgba(0, 0, 0, 0.5); display: flex; align-items: center; justify-content: center; z-index: 1000;">
+        
+        <div style="background-color: white; border-radius: 12px; width: 90%; max-width: 500px; padding: 24px; box-shadow: 0 10px 25px rgba(0,0,0,0.15); display: flex; flex-direction: column; gap: 16px;">
+            
+            <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #e2e8f0; padding-bottom: 12px;">
+                <h3 style="margin: 0; font-size: 18px; font-weight: 700; color: #2d3748;">
+                    Procesar Pago y Facturación
+                </h3>
+                <button (click)="cerrarPagoModal()" 
+                        style="background: none; border: none; font-size: 20px; cursor: pointer; color: #a0aec0;">
+                    &times;
+                </button>
+            </div>
+
+            <div style="background-color: #ebf8ff; border: 1px solid #bee3f8; padding: 12px; border-radius: 8px; color: #2b6cb0; font-size: 14px;">
+                <strong>Detalles del Pago:</strong>
+                <div style="margin-top: 4px;">Cuota Seleccionada: Cuota #{{ selectedCuota?.nroCuota }}</div>
+                <div>Monto a Pagar: <strong>Bs. {{ selectedCuota?.montoCuota | number:'1.2-2' }}</strong></div>
+            </div>
+
+            <form (ngSubmit)="confirmarPago()" style="display: flex; flex-direction: column; gap: 12px;">
+                <div style="display: flex; flex-direction: column; gap: 4px;">
+                    <label style="font-size: 12px; font-weight: 600; color: #4a5568; text-transform: uppercase;">
+                        NIT / CI del Cliente
+                    </label>
+                    <input type="text" 
+                           [(ngModel)]="nitCliente" 
+                           name="nitCliente"
+                           required
+                           placeholder="Ej: 123456789"
+                           style="width: 100%; padding: 10px; border: 1px solid #cbd5e0; border-radius: 6px; font-size: 14px; box-sizing: border-box;" />
+                </div>
+
+                <div style="display: flex; flex-direction: column; gap: 4px;">
+                    <label style="font-size: 12px; font-weight: 600; color: #4a5568; text-transform: uppercase;">
+                        Nombre / Razón Social
+                    </label>
+                    <input type="text" 
+                           [(ngModel)]="razonSocial" 
+                           name="razonSocial"
+                           required
+                           placeholder="Ej: Juan Perez / Perez S.R.L."
+                           style="width: 100%; padding: 10px; border: 1px solid #cbd5e0; border-radius: 6px; font-size: 14px; box-sizing: border-box;" />
+                </div>
+
+                <div style="display: flex; flex-direction: column; gap: 4px;">
+                    <label style="font-size: 12px; font-weight: 600; color: #4a5568; text-transform: uppercase;">
+                        Método de Pago
+                    </label>
+                    <select [(ngModel)]="metodoPago" 
+                            name="metodoPago"
+                            style="width: 100%; padding: 10px; border: 1px solid #cbd5e0; border-radius: 6px; font-size: 14px; box-sizing: border-box;">
+                        <option value="QR">Pago Simple (QR)</option>
+                        <option value="Banco">Transferencia Bancaria</option>
+                        <option value="Tarjeta">Tarjeta de Crédito / Débito</option>
+                    </select>
+                </div>
+
+                <div style="display: flex; gap: 12px; justify-content: flex-end; margin-top: 12px; border-top: 1px solid #e2e8f0; padding-top: 16px;">
+                    <button type="button" 
+                            (click)="cerrarPagoModal()" 
+                            style="background-color: #e2e8f0; color: #4a5568; border: none; padding: 10px 16px; border-radius: 6px; cursor: pointer; font-size: 14px; font-weight: 600;">
+                        Cancelar
+                    </button>
+                    <button type="submit" 
+                            [disabled]="procesandoPago"
+                            style="background-color: #48bb78; color: white; border: none; padding: 10px 16px; border-radius: 6px; cursor: pointer; font-size: 14px; font-weight: 600; display: inline-flex; align-items: center; gap: 8px;">
+                        <span *ngIf="procesandoPago" style="border: 2px solid white; border-top: 2px solid transparent; border-radius: 50%; width: 12px; height: 12px; display: inline-block; animation: spin 1s linear infinite;"></span>
+                        {{ procesandoPago ? 'Procesando en SIAT...' : 'Emitir Factura y Pagar' }}
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
 </div>
 
 }
+
+<!-- Animación para el spinner de carga en CSS inline -->
+<style>
+    @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+    }
+</style>

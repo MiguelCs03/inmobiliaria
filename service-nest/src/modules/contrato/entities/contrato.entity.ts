@@ -122,6 +122,7 @@ export class Contrato {
   @JoinColumn({ name: 'propiedad_id' })
   propiedad!: Propiedad;
 
+  @Field(() => Cliente, { nullable: true })
   @ManyToOne(() => Cliente, (cliente) => cliente.contratos)
   @JoinColumn({ name: 'cliente_id' })
   cliente!: Cliente;
@@ -130,6 +131,7 @@ export class Contrato {
   @JoinColumn({ name: 'empleado_id' })
   empleado!: Empleado;
 
+  @Field(() => [PlanPago], { nullable: true })
   @OneToMany(() => PlanPago, (planPago) => planPago.contrato)
   planPagos!: PlanPago[];
   @OneToMany(
