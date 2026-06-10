@@ -27,7 +27,8 @@ import {
   ArrowRight,
   LogOut,
   LogIn,
-  RefreshCw
+  RefreshCw,
+  Heart
 } from 'lucide-react-native';
 import { useAuth } from '@/context/auth-context';
 import {
@@ -325,6 +326,19 @@ export default function HomeScreen() {
                 Todos
               </Text>
             </TouchableOpacity>
+
+            {/* Botón: Matchmaking (Solo para Cliente) */}
+            {usuario?.rolId === 3 && (
+              <TouchableOpacity
+                onPress={() => router.push('/swipe' as any)}
+                className="flex-row items-center px-4 py-2 rounded-xl mr-2 border bg-white border-slate-200"
+              >
+                <Heart size={15} color="#f43f5e" fill="#f43f5e" />
+                <Text className="ml-1.5 text-xs font-bold text-slate-600">
+                  Matchmaking
+                </Text>
+              </TouchableOpacity>
+            )}
 
             {/* Botón: Contratos */}
             <TouchableOpacity

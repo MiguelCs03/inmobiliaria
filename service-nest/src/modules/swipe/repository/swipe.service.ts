@@ -55,11 +55,13 @@ export class SwipeService {
     });
     const swipedPropIds = swipesRealizados.map((s) => Number(s.propiedadId));
 
-    // 3. Obtener propiedades actualmente Disponibles (estadoPropiedadId = 1 es Disponible)
-    const propiedades = await this.propiedadRepository.find({
-      where: { estadoPropiedadId: 1 },
+    // 3. Obtener propiedades y filtrar las que tengan estado "Disponible"
+    const todasLasPropiedades = await this.propiedadRepository.find({
       relations: ['imagenes', 'tipoPropiedad', 'tipoOperacion', 'estadoPropiedad'],
     });
+    const propiedades = todasLasPropiedades.filter(
+      (p) => p.estadoPropiedad?.nombre?.toLowerCase() === 'disponible',
+    );
 
     // 4. Filtrar candidatas no deslizadas
     const candidatas = propiedades.filter((p) => !swipedPropIds.includes(Number(p.id)));
