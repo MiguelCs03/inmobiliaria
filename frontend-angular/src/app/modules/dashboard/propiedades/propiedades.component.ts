@@ -350,7 +350,8 @@ export class PropiedadesComponent implements OnInit {
     // Pequeño retardo para asegurar que el contenedor #intranetMap existe en el DOM tras abrir el modal
     setTimeout(async () => {
       try {
-        const L = await import('leaflet');
+        const leafletModule = await import('leaflet');
+        const L = (leafletModule as any).default || leafletModule;
         const mapContainer = document.getElementById('intranetMap');
         if (!mapContainer) return;
 
