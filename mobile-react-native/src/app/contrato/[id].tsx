@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import {
   View,
   Text,
@@ -7,7 +7,8 @@ import {
   ActivityIndicator,
   SafeAreaView,
   StatusBar,
-  Alert
+  Alert,
+  Modal
 } from 'react-native';
 import { useLocalSearchParams, router } from 'expo-router';
 import { useQuery } from '@apollo/client/react';
@@ -20,16 +21,21 @@ import {
   CheckCircle2,
   Clock,
   Copy,
-  PenTool
+  PenTool,
+  BadgeDollarSign,
+  Receipt
 } from 'lucide-react-native';
 import { GET_CONTRATO } from '@/graphql/queries';
 
 export default function ContratoDetalleScreen() {
   const { id } = useLocalSearchParams();
+  const [mostrarFactura, setMostrarFactura] = useState(false);
+  const [facturaSeleccionada, setFacturaSeleccionada] = useState<any>(null);
 
   const { data, loading, error } = useQuery<any>(GET_CONTRATO, {
     variables: { id: Number(id) },
     skip: !id,
+    fetchPolicy: 'cache-and-network',
   });
 
   const contrato = data?.contrato?.data;
@@ -151,6 +157,91 @@ export default function ContratoDetalleScreen() {
           </View>
         </View>
 
+        {/* SECCIÓN: Plan de Pagos / Cuotas */}
+        <Text className="text-slate-900 text-sm font-bold uppercase tracking-wider ml-1 mb-2">
+          Plan de Pagos (Cuotas)
+        </Text>
+
+        <View className="mb-5 gap-y-3">
+          {contrato.planPagos && contrato.planPagos.length > 0 ? (
+            contrato.planPagos.map((cuota: any) => {
+              const esPagada = cuota.estado?.toLowerCase() === 'pagado';
+              return (
+                <View
+                  key={cuota.id}
+                  className="bg-white p-4 rounded-2xl border border-slate-100 shadow-sm flex-row justify-between items-center"
+                >
+                  <View className="flex-row items-center flex-1 pr-4">
+                    <View className={`p-3 rounded-xl mr-3 ${esPagada ? 'bg-emerald-50' : 'bg-amber-50'}`}>
+                      <BadgeDollarSign size={20} color={esPagada ? '#10b981' : '#f59e0b'} />
+                    </View>
+                    <View className="flex-1">
+                      <Text className="text-slate-900 font-extrabold text-sm mb-0.5">
+                        Cuota #{cuota.nroCuota}
+                      </Text>
+                      <Text className="text-slate-500 text-xs">
+                        Monto: ${Number(cuota.montoCuota).toFixed(2)} USD
+                      </Text>
+                    </View>
+                  </View>
+
+                  <View className="items-end">
+                    <View className={`px-2 py-0.5 rounded-md mb-2 ${esPagada ? 'bg-emerald-50' : 'bg-amber-50'}`}>
+                      <Text className={`text-[9px] font-bold uppercase tracking-wider ${esPagada ? 'text-emerald-700' : 'text-amber-700'}`}>
+                        {cuota.estado}
+                      </Text>
+                    </View>
+
+                    {esPagada ? (
+                      <TouchableOpacity
+                        onPress={() => {
+                          const factura = cuota.facturas?.[0];
+                          if (factura) {
+                            setFacturaSeleccionada(factura);
+                            setMostrarFactura(true);
+                          } else {
+                            Alert.alert('Información', 'Esta cuota está marcada como Pagada, pero no tiene factura asociada.');
+                          }
+                        }}
+                        className="bg-slate-50 border border-slate-200 px-3 py-1.5 rounded-lg active:bg-slate-100 flex-row items-center"
+                      >
+                        <Receipt size={12} color="#475569" className="mr-1" />
+                        <Text className="text-slate-600 font-bold text-[10px]">Ver Factura</Text>
+                      </TouchableOpacity>
+                    ) : (
+                      <TouchableOpacity
+                        onPress={() => {
+                          router.push({
+                            pathname: '/contrato/pago',
+                            params: {
+                              planPagoId: cuota.id.toString(),
+                              contratoId: contrato.id.toString(),
+                              contratoTitulo: contrato.titulo,
+                              monto: cuota.montoCuota.toString(),
+                              nroCuota: cuota.nroCuota.toString(),
+                              nitCliente: contrato.cliente?.ciNit || '',
+                              razonSocial: contrato.cliente?.nombres || '',
+                            }
+                          });
+                        }}
+                        className="bg-corporate-600 px-3.5 py-1.5 rounded-lg active:bg-corporate-700 flex-row items-center"
+                      >
+                        <BadgeDollarSign size={12} color="#ffffff" className="mr-1" />
+                        <Text className="text-white font-bold text-[10px]">Pagar</Text>
+                      </TouchableOpacity>
+                    )}
+                  </View>
+                </View>
+              );
+            })
+          ) : (
+            <View className="bg-white p-5 rounded-2xl border border-slate-100 shadow-sm items-center py-6">
+              <Clock size={32} color="#94a3b8" />
+              <Text className="text-slate-500 text-sm mt-2">No se registra un plan de pagos para este contrato.</Text>
+            </View>
+          )}
+        </View>
+
         {/* SECCIÓN: Firmantes (Timeline UI) */}
         <Text className="text-slate-900 text-sm font-bold uppercase tracking-wider ml-1 mb-2">
           Estatus de Firmas
@@ -227,6 +318,114 @@ export default function ContratoDetalleScreen() {
         </View>
 
       </ScrollView>
+
+      {/* MODAL DETALLE FACTURA SIAT */}
+      <Modal
+        visible={mostrarFactura}
+        transparent={true}
+        animationType="slide"
+        onRequestClose={() => setMostrarFactura(false)}
+      >
+        <View className="flex-1 justify-end bg-slate-900/60">
+          <View className="bg-white rounded-t-3xl p-6 w-full max-h-[85%]">
+            
+            {/* Header */}
+            <View className="flex-row justify-between items-center border-b border-slate-100 pb-4 mb-4">
+              <Text className="text-slate-900 text-lg font-black">Factura de Servicio Electrónica</Text>
+              <TouchableOpacity
+                onPress={() => setMostrarFactura(false)}
+                className="bg-slate-100 rounded-full p-1.5 px-3 py-1"
+              >
+                <Text className="text-slate-600 font-bold text-xs">Cerrar</Text>
+              </TouchableOpacity>
+            </View>
+
+            {facturaSeleccionada && (
+              <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ gap: 16 }}>
+                <View className="items-center border-b border-slate-100 pb-4">
+                  <Text className="text-corporate-700 font-extrabold text-sm uppercase mb-1">INMOBILIARIA ESTATECORE S.A.</Text>
+                  <Text className="text-slate-400 text-[10px] uppercase font-bold tracking-wider">NIT: 1020304023</Text>
+                  <Text className="text-slate-400 text-[10px] uppercase font-bold tracking-wider">Punto de Venta 1 - Santa Cruz</Text>
+                </View>
+
+                {/* Ticket Body */}
+                <View className="bg-slate-50 rounded-2xl p-5 border border-slate-100 gap-y-3">
+                  <View className="flex-row justify-between">
+                    <Text className="text-slate-400 text-xs font-bold uppercase">Nro Factura</Text>
+                    <Text className="text-slate-800 text-xs font-black">#{facturaSeleccionada.nroFactura}</Text>
+                  </View>
+
+                  <View className="flex-row justify-between">
+                    <Text className="text-slate-400 text-xs font-bold uppercase">Estado SIAT</Text>
+                    <Text className="text-emerald-600 text-xs font-black uppercase">{facturaSeleccionada.estadoSiat || 'VALIDA'}</Text>
+                  </View>
+
+                  <View className="h-[1px] bg-slate-200/60 my-1" />
+
+                  <View className="flex-row justify-between">
+                    <Text className="text-slate-400 text-xs font-bold uppercase">Fecha de Emisión</Text>
+                    <Text className="text-slate-700 text-xs font-semibold">
+                      {new Date(facturaSeleccionada.fechaEmision).toLocaleString('es-ES', {
+                        dateStyle: 'medium',
+                        timeStyle: 'short'
+                      })}
+                    </Text>
+                  </View>
+
+                  <View className="flex-row justify-between">
+                    <Text className="text-slate-400 text-xs font-bold uppercase">Razón Social</Text>
+                    <Text className="text-slate-700 text-xs font-bold">{facturaSeleccionada.razonSocial}</Text>
+                  </View>
+
+                  <View className="flex-row justify-between">
+                    <Text className="text-slate-400 text-xs font-bold uppercase">NIT/CI Cliente</Text>
+                    <Text className="text-slate-700 text-xs font-bold">{facturaSeleccionada.nitCliente}</Text>
+                  </View>
+
+                  <View className="h-[1px] bg-slate-200/60 my-1" />
+
+                  <View>
+                    <Text className="text-slate-400 text-[10px] font-bold uppercase mb-1">Código Único de Facturación (CUF)</Text>
+                    <TouchableOpacity
+                      onPress={() => copiarAlPortapapeles(facturaSeleccionada.cuf, 'Código CUF')}
+                      className="bg-white border border-slate-100 p-2 rounded-lg flex-row justify-between items-center"
+                    >
+                      <Text numberOfLines={1} className="text-slate-600 font-mono text-[10px] flex-1 pr-2">
+                        {facturaSeleccionada.cuf}
+                      </Text>
+                      <Copy size={12} color="#94a3b8" />
+                    </TouchableOpacity>
+                  </View>
+
+                  <View>
+                    <Text className="text-slate-400 text-[10px] font-bold uppercase mb-1">Código Recepción SIAT</Text>
+                    <Text className="text-slate-700 font-mono text-[10px] bg-white border border-slate-100 p-2 rounded-lg">
+                      {facturaSeleccionada.codigoRecepcion}
+                    </Text>
+                  </View>
+
+                  <View className="h-[1px] bg-slate-200/60 my-1" />
+
+                  <View className="flex-row justify-between items-center pt-2">
+                    <Text className="text-slate-900 font-black text-sm">MONTO TOTAL PAGADO</Text>
+                    <Text className="text-corporate-700 font-black text-lg">
+                      ${Number(facturaSeleccionada.montoTotal).toFixed(2)} USD
+                    </Text>
+                  </View>
+                </View>
+
+                {/* Footer disclaimer */}
+                <View className="items-center py-2">
+                  <ShieldCheck size={28} color="#10b981" />
+                  <Text className="text-slate-400 text-[10px] text-center mt-2 px-6">
+                    Esta es una factura electrónica certificada por el simulador del Servicio de Impuestos Nacionales de Bolivia (SIAT).
+                  </Text>
+                </View>
+              </ScrollView>
+            )}
+          </View>
+        </View>
+      </Modal>
     </SafeAreaView>
   );
 }
