@@ -22,7 +22,7 @@ export class ContratoPreviaVistaComponent {
         if (!data) return;
 
         html2canvas(data)
-            .then(canvas => {
+            .then((canvas: HTMLCanvasElement) => {
 
                 const imgWidth = 250;
 
