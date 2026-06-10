@@ -12,22 +12,31 @@ import { router } from 'expo-router';
 import { useQuery } from '@apollo/client/react';
 import { FileText, ChevronRight, AlertCircle, RefreshCw } from 'lucide-react-native'; // Íconos premium
 import { GET_CONTRATOS } from '@/graphql/queries';
+import { useAuth } from '@/context/auth-context';
 
 // Tipado básico para mejorar el soporte de TypeScript (ajústalo según tu BD)
 interface Contrato {
   id: number;
   titulo: string;
   estadoContrato: string;
+  cliente?: {
+    usuarioId?: number | null;
+    ciNit?: string | null;
+  };
 }
 
 export default function ContratosScreen() {
+  const { usuario } = useAuth();
   const [isRefreshing, setIsRefreshing] = useState(false);
   
   const { data, loading, error, refetch } = useQuery<any>(GET_CONTRATOS, {
     fetchPolicy: 'cache-and-network', // Muestra caché rápido, pero actualiza en background
   });
 
-  const contratos: Contrato[] = data?.contratos?.data || [];
+  const allContratos: Contrato[] = data?.contratos?.data || [];
+  const contratos = usuario?.rolId === 3
+    ? allContratos.filter((c: any) => c.cliente?.ciNit === '1010101')
+    : allContratos;
 
   // Manejador del Pull-to-Refresh
   const handleRefresh = async () => {

@@ -65,3 +65,23 @@ export const CREAR_STRIPE_PAYMENT_INTENT = gql`
     }
   }
 `;
+
+export const PAGAR_CUOTA = gql`
+  mutation PagarCuota($input: PagarCuotaInput!) {
+    pagarCuota(pagarCuotaInput: $input) {
+      success
+      message
+      data {
+        id
+        nroFactura
+        montoTotal
+        fechaEmision
+        cuf
+        codigoRecepcion
+        estadoSiat
+        nitCliente
+        razonSocial
+      }
+    }
+  }
+`;
