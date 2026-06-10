@@ -41,14 +41,9 @@ export const routes: Routes = [
     canActivate: [authGuard],
     loadComponent: () => import('./modules/dashboard/dashboard-layout/dashboard-layout.component').then(m => m.DashboardLayoutComponent),
     children: [
-<<<<<<< HEAD
-      { path: '', redirectTo: 'visitas', pathMatch: 'full' },
-      { path: 'visitas', loadComponent: () => import('./modules/dashboard/home/home.component').then(m => m.HomeComponent) },
-=======
       { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
       { path: 'dashboard', loadComponent: () => import('./modules/dashboard/home/home.component').then(m => m.HomeComponent) },
       { path: 'visitas', loadComponent: () => import('./modules/dashboard/visitas/visitas.component').then(m => m.VisitasComponent) },
->>>>>>> 6474e36 (frontend)
       { path: 'propietarios', loadComponent: () => import('./modules/dashboard/propietarios/propietarios.component').then(m => m.PropietariosComponent) },
       { path: 'propiedades', loadComponent: () => import('./modules/dashboard/propiedades/propiedades.component').then(m => m.PropiedadesComponent) },
       { path: 'perfil', loadComponent: () => import('./modules/dashboard/perfil/perfil.component').then(m => m.PerfilComponent) }
