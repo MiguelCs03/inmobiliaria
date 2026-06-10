@@ -1,19 +1,20 @@
+import { useAuth } from '@/context/auth-context';
+import { SIGN_CONTRACT } from '@/graphql/mutations';
+import { GET_CONTRATO, GET_CONTRATOS } from '@/graphql/queries';
+import { useMutation } from '@apollo/client/react';
+import { router, useLocalSearchParams } from 'expo-router';
+import { ArrowLeft, CheckCircle, PenTool, RefreshCw } from 'lucide-react-native';
 import React, { useRef, useState } from 'react';
 import {
-  View,
-  Text,
+  ActivityIndicator,
   Alert,
-  TouchableOpacity,
   SafeAreaView,
   StatusBar,
-  ActivityIndicator
+  Text,
+  TouchableOpacity,
+  View
 } from 'react-native';
-import { useLocalSearchParams, router } from 'expo-router';
-import { useMutation } from '@apollo/client/react';
 import SignatureScreen from 'react-native-signature-canvas';
-import { ArrowLeft, PenTool, RefreshCw, CheckCircle } from 'lucide-react-native';
-import { SIGN_CONTRACT } from '@/graphql/mutations';
-import { useAuth } from '@/context/auth-context';
 
 
 export default function FirmarScreen() {
@@ -22,7 +23,18 @@ export default function FirmarScreen() {
   const ref = useRef<any>(null);
   const [loading, setLoading] = useState(false);
 
-  const [signContract] = useMutation(SIGN_CONTRACT);
+  const [signContract] = useMutation(SIGN_CONTRACT, {
+  refetchQueries: [
+    {
+      query: GET_CONTRATO,
+      variables: { id: Number(id) },
+    },
+    {
+      query: GET_CONTRATOS,
+    },
+  ],
+  awaitRefetchQueries: true,
+});
 
   const handleOK = async (signature: string) => {
     setLoading(true);
@@ -35,7 +47,7 @@ export default function FirmarScreen() {
         base64.length
       );
       const signerType =
-        usuario?.rolId === 2
+        usuario?.rolId === 3
           ? 'CLIENT'
           : 'AGENT';
 

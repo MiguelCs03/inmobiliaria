@@ -1,42 +1,41 @@
-import React, { useState } from 'react';
-import {
-  View,
-  Text,
-  FlatList,
-  TouchableOpacity,
-  ActivityIndicator,
-  SafeAreaView,
-  StatusBar
-} from 'react-native';
-import { router } from 'expo-router';
-import { useQuery } from '@apollo/client/react';
-import { FileText, ChevronRight, AlertCircle, RefreshCw } from 'lucide-react-native'; // Íconos premium
 import { GET_CONTRATOS } from '@/graphql/queries';
-import { useAuth } from '@/context/auth-context';
+import { useQuery } from '@apollo/client/react';
+import { useFocusEffect } from '@react-navigation/native';
+import { router } from 'expo-router';
+import { AlertCircle, ChevronRight, FileText, RefreshCw } from 'lucide-react-native'; // Íconos premium
+import React, { useCallback, useState } from 'react';
+import {
+  ActivityIndicator,
+  FlatList,
+  SafeAreaView,
+  StatusBar,
+  Text,
+  TouchableOpacity,
+  View
+} from 'react-native';
 
 // Tipado básico para mejorar el soporte de TypeScript (ajústalo según tu BD)
 interface Contrato {
   id: number;
   titulo: string;
   estadoContrato: string;
-  cliente?: {
-    usuarioId?: number | null;
-    ciNit?: string | null;
-  };
 }
 
 export default function ContratosScreen() {
-  const { usuario } = useAuth();
   const [isRefreshing, setIsRefreshing] = useState(false);
-  
+
   const { data, loading, error, refetch } = useQuery<any>(GET_CONTRATOS, {
-    fetchPolicy: 'cache-and-network', // Muestra caché rápido, pero actualiza en background
+    fetchPolicy: 'cache-and-network',
+    notifyOnNetworkStatusChange: true,
   });
 
-  const allContratos: Contrato[] = data?.contratos?.data || [];
-  const contratos = usuario?.rolId === 3
-    ? allContratos.filter((c: any) => c.cliente?.ciNit === '1010101')
-    : allContratos;
+  useFocusEffect(
+    useCallback(() => {
+      refetch();
+    }, [refetch])
+  );
+
+  const contratos: Contrato[] = data?.contratos?.data || [];
 
   // Manejador del Pull-to-Refresh
   const handleRefresh = async () => {
@@ -114,16 +113,16 @@ export default function ContratosScreen() {
   return (
     <SafeAreaView className="flex-1 bg-slate-50">
       <StatusBar barStyle="dark-content" />
-      
+
       <FlatList
         data={contratos}
         keyExtractor={(item) => item.id.toString()}
         contentContainerStyle={{ paddingHorizontal: 16, paddingTop: 50, paddingBottom: 32 }}
-        
+
         // Pull-to-refresh nativo
         refreshing={isRefreshing}
         onRefresh={handleRefresh}
-        
+
         // Estado vacío si la query no trae contratos
         ListEmptyComponent={() => (
           <View className="items-center justify-center py-20">
@@ -134,16 +133,16 @@ export default function ContratosScreen() {
             </Text>
           </View>
         )}
-        
+
         renderItem={({ item }) => (
           <TouchableOpacity
             onPress={() =>
-            router.push({
+              router.push({
                 pathname: '/contrato/[id]',
                 params: {
-                id: item.id.toString(),
+                  id: item.id.toString(),
                 },
-            })
+              })
             }
             activeOpacity={0.7}
             className="bg-white mb-3 p-4 rounded-2xl border border-slate-100 shadow-sm flex-row items-center justify-between"
@@ -153,10 +152,10 @@ export default function ContratosScreen() {
               <View className="p-3 bg-blue-50 rounded-xl mr-4">
                 <FileText size={22} color="#2563eb" />
               </View>
-              
+
               <View className="flex-1">
-                <Text 
-                  numberOfLines={1} 
+                <Text
+                  numberOfLines={1}
                   className="text-slate-900 text-base font-bold mb-1.5 tracking-tight"
                 >
                   {item.titulo || 'Contrato sin título'}
