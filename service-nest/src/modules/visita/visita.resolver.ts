@@ -1,4 +1,4 @@
-import { Resolver, Query, Mutation, Args, Int } from '@nestjs/graphql';
+import { Resolver, Query, Mutation, Args, Int, Float } from '@nestjs/graphql';
 import { VisitaService } from './repository/visita.service';
 import { Visita } from './entities/visita.entity';
 import { CreateVisitaInput } from './dto/create-visita.input';
@@ -50,7 +50,7 @@ export class VisitaResolver {
 
   @Mutation(() => StripePaymentIntentResponse)
   async crearStripePaymentIntent(
-    @Args('monto') monto: number,
+    @Args('monto', { type: () => Float }) monto: number,
   ): Promise<StripePaymentIntentResponse> {
     return this.visitaService.crearStripePaymentIntent(monto);
   }
