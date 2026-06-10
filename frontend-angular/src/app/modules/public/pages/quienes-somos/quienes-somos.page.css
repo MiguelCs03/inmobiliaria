@@ -106,3 +106,190 @@
     font-size: 2rem;
   }
 }
+
+/* Corporate section */
+.corporate-section {
+  padding: 5rem 1.5rem;
+  background: #ffffff;
+}
+
+.corporate-container {
+  max-width: 1100px;
+  margin: 0 auto;
+}
+
+.text-center-wrapper {
+  text-align: center;
+  margin-bottom: 4rem;
+}
+
+.section-title-large {
+  font-size: 2.2rem;
+  font-weight: 800;
+  color: var(--dark);
+  margin-bottom: 1rem;
+}
+
+.section-subtitle-large {
+  font-size: 1.1rem;
+  color: #64748b;
+  max-width: 700px;
+  margin: 0 auto;
+}
+
+/* Company Stats */
+.company-stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 2rem;
+  margin-bottom: 5rem;
+  text-align: center;
+}
+
+.stat-item {
+  background: #f8fafc;
+  padding: 2.5rem 1.5rem;
+  border-radius: 1rem;
+  border: 1px solid #e2e8f0;
+  transition: transform 0.2s ease, border-color 0.2s ease;
+}
+
+.stat-item:hover {
+  transform: translateY(-3px);
+  border-color: #cbd5e1;
+}
+
+.stat-number {
+  font-size: 3rem;
+  font-weight: 800;
+  color: var(--primary);
+  line-height: 1.1;
+  margin-bottom: 0.5rem;
+}
+
+.stat-label {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: #475569;
+}
+
+/* Details and branch offices */
+.company-details-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 2.5rem;
+}
+
+@media (max-width: 768px) {
+  .company-details-row {
+    grid-template-columns: 1fr;
+  }
+}
+
+.details-card {
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 1.25rem;
+  padding: 2.5rem;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.02);
+}
+
+.details-card h3 {
+  font-size: 1.4rem;
+  font-weight: 800;
+  color: var(--dark);
+  margin-bottom: 2rem;
+  border-bottom: 2px solid #e2e8f0;
+  padding-bottom: 0.75rem;
+}
+
+.info-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.info-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.95rem;
+  border-bottom: 1px dashed #e2e8f0;
+  padding-bottom: 0.75rem;
+}
+
+.info-row:last-child {
+  border-bottom: none;
+  padding-bottom: 0;
+}
+
+.info-key {
+  font-weight: 700;
+  color: #475569;
+}
+
+.info-value {
+  color: #0f172a;
+  text-align: right;
+  font-weight: 500;
+}
+
+/* Branches */
+.branch-list {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+.branch-item {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 0.75rem;
+  padding: 1.5rem;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+}
+
+.branch-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.75rem;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.branch-header h4 {
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: var(--dark);
+  margin: 0;
+}
+
+.branch-badge {
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: #1e3a8a;
+  background: #dbeafe;
+  padding: 0.25rem 0.65rem;
+  border-radius: 100px;
+}
+
+.branch-badge.branch-secondary {
+  color: #701a75;
+  background: #fbcfe8;
+}
+
+.branch-address {
+  font-size: 0.9rem;
+  line-height: 1.5;
+  color: #64748b;
+  margin: 0 0 1rem 0;
+}
+
+.branch-contact {
+  display: block;
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--primary);
+}
+
