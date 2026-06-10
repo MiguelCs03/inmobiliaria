@@ -1,0 +1,312 @@
+<div class="visitas-wrapper">
+  <!-- Feedback Messages -->
+  <div class="alert alert-success alert-dismissible" *ngIf="successMessage">
+    <span class="alert-icon">✓</span>
+    <span class="alert-text">{{ successMessage }}</span>
+  </div>
+  <div class="alert alert-danger alert-dismissible" *ngIf="errorMessage">
+    <span class="alert-icon">⚠</span>
+    <span class="alert-text">{{ errorMessage }}</span>
+  </div>
+
+  <!-- Page Header -->
+  <div class="page-title-section">
+    <div>
+      <span class="breadcrumb-item">Gestión / Visitas</span>
+      <h1>Control de Visitas Inmobiliarias</h1>
+      <p class="subtitle" *ngIf="userRole === 1">Monitorea y gestiona todas las visitas asignadas a los inmuebles y agentes de la inmobiliaria.</p>
+      <p class="subtitle" *ngIf="userRole === 2">Verifica tus citas agendadas con clientes interesados en el catálogo.</p>
+    </div>
+  </div>
+
+  <!-- Metrics / KPI Panel -->
+  <div class="kpi-grid">
+    <div class="kpi-card card-primary">
+      <div class="kpi-icon">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
+        </svg>
+      </div>
+      <div class="kpi-info">
+        <h3>Total Visitas</h3>
+        <p class="value">{{ kpiTotal }}</p>
+      </div>
+    </div>
+
+    <div class="kpi-card card-warning">
+      <div class="kpi-icon">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+        </svg>
+      </div>
+      <div class="kpi-info">
+        <h3>Pendientes</h3>
+        <p class="value">{{ kpiPendientes }}</p>
+      </div>
+    </div>
+
+    <div class="kpi-card card-info">
+      <div class="kpi-icon">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
+        </svg>
+      </div>
+      <div class="kpi-info">
+        <h3>Pagadas (Reserva)</h3>
+        <p class="value">{{ kpiPagadas }}</p>
+      </div>
+    </div>
+
+    <div class="kpi-card card-success">
+      <div class="kpi-icon">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+        </svg>
+      </div>
+      <div class="kpi-info">
+        <h3>Completadas</h3>
+        <p class="value">{{ kpiCompletadas }}</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Filter & Search Toolbar -->
+  <div class="toolbar-section">
+    <div class="search-box">
+      <svg class="search-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+      </svg>
+      <input 
+        type="text" 
+        placeholder="Buscar por cliente, dirección de inmueble o agente..." 
+        [(ngModel)]="searchTerm" 
+        (input)="onFilterChange()"
+      />
+    </div>
+
+    <div class="filters-container">
+      <div class="filter-item">
+        <label>Estado</label>
+        <select [(ngModel)]="filterStatus" (change)="onFilterChange()">
+          <option value="all">Todos los estados</option>
+          <option value="pendiente">Pendiente</option>
+          <option value="pagada">Pagada</option>
+          <option value="completada">Completada</option>
+          <option value="cancelada">Cancelada</option>
+        </select>
+      </div>
+
+      <div class="filter-item" *ngIf="userRole === 1">
+        <label>Agente</label>
+        <select [(ngModel)]="filterAgent" (change)="onFilterChange()">
+          <option value="all">Todos los agentes</option>
+          <option *ngFor="let agent of agentesFilterList" [value]="agent.id">
+            {{ agent.nombreCompleto }}
+          </option>
+        </select>
+      </div>
+
+      <button class="btn-refresh" (click)="loadVisitas()" title="Recargar lista">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 1121.21 7.89H18v3" />
+        </svg>
+      </button>
+    </div>
+  </div>
+
+  <!-- Grid / Table Content -->
+  <div class="content-table-wrapper card-table shadow-sm">
+    <div class="loading-overlay" *ngIf="loading">
+      <div class="spinner"></div>
+      <p>Consultando la base de datos...</p>
+    </div>
+
+    <table class="dashboard-table" *ngIf="!loading && filteredVisitas.length > 0">
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Inmueble / Ubicación</th>
+          <th>Cliente</th>
+          <th *ngIf="userRole === 1">Agente Asignado</th>
+          <th>Fecha y Hora</th>
+          <th>Estado</th>
+          <th>Acciones</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let visita of filteredVisitas" class="table-row-interactive" (click)="openDetail(visita)">
+          <td class="font-bold text-slate-800">#{{ visita.id }}</td>
+          <td>
+            <div class="property-info-cell">
+              <span class="property-address">{{ getDireccionReferencia(visita.propiedad?.ubicacion) }}</span>
+              <span class="property-sub">Ref ID: {{ visita.propiedadId }} - Área: {{ visita.propiedad?.areaM2 || 'N/A' }} m²</span>
+            </div>
+          </td>
+          <td>
+            <div class="client-info-cell">
+              <span class="client-name">{{ visita.cliente?.nombres || 'Cliente Anónimo' }}</span>
+              <span class="client-phone">🕿 {{ visita.cliente?.telefono || 'N/A' }}</span>
+            </div>
+          </td>
+          <td *ngIf="userRole === 1">
+            <div class="agent-info-cell" *ngIf="visita.empleado">
+              <span class="agent-name">{{ visita.empleado.nombres }} {{ visita.empleado.apellidos }}</span>
+            </div>
+            <span class="text-slate-400" *ngIf="!visita.empleado">Sin agente</span>
+          </td>
+          <td>
+            <div class="date-info-cell">
+              <span class="date-main">🗓 {{ formatDate(visita.fechaVisita) }}</span>
+              <span class="time-sub">⏰ {{ formatTime(visita.fechaVisita) }}</span>
+            </div>
+          </td>
+          <td>
+            <span class="badge" [ngClass]="getStatusClass(visita.estado)">
+              {{ visita.estado }}
+            </span>
+          </td>
+          <td>
+            <button class="btn-action-view" (click)="$event.stopPropagation(); openDetail(visita)">
+              Ver Detalle
+            </button>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+
+    <!-- Empty State -->
+    <div class="empty-state-container" *ngIf="!loading && filteredVisitas.length === 0">
+      <div class="empty-icon-box">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+        </svg>
+      </div>
+      <h3>No se encontraron visitas</h3>
+      <p>Intenta cambiar los parámetros de búsqueda o recargar la lista.</p>
+      <button class="btn-primary-small" (click)="loadVisitas()">Actualizar lista</button>
+    </div>
+  </div>
+</div>
+
+<!-- Slide-Over Detail Drawer Panel -->
+<div class="drawer-overlay" [class.show]="showDetail" (click)="closeDetail()"></div>
+<aside class="detail-drawer" [class.open]="showDetail">
+  <div class="drawer-header" *ngIf="selectedVisita">
+    <h2>Visita #{{ selectedVisita.id }}</h2>
+    <button class="btn-close-drawer" (click)="closeDetail()">&times;</button>
+  </div>
+
+  <div class="drawer-body" *ngIf="selectedVisita">
+    <!-- State Summary -->
+    <div class="drawer-section state-summary">
+      <div class="flex-justify-between mb-3">
+        <span class="text-label">Estado actual</span>
+        <span class="badge" [ngClass]="getStatusClass(selectedVisita.estado)">{{ selectedVisita.estado }}</span>
+      </div>
+      <div class="drawer-timeline-item">
+        <span class="timeline-dot"></span>
+        <div class="timeline-content">
+          <h4>Programación</h4>
+          <p>Cita fijada para el {{ formatDate(selectedVisita.fechaVisita) }} a las {{ formatTime(selectedVisita.fechaVisita) }}.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Propiedad details -->
+    <div class="drawer-section">
+      <h3 class="section-title">Detalles del Inmueble</h3>
+      <div class="details-card">
+        <div class="details-row">
+          <span class="detail-label">Dirección</span>
+          <span class="detail-val">{{ getDireccionReferencia(selectedVisita.propiedad?.ubicacion) }}</span>
+        </div>
+        <div class="details-row">
+          <span class="detail-label">Código Inmueble</span>
+          <span class="detail-val">#{{ selectedVisita.propiedadId }}</span>
+        </div>
+        <div class="details-row" *ngIf="selectedVisita.propiedad">
+          <span class="detail-label">Área del Inmueble</span>
+          <span class="detail-val">{{ selectedVisita.propiedad.areaM2 }} m²</span>
+        </div>
+        <div class="details-row" *ngIf="selectedVisita.propiedad">
+          <span class="detail-label">Precio Referencial</span>
+          <span class="detail-val font-bold text-blue-600">${{ selectedVisita.propiedad.precioBase | number:'1.2-2' }} USD</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Cliente details -->
+    <div class="drawer-section">
+      <h3 class="section-title">Información del Cliente</h3>
+      <div class="details-card">
+        <div class="details-row">
+          <span class="detail-label">Nombre</span>
+          <span class="detail-val font-bold">{{ selectedVisita.cliente?.nombres || 'No disponible' }}</span>
+        </div>
+        <div class="details-row">
+          <span class="detail-label">Teléfono de contacto</span>
+          <span class="detail-val text-blue-600">🕿 {{ selectedVisita.cliente?.telefono || 'No disponible' }}</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Agent details -->
+    <div class="drawer-section">
+      <h3 class="section-title">Agente Responsable</h3>
+      <div class="details-card">
+        <div class="details-row" *ngIf="selectedVisita.empleado">
+          <span class="detail-label">Agente</span>
+          <span class="detail-val">{{ selectedVisita.empleado.nombres }} {{ selectedVisita.empleado.apellidos }}</span>
+        </div>
+        <div class="details-row">
+          <span class="detail-label">Código Agente</span>
+          <span class="detail-val">#{{ selectedVisita.empleadoId }}</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Action panel: Cambiar estado (Admin y Agente) -->
+    <div class="drawer-section actions-panel">
+      <h3 class="section-title">Actualizar Estado de la Cita</h3>
+      <p class="section-desc">Modifica el estado del flujo de venta. Los cambios se actualizan en el backend.</p>
+
+      <div class="actions-buttons-grid" *ngIf="!updatingStatus">
+        <!-- Si está Pendiente -->
+        <ng-container *ngIf="selectedVisita.estado.toLowerCase() === 'pendiente'">
+          <button class="btn-change-state btn-info-outline" (click)="cambiarEstado('Pagada')">
+            Registrar Pago
+          </button>
+          <button class="btn-change-state btn-success" (click)="cambiarEstado('Completada')">
+            Marcar Completada
+          </button>
+          <button class="btn-change-state btn-danger-outline" (click)="cambiarEstado('Cancelada')">
+            Cancelar Cita
+          </button>
+        </ng-container>
+
+        <!-- Si está Pagada -->
+        <ng-container *ngIf="selectedVisita.estado.toLowerCase() === 'pagada'">
+          <button class="btn-change-state btn-success" (click)="cambiarEstado('Completada')">
+            Completar Visita
+          </button>
+          <button class="btn-change-state btn-danger-outline" (click)="cambiarEstado('Cancelada')">
+            Cancelar Cita
+          </button>
+        </ng-container>
+
+        <!-- Si está Completada o Cancelada -->
+        <div class="status-closed-message" *ngIf="selectedVisita.estado.toLowerCase() === 'completada' || selectedVisita.estado.toLowerCase() === 'cancelada'">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+          </svg>
+          <p>Esta visita ya ha sido cerrada con el estado <strong>{{ selectedVisita.estado }}</strong>. No se admiten modificaciones.</p>
+        </div>
+      </div>
+
+      <div class="updating-spinner-box" *ngIf="updatingStatus">
+        <div class="spinner spinner-small"></div>
+        <p>Guardando cambios en el servidor...</p>
+      </div>
+    </div>
+  </div>
+</aside>

@@ -28,6 +28,7 @@ export const routes: Routes = [
       { path: 'propietarios', loadComponent: () => import('./modules/dashboard/propietarios/propietarios.component').then(m => m.PropietariosComponent) },
       { path: 'agentes', loadComponent: () => import('./modules/dashboard/agentes/agentes.component').then(m => m.AgentesComponent) },
       { path: 'propiedades', loadComponent: () => import('./modules/dashboard/propiedades/propiedades.component').then(m => m.PropiedadesComponent) },
+      { path: 'visitas', loadComponent: () => import('./modules/dashboard/visitas/visitas.component').then(m => m.VisitasComponent) },
       { path: 'contratos', loadComponent: () => import('./modules/dashboard/contratos/contratos-lista/contratos-lista.component').then(m => m.ContractosListaComponent) },
       { path: 'contrato-nuevo', loadComponent: () => import('./modules/dashboard/contratos/contrato-nuevo/contrato-nuevo.component').then(m => m.ContratoNuevoComponent) },
       { path: 'contratos/:id', loadComponent:()=> import('./modules/dashboard/contratos/contrato-detalle/contrato-detalle.component').then(m=>m.ContratoDetalleComponent)},
