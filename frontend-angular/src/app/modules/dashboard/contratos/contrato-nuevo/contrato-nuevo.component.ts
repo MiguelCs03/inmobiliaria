@@ -2,7 +2,6 @@ import { Component, OnInit, inject } from "@angular/core";
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { Router } from "@angular/router";
-import { ContratoPreviaVistaComponent } from "../contrato-vista-previa/contrato-vista-previa.component";
 import { ContratoService } from "../../../../core/services/contrato.service";
 import { ClienteService } from '../../../../core/services/cliente.service';
 import { PropiedadService } from "../../../../core/services/propiedad.service";
@@ -23,8 +22,7 @@ interface Propiedad {
     standalone: true,
     imports: [
         CommonModule,
-        ReactiveFormsModule,
-        ContratoPreviaVistaComponent
+        ReactiveFormsModule
     ],
     templateUrl: './contrato-nuevo.component.html',
     styleUrls: ['./contrato-nuevo.component.css']

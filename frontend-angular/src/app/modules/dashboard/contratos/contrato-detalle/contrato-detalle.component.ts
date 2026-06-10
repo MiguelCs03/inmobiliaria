@@ -1,13 +1,14 @@
 import { Component, OnInit, inject } from "@angular/core";
 import { ActivatedRoute } from "@angular/router";
 import { CommonModule } from "@angular/common";
+import { FormsModule } from "@angular/forms";
 import { Observable, BehaviorSubject, switchMap } from "rxjs";
 import { ContratoService } from "../../../../core/services/contrato.service";
 
 @Component({
   selector: 'app-contrato-detalle',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, FormsModule],
   templateUrl: './contrato-detalle.component.html',
   styleUrls: ['./contrato-detalle.component.css']
 })
@@ -17,6 +18,14 @@ export class ContratoDetalleComponent implements OnInit {
 
   contratoId!: number;
   
+  // Variables para la gestión del modal de facturación y pagos
+  showPaymentModal = false;
+  selectedCuota: any = null;
+  nitCliente = '';
+  razonSocial = '';
+  metodoPago = 'QR';
+  procesandoPago = false;
+
   // 1. Creamos un disparador reactivo
   private refreshContrato$ = new BehaviorSubject<void>(undefined);
   contrato$!: Observable<any>;
@@ -78,6 +87,59 @@ export class ContratoDetalleComponent implements OnInit {
       error: (err) => {
         console.error(err);
         alert('Error al generar el PDF firmado.');
+      }
+    });
+  }
+
+  // Abre el modal para proceder con el pago y precarga los datos del cliente
+  abrirPagoModal(cuota: any, cliente: any): void {
+    this.selectedCuota = cuota;
+    this.nitCliente = cliente?.ciNit || '';
+    this.razonSocial = cliente?.nombres || '';
+    this.metodoPago = 'QR';
+    this.showPaymentModal = true;
+  }
+
+  // Cierra el modal y limpia el estado del pago
+  cerrarPagoModal(): void {
+    this.showPaymentModal = false;
+    this.selectedCuota = null;
+    this.nitCliente = '';
+    this.razonSocial = '';
+    this.procesandoPago = false;
+  }
+
+  // Confirma el pago de la cuota llamando al servicio GraphQL
+  confirmarPago(): void {
+    if (!this.nitCliente.trim() || !this.razonSocial.trim()) {
+      alert('Por favor complete el NIT/CI y la Razón Social.');
+      return;
+    }
+
+    this.procesandoPago = true;
+
+    const input = {
+      planPagoId: Number(this.selectedCuota.id),
+      nitCliente: this.nitCliente.trim(),
+      razonSocial: this.razonSocial.trim(),
+      metodoPago: this.metodoPago
+    };
+
+    this.contratoService.pagarCuota(input).subscribe({
+      next: (response) => {
+        this.procesandoPago = false;
+        if (response.success) {
+          alert(`¡Pago procesado con éxito!\nFactura Nro: ${response.data.nroFactura}\nCUF: ${response.data.cuf}`);
+          this.cerrarPagoModal();
+          this.refrescarDatos(); // Recargar datos reactivamente
+        } else {
+          alert(`Error al procesar el pago: ${response.message}`);
+        }
+      },
+      error: (err) => {
+        this.procesandoPago = false;
+        console.error(err);
+        alert('Ocurrió un error inesperado al procesar el pago.');
       }
     });
   }

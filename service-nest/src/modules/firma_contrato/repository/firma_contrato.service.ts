@@ -86,16 +86,10 @@ export class FirmaService {
             signatureUrl,
         });
 
-<<<<<<< HEAD
         const goUrl = process.env.GO_SERVICE_URL || 'http://host.docker.internal:3030';
         const response = await axios.post(
 
             `${goUrl}/contracts/${contrato.blockchainContractId}/sign`,
-=======
-        const response = await axios.post(
-
-            `http://host.docker.internal:3030/contracts/${contrato.blockchainContractId}/sign`,
->>>>>>> main
 
             {
 

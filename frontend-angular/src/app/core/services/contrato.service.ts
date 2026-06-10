@@ -108,56 +108,53 @@ export class ContratoService {
       );
   }
 
-  //ahora vamos a pasar a detallar cada contrato, para pasar a firmas y demás
+  // Consulta para obtener detalles de un contrato, incluyendo firmas y plan de pagos
   GET_CONTRATO_BY_ID = gql`
-query GetContratoById(
-  $id: Int!
-) {
-
-  contrato(
-    id: $id
-  ) {
-
-    success
-
-    message
-
-    data {
-
-      id
-
-      titulo
-
-      montoTotal
-
-      observaciones
-
-      estadoContrato
-
-      pdfUrl
-
-      blockchainContractId
-
-      documentHash
-
-      firmas {
-
-        id
-
-        tipoFirmante
-
-        fechaFirma
-
-        signatureUrl
-
+    query GetContratoById($id: Int!) {
+      contrato(id: $id) {
+        success
+        message
+        data {
+          id
+          titulo
+          montoTotal
+          observaciones
+          estadoContrato
+          pdfUrl
+          blockchainContractId
+          documentHash
+          firmas {
+            id
+            tipoFirmante
+            fechaFirma
+            signatureUrl
+          }
+          planPagos {
+            id
+            nroCuota
+            montoCuota
+            estado
+            facturas {
+              id
+              nroFactura
+              montoTotal
+              fechaEmision
+              cuf
+              codigoRecepcion
+              estadoSiat
+              nitCliente
+              razonSocial
+            }
+          }
+          cliente {
+            ciNit
+            nombres
+          }
+        }
       }
-
     }
+  `;
 
-  }
-
-}
-`;
 
 
   getContratoById(
@@ -371,24 +368,38 @@ mutation GenerateSignedPdf(
       });
 
   }
-  // getContratos(){
+  // Mutación para pagar y facturar una cuota
+  private readonly PAGAR_CUOTA = gql`
+    mutation PagarCuota($input: PagarCuotaInput!) {
+      pagarCuota(pagarCuotaInput: $input) {
+        success
+        message
+        data {
+          id
+          nroFactura
+          montoTotal
+          fechaEmision
+          cuf
+          codigoRecepcion
+          estadoSiat
+          nitCliente
+          razonSocial
+        }
+      }
+    }
+  `;
 
-  // return this.apollo
-  //   .watchQuery({
-  //     query: this.GET_CONTRACTS
-  //   })
-  //   .valueChanges
-  //   .pipe(
-  //     map((result: any) => {
-
-  //       console.log(
-  //         'GRAPHQL RESPONSE',
-  //         result
-  //       );
-
-  //       return result.data.contratos.data;
-  //     })
-  //   );
-  // }
-
+  pagarCuota(input: { planPagoId: number; nitCliente: string; razonSocial: string; metodoPago: string }) {
+    return this.apollo
+      .mutate({
+        mutation: this.PAGAR_CUOTA,
+        variables: {
+          input,
+        },
+      })
+      .pipe(
+        map((result: any) => result.data.pagarCuota)
+      );
+  }
 }
+
