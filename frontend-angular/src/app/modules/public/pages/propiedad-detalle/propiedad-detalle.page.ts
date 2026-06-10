@@ -285,8 +285,7 @@ export class PropiedadDetalleComponent implements OnInit {
 
     setTimeout(async () => {
       try {
-        const leafletModule = await import('leaflet');
-        const L = (leafletModule as any).default || leafletModule;
+        const L = await import('leaflet');
         const mapContainer = document.getElementById('publicMap');
         if (!mapContainer) return;
 
