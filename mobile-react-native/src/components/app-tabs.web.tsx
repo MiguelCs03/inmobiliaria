@@ -15,8 +15,11 @@ import { ThemedText } from './themed-text';
 import { ThemedView } from './themed-view';
 
 import { Colors, MaxContentWidth, Spacing } from '@/constants/theme';
+import { useAuth } from '@/context/auth-context';
 
 export default function AppTabs() {
+  const { usuario } = useAuth();
+
   return (
     <Tabs>
       <TabSlot style={{ height: '100%' }} />
@@ -27,6 +30,14 @@ export default function AppTabs() {
           </TabTrigger>
           <TabTrigger name="explore" href="/explore" asChild>
             <TabButton>Explore</TabButton>
+          </TabTrigger>
+          {usuario?.rolId === 3 && (
+            <TabTrigger name="swipe" href={"/swipe" as any} asChild>
+              <TabButton>Matchmaking</TabButton>
+            </TabTrigger>
+          )}
+          <TabTrigger name="contratos" href={"/contratos" as any} asChild>
+            <TabButton>Contratos</TabButton>
           </TabTrigger>
         </CustomTabList>
       </TabList>

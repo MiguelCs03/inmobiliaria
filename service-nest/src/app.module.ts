@@ -21,6 +21,7 @@ import { VisitaModule } from './modules/visita/visita.module';
 import { UploadModule } from './modules/upload/upload.module';
 import { FirmaModule } from './modules/firma_contrato/firma_contrato.module';
 import { DispositivoModule } from './modules/dispositivo/dispositivo.module';
+import { SwipeModule } from './modules/swipe/swipe.module';
 
 @Module({
   imports: [
@@ -50,6 +51,7 @@ import { DispositivoModule } from './modules/dispositivo/dispositivo.module';
     UploadModule,
     FirmaModule,
     DispositivoModule,
+    SwipeModule,
   ],
   controllers: [AppController],
   providers: [AppService],
