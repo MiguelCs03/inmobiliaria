@@ -10,7 +10,7 @@ export const guestGuard: CanActivateFn = () => {
   if (authService.isAuthenticated()) {
     const role = authService.getUserRole();
     if (role === 1) return router.parseUrl('/admin/dashboard');
-    if (role === 2) return router.parseUrl('/agente/visitas');
+    if (role === 2) return router.parseUrl('/agente/dashboard');
     authService.logout();
     return router.parseUrl('/intranet');
   }

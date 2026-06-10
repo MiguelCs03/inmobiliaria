@@ -105,7 +105,7 @@ export class LoginComponent implements OnInit, OnDestroy {
     if (rolId === 1) {
       this.router.navigate(['/admin/dashboard']);
     } else if (rolId === 2) {
-      this.router.navigate(['/agente/visitas']);
+      this.router.navigate(['/agente/dashboard']);
     } else {
       this.errorMessage = 'Acceso restringido. Su cuenta no cuenta con un rol de personal autorizado.';
       this.authService.logout();
