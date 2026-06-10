@@ -55,7 +55,7 @@ export class SwipeService {
     });
     const swipedPropIds = swipesRealizados.map((s) => Number(s.propiedadId));
 
-    // 3. Obtener propiedades y filtrar las que tengan estado "Disponible"
+    // 3. Obtener propiedades y filtrar las que tengan estado "Disponibleeee"
     const todasLasPropiedades = await this.propiedadRepository.find({
       relations: ['imagenes', 'tipoPropiedad', 'tipoOperacion', 'estadoPropiedad'],
     });
