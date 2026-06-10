@@ -194,10 +194,16 @@ export class ContratoService {
       pdfBuffer.toString('base64');
 
     // Enviar a GO
+<<<<<<< HEAD
     const goUrl = process.env.GO_SERVICE_URL || 'http://host.docker.internal:3030';
     const response =
       await axios.post(
         `${goUrl}/contracts`,
+=======
+    const response =
+      await axios.post(
+        'http://host.docker.internal:3030/contracts',
+>>>>>>> main
         {
           title:
             contrato.titulo,

@@ -32,6 +32,7 @@ export const getDatabaseConfig = (configService: ConfigService): TypeOrmModuleOp
 				password: configService.get<string>('DB_MASTER_PASS') ?? 'postgres',
 				database: configService.get<string>('DB_MASTER_NAME') ?? 'inmobiliaria',
 			},
+<<<<<<< HEAD
 			slaves: [
 				{
 					host: configService.get<string>('DB_SLAVE_HOST') ?? 'localhost',
@@ -48,3 +49,18 @@ export const getDatabaseConfig = (configService: ConfigService): TypeOrmModuleOp
 		logging: false,
 	};
 };
+=======
+		],
+	},
+	entities: [__dirname + '/../**/*.entity{.ts,.js}'],
+	// synchronize: true,
+	// autoLoadEntities: true,
+	// dropSchema: false,
+	// logging: true,
+	
+	synchronize: false, 
+	dropSchema: false,
+	logging: false, 
+
+});
+>>>>>>> main

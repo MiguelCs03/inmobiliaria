@@ -47,14 +47,20 @@ export class CreateContratoInput {
     nullable: true
   })
   @IsOptional()
+<<<<<<< HEAD
   
+=======
+>>>>>>> main
   fechaInicio?: Date;
 
   @Field(() => Date, {
     nullable: true
   })
   @IsOptional()
+<<<<<<< HEAD
   
+=======
+>>>>>>> main
   fechaFin?: Date;
 
   @Field(() => String, {

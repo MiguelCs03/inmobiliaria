@@ -103,6 +103,6 @@ export class DashboardLayoutComponent implements OnInit {
   }
 
   getDashboardRoute(): string {
-    return this.userRole === 1 ? '/admin/dashboard' : '/agente/visitas';
+    return this.userRole === 1 ? '/admin/dashboard' : '/agente/dashboard';
   }
 }
