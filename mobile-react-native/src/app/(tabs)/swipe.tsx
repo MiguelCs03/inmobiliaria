@@ -97,6 +97,15 @@ export default function SwipeScreen() {
   // Valor animado para la posición del arrastre
   const position = useRef(new Animated.ValueXY()).current;
 
+  // Log de depuración para inspeccionar qué está respondiendo el servidor GraphQL
+  useEffect(() => {
+    console.log('[DEBUG Matchmaking] Variables:', { usuarioId });
+    console.log('[DEBUG Matchmaking] Query State:', { loading, error });
+    if (data) {
+      console.log('[DEBUG Matchmaking] GraphQL Data:', JSON.stringify(data, null, 2));
+    }
+  }, [usuarioId, data, loading, error]);
+
   // Reiniciar el índice si las recomendaciones se recargan
   useEffect(() => {
     setCurrentIndex(0);

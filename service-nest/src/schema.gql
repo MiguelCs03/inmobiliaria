@@ -132,6 +132,11 @@ input CreateSucursalInput {
   nombre: String!
 }
 
+input CreateSwipeInput {
+  like: Boolean!
+  propiedadId: Int!
+}
+
 input CreateVisitaInput {
   clienteId: Int!
   empleadoId: Int!
@@ -257,6 +262,7 @@ type Mutation {
   register(registerUsuarioInput: RegisterUsuarioInput!): UsuarioAuthResponse!
   registerBlockchain(id: Int!): ContratoResponse!
   registrarDispositivo(registrarDispositivoInput: RegistrarDispositivoInput!): DispositivoResponse!
+  registrarSwipe(input: CreateSwipeInput!, usuarioId: Int!): SwipeResponse!
   removeCliente(id: Int!): ClienteResponse!
   removeContrato(id: Int!): ContratoResponse!
   removeEmpleado(id: Int!): EmpleadoResponse!
@@ -394,6 +400,7 @@ type Query {
   segmentos: [Segmento!]!
   sucursal(id: Int!): SucursalResponse!
   sucursales(pagination: PaginationInput): SucursalListResponse!
+  swipeRecomendaciones(usuarioId: Int!): PropiedadListResponse!
   usuario(id: Int!): UsuarioAuthResponse!
   usuarios: UsuarioAuthListResponse!
   visita(id: Int!): VisitaResponse!
@@ -462,6 +469,20 @@ type SucursalListResponse {
 
 type SucursalResponse {
   data: Sucursal
+  message: String!
+  success: Boolean!
+}
+
+type Swipe {
+  createdAt: DateTime!
+  id: Int!
+  like: Boolean!
+  propiedadId: Int!
+  usuarioId: Int!
+}
+
+type SwipeResponse {
+  data: Swipe
   message: String!
   success: Boolean!
 }

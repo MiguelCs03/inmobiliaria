@@ -6,8 +6,15 @@ async function bootstrap() {
   const app = await NestFactory.create(AppModule);
   const logger = new Logger('Gateway');
 
+  const origins = process.env.ALLOWED_ORIGINS?.split(',') ?? [
+    'http://localhost:3000',
+    'http://localhost:4200',
+  ];
+  origins.push('http://localhost:8081');
+  origins.push('http://192.168.88.46:8081');
+
   app.enableCors({
-    origin: process.env.ALLOWED_ORIGINS?.split(',') ?? ['http://localhost:3000'],
+    origin: origins,
     credentials: true,
   });
 

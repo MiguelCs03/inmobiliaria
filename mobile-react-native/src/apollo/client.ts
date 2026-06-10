@@ -5,9 +5,29 @@ import { storage } from '@/utils/storage';
 // Clave para guardar el token JWT en el SecureStore
 const TOKEN_KEY = 'estatecore_auth_token';
 
+import { Platform } from 'react-native';
+
+// Resolver la URL de GraphQL de forma inteligente según la plataforma y el entorno
+const getGraphQLUri = () => {
+  const envUrl = process.env.EXPO_PUBLIC_GRAPHQL_URL;
+  
+  // Si hay una URL en .env y apunta a producción (Railway/Nube), la usamos
+  if (envUrl && !envUrl.includes('localhost') && !envUrl.includes('127.0.0.1')) {
+    return envUrl;
+  }
+  
+  // Para desarrollo local, resolver según el dispositivo/plataforma
+  if (Platform.OS === 'web') {
+    return 'http://localhost:3001/graphql';
+  } else {
+    // 10.0.2.2 es el alias de localhost para el emulador de Android
+    return 'http://10.0.2.2:3001/graphql';
+  }
+};
+
 // Crear el enlace HTTP hacia el API Gateway
 const httpLink = createHttpLink({
-  uri: process.env.EXPO_PUBLIC_GRAPHQL_URL || 'http://10.0.2.2:3001/graphql',
+  uri: getGraphQLUri(),
 });
 
 // Enlace de autenticación para inyectar el token Bearer en cada petición

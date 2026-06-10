@@ -55,13 +55,23 @@ export class SwipeService {
     });
     const swipedPropIds = swipesRealizados.map((s) => Number(s.propiedadId));
 
-    // 3. Obtener propiedades y filtrar las que tengan estado "Disponibleeee"
+    // 3. Obtener propiedades y filtrar las que tengan estado "Disponible"
     const todasLasPropiedades = await this.propiedadRepository.find({
       relations: ['imagenes', 'tipoPropiedad', 'tipoOperacion', 'estadoPropiedad'],
     });
+    
+    console.log('[BACKEND SWIPE DEBUG] Total properties in DB:', todasLasPropiedades.length);
+    if (todasLasPropiedades.length > 0) {
+      console.log('[BACKEND SWIPE DEBUG] Sample property state:', todasLasPropiedades[0].estadoPropiedad?.nombre);
+      console.log('[BACKEND SWIPE DEBUG] Sample property ID:', todasLasPropiedades[0].id);
+    }
+
     const propiedades = todasLasPropiedades.filter(
       (p) => p.estadoPropiedad?.nombre?.toLowerCase() === 'disponible',
     );
+    
+    console.log('[BACKEND SWIPE DEBUG] Available properties:', propiedades.length);
+    console.log('[BACKEND SWIPE DEBUG] Already swiped IDs:', swipedPropIds);
 
     // 4. Filtrar candidatas no deslizadas
     const candidatas = propiedades.filter((p) => !swipedPropIds.includes(Number(p.id)));
