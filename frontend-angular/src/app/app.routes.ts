@@ -33,6 +33,8 @@ export const routes: Routes = [
       { path: 'contrato-nuevo', loadComponent: () => import('./modules/dashboard/contratos/contrato-nuevo/contrato-nuevo.component').then(m => m.ContratoNuevoComponent) },
       { path: 'contratos/:id', loadComponent:()=> import('./modules/dashboard/contratos/contrato-detalle/contrato-detalle.component').then(m=>m.ContratoDetalleComponent)},
       { path: 'perfil', loadComponent: () => import('./modules/dashboard/perfil/perfil.component').then(m => m.PerfilComponent) }
+      { path: 'auditoria', loadComponent: () => import('./modules/dashboard/auditoria/auditoria.components').then(m => m.AuditoriaComponent) }
+      
     ]
   },
 

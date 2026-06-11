@@ -1,0 +1,192 @@
+<div class="audit-page">
+
+    <div class="audit-header">
+
+        <div>
+
+            <h1>
+                Auditoría Blockchain
+            </h1>
+
+            <p>
+                Historial de eventos registrados
+            </p>
+
+        </div>
+
+    </div>
+
+    <div class="filter-card">
+
+        <input
+            type="text"
+            placeholder="Buscar..."
+            [(ngModel)]="searchText"
+            (input)="applyFilter()">
+
+    </div>
+
+    <div class="table-card">
+
+        <table>
+
+            <thead>
+
+                <tr>
+
+                    <th>Acción</th>
+
+                    <th>Entidad</th>
+
+                    <th>Hash</th>
+
+                    <th>Fecha</th>
+
+                    <th></th>
+
+                </tr>
+
+            </thead>
+
+            <tbody>
+
+                <tr *ngFor="let log of filteredLogs">
+
+                    <td>
+
+                        <span class="action-badge">
+
+                            {{ log.action }}
+
+                        </span>
+
+                    </td>
+
+                    <td>
+
+                        {{ log.entity }}
+
+                    </td>
+
+                    <td class="mono">
+
+                        {{ log.hash | slice:0:25 }}...
+
+                    </td>
+
+                    <td>
+
+                        {{ log.timestamp | date:'dd/MM/yyyy HH:mm' }}
+
+                    </td>
+
+                    <td>
+
+                        <button
+                            class="btn-view"
+                            (click)="openDetail(log)">
+
+                            Ver
+
+                        </button>
+
+                    </td>
+
+                </tr>
+
+            </tbody>
+
+        </table>
+
+    </div>
+
+</div>
+
+<!-- MODAL -->
+
+<div
+    *ngIf="selectedLog"
+    class="modal-overlay">
+
+    <div class="modal-content">
+
+        <div class="modal-header">
+
+            <h2>
+
+                Detalle Auditoría
+
+            </h2>
+
+            <button
+                (click)="closeDetail()">
+
+                ✕
+
+            </button>
+
+        </div>
+
+        <div class="detail">
+
+            <p>
+
+                <strong>ID:</strong>
+
+                {{ selectedLog.id }}
+
+            </p>
+
+            <p>
+
+                <strong>Acción:</strong>
+
+                {{ selectedLog.action }}
+
+            </p>
+
+            <p>
+
+                <strong>Entidad:</strong>
+
+                {{ selectedLog.entity }}
+
+            </p>
+
+            <p>
+
+                <strong>Fecha:</strong>
+
+                {{ selectedLog.timestamp }}
+
+            </p>
+
+            <p>
+
+                <strong>Hash:</strong>
+
+            </p>
+
+            <div class="code-box">
+
+                {{ selectedLog.hash }}
+
+            </div>
+
+            <p>
+
+                <strong>Firma Digital:</strong>
+
+            </p>
+
+            <div class="code-box">
+
+                {{ selectedLog.signature }}
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
