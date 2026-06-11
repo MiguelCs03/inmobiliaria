@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { CreateContratoInput } from '../dto/create-contrato.input';
@@ -24,6 +24,8 @@ export class ContratoService {
     private readonly notificacionesService: NotificacionesService,
   ) { }
 
+  private readonly logger = new Logger(ContratoService.name);
+
 
   async create(
     createContratoInput: CreateContratoInput
@@ -35,11 +37,11 @@ export class ContratoService {
 
     const savedContrato = await this.contratoRepository.save(contrato);
 
-    this.notificacionesService.sendToTopic(
+    await this.notificacionesService.sendToTopic(
       'contrato-adjudicado',
-      'Contrato: ok!',
-      'Se le adjudico el Contrato'
-    );
+      `Contrato #${savedContrato.id} adjudicado`,
+      `Se le adjudicó el contrato "${savedContrato.titulo || 'Sin título'}" - Monto: Bs ${savedContrato.montoTotal}`
+    ).catch((err) => this.logger.error('Error al enviar notificación push:', err));
 
     // Generación de plan de pagos por defecto: se divide el monto total del contrato en 3 cuotas
     const totalMonto = Number(savedContrato.montoTotal);
