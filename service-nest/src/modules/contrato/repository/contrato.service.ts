@@ -10,6 +10,7 @@ import { ContractPdfService } from '../pdf/contract-pdf.service';
 import { StorageService } from 'src/common/storage/storage.service';
 import axios from 'axios';
 import { GetObjectCommand } from '@aws-sdk/client-s3';
+import { NotificacionesService } from 'src/modules/notificaciones/notificaciones.service';
 
 @Injectable()
 export class ContratoService {
@@ -20,6 +21,7 @@ export class ContratoService {
     private readonly planPagoRepository: Repository<PlanPago>,
     private readonly contractPdfService: ContractPdfService,
     private readonly storageService: StorageService,
+    private readonly notificacionesService: NotificacionesService,
   ) { }
 
 
@@ -32,6 +34,12 @@ export class ContratoService {
     });
 
     const savedContrato = await this.contratoRepository.save(contrato);
+
+    this.notificacionesService.sendToTopic(
+      'contrato-adjudicado',
+      'Contrato: ok!',
+      'Se le adjudico el Contrato'
+    );
 
     // Generación de plan de pagos por defecto: se divide el monto total del contrato en 3 cuotas
     const totalMonto = Number(savedContrato.montoTotal);
@@ -52,6 +60,7 @@ export class ContratoService {
       });
       await this.planPagoRepository.save(cuota);
     }
+
 
     return savedContrato;
   }
