@@ -14,7 +14,7 @@ import {
 
 import {
   AuditoriaService
-} from '../../../../core/services/auditoria.service';
+} from '../../../core/services/audit.service';
 
 @Component({
   selector: 'app-auditoria',
@@ -51,7 +51,7 @@ export class AuditoriaComponent implements OnInit {
       .getAuditLogs()
       .subscribe({
 
-        next: (data) => {
+        next: (data: any) => {
 
           this.auditLogs = data;
 
@@ -59,7 +59,7 @@ export class AuditoriaComponent implements OnInit {
 
         },
 
-        error: (err) => {
+        error: (err: any) => {
 
           console.error(err);
 
