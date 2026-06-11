@@ -38,7 +38,7 @@ export class ContratoService {
     const savedContrato = await this.contratoRepository.save(contrato);
 
     await this.notificacionesService.sendToTopic(
-      'contrato-adjudicado',
+      'nuevas-propiedades',
       `Contrato #${savedContrato.id} adjudicado`,
       `Se le adjudicó el contrato "${savedContrato.titulo || 'Sin título'}" - Monto: Bs ${savedContrato.montoTotal}`
     ).catch((err) => this.logger.error('Error al enviar notificación push:', err));
