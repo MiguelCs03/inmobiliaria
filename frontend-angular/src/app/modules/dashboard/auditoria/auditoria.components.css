@@ -1,0 +1,205 @@
+:host {
+
+    display: block;
+
+    background: #f5f7fa;
+
+    min-height: 100vh;
+
+}
+
+.audit-page {
+
+    max-width: 1400px;
+
+    margin: auto;
+
+    padding: 24px;
+
+}
+
+.audit-header {
+
+    margin-bottom: 20px;
+
+}
+
+.audit-header h1 {
+
+    margin: 0;
+
+    font-size: 1.8rem;
+
+    color: #111827;
+
+}
+
+.audit-header p {
+
+    color: #6b7280;
+
+}
+
+.filter-card {
+
+    background: white;
+
+    border: 1px solid #e5e7eb;
+
+    padding: 16px;
+
+    border-radius: 8px;
+
+    margin-bottom: 20px;
+
+}
+
+.filter-card input {
+
+    width: 100%;
+
+    padding: 12px;
+
+    border: 1px solid #d1d5db;
+
+    border-radius: 6px;
+
+}
+
+.table-card {
+
+    background: white;
+
+    border: 1px solid #e5e7eb;
+
+    border-radius: 8px;
+
+    overflow: hidden;
+
+}
+
+table {
+
+    width: 100%;
+
+    border-collapse: collapse;
+
+}
+
+thead {
+
+    background: #f9fafb;
+
+}
+
+th {
+
+    padding: 14px;
+
+    text-align: left;
+
+}
+
+td {
+
+    padding: 14px;
+
+    border-top: 1px solid #e5e7eb;
+
+}
+
+.action-badge {
+
+    background: #eff6ff;
+
+    color: #1d4ed8;
+
+    padding: 5px 10px;
+
+    border-radius: 6px;
+
+    font-size: .8rem;
+
+    font-weight: 600;
+
+}
+
+.mono {
+
+    font-family: monospace;
+
+}
+
+.btn-view {
+
+    border: none;
+
+    background: #111827;
+
+    color: white;
+
+    padding: 8px 12px;
+
+    border-radius: 6px;
+
+    cursor: pointer;
+
+}
+
+.modal-overlay {
+
+    position: fixed;
+
+    inset: 0;
+
+    background: rgba(0,0,0,.6);
+
+    display: flex;
+
+    justify-content: center;
+
+    align-items: center;
+
+}
+
+.modal-content {
+
+    background: white;
+
+    width: 900px;
+
+    max-width: 95%;
+
+    border-radius: 10px;
+
+    padding: 24px;
+
+}
+
+.modal-header {
+
+    display: flex;
+
+    justify-content: space-between;
+
+    align-items: center;
+
+}
+
+.code-box {
+
+    background: #f3f4f6;
+
+    border: 1px solid #d1d5db;
+
+    border-radius: 6px;
+
+    padding: 12px;
+
+    word-break: break-all;
+
+    font-family: monospace;
+
+    margin-bottom: 15px;
+
+}
