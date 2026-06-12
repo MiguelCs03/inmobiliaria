@@ -87,6 +87,8 @@
   width: 100%;
   border-collapse: collapse;
   text-align: left;
+  height: auto;
+  overflow-y: scroll;
   font-size: 0.875rem;
 }
 
